@@ -1,6 +1,11 @@
 # Per-machine Claude Code config (tool allowlist, etc.)
 .claude/
 
+# Claude session context — contains machine-specific notes (paths, current
+# portproxy state, etc.). Local-only by design.
+CLAUDE.md
+CLAUDE.local.md
+
 # Python
 __pycache__/
 *.py[cod]
