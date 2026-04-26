@@ -132,6 +132,7 @@ Then strip HTML/scripts and parse the threats section. Ask Claude to refresh the
 ## Sources
 
 - **Mundo (top):** [Belle19's "Too Big to Fail"](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) — NA Challenger Mundo main, Mobafire
+- **Sivir (bot):** [heeiseenbeerg's "The Ultimate Sivir Build"](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305) — Mobafire (build-only; playbook + most matchups in this repo are general Sivir/ADC knowledge — see `sivir/README.md` for per-file provenance)
 
 ## Status & roadmap
 
