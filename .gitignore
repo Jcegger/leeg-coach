@@ -1,0 +1,22 @@
+# Per-machine Claude Code config (tool allowlist, etc.)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local scratch
+*.log
+/tmp/
