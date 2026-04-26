@@ -58,7 +58,7 @@ _AD = (
     "nocturne olaf pantheon pyke qiyana quinn rammus reksai renekton rengar "
     "riven samira senna sett shyvana sion sivir skarner smolder talon tristana "
     "trundle tryndamere twitch udyr urgot varus vayne vi viego volibear warwick "
-    "wukong xayah xinzhao yasuo yone yorick yunara zed zeri"
+    "wukong monkeyking xayah xinzhao yasuo yone yorick yunara zaahen zed zeri"
 ).split()
 _AP = (
     "ahri akali alistar amumu anivia annie aurelionsol aurora azir bard "
@@ -66,7 +66,7 @@ _AP = (
     "evelynn fiddlesticks fizz galio gragas gwen heimerdinger hwei ivern "
     "janna karma karthus kassadin katarina kayle kennen leblanc leona lillia "
     "lissandra lulu lux malphite malzahar maokai mel milio mordekaiser morgana "
-    "nami nautilus neeko nunuwillump orianna rakan rell renataglasc rumble "
+    "nami nautilus neeko nunu nunuwillump orianna rakan rell renata renataglasc rumble "
     "ryze sejuani seraphine singed sona soraka swain sylas syndra tahmkench "
     "taliyah taric teemo twistedfate veigar velkoz vex viktor vladimir xerath "
     "yuumi zac ziggs zilean zoe zyra"
@@ -331,6 +331,8 @@ def build_path_summary(body, max_items=10):
 
 CHAMPION_INDEX_URL = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json'
 ITEMS_INDEX_URL = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/items.json'
+DDRAGON_VERSIONS_URL = 'https://ddragon.leagueoflegends.com/api/versions.json'
+META_FILENAME = 'meta.json'
 
 
 def _cdragon_get(url):
@@ -343,11 +345,25 @@ def _cdragon_get(url):
 
 
 def fetch_champion_index():
+    """Returns ({id: display_name}, [alias, ...]). Empty pair on failure.
+    Filters out Doom Bot event entries so they never surface in champ select."""
     try:
         data = _cdragon_get(CHAMPION_INDEX_URL)
-        return {c['id']: c.get('name', f"#{c['id']}") for c in data if c.get('id', -1) != -1}
+        names, aliases = {}, []
+        for c in data:
+            cid = c.get('id', -1)
+            if cid <= 0:
+                continue
+            name = c.get('name', f'#{cid}')
+            if name.startswith('Doom Bot'):
+                continue
+            names[cid] = name
+            alias = c.get('alias')
+            if alias:
+                aliases.append(alias)
+        return names, aliases
     except Exception:
-        return {}
+        return {}, []
 
 
 def classify_item(categories):
@@ -373,6 +389,60 @@ def fetch_item_index():
         return {it['id']: classify_item(it.get('categories') or []) for it in data if it.get('id')}
     except Exception:
         return {}
+
+
+# ─── patch detection + per-champ metadata ───────────────────────────────────
+
+def parse_patch(version_str):
+    """'16.8.1' -> (16, 8). Returns None if unparseable."""
+    if not version_str:
+        return None
+    m = re.match(r'^(\d+)\.(\d+)', version_str)
+    if not m:
+        return None
+    return int(m.group(1)), int(m.group(2))
+
+
+def fmt_patch(tup):
+    return f'{tup[0]}.{tup[1]}' if tup else None
+
+
+def fetch_current_patch():
+    """Returns 'major.minor' string or None on failure."""
+    try:
+        with urllib.request.urlopen(DDRAGON_VERSIONS_URL, timeout=5) as resp:
+            versions = json.loads(resp.read())
+        if versions:
+            return fmt_patch(parse_patch(versions[0]))
+    except Exception:
+        pass
+    return None
+
+
+def read_meta(champ_folder):
+    p = LEEG_ROOT / champ_folder / META_FILENAME
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def write_meta(champ_folder, meta):
+    p = LEEG_ROOT / champ_folder / META_FILENAME
+    p.write_text(json.dumps(meta, indent=2) + '\n')
+
+
+def patch_drift(reviewed_str, current_str):
+    """Returns a human description of drift, or None if not behind / unknowable."""
+    r, c = parse_patch(reviewed_str), parse_patch(current_str)
+    if not r or not c or r >= c:
+        return None
+    if r[0] == c[0]:
+        n = c[1] - r[1]
+        return f'{n} patch{"es" if n > 1 else ""} behind ({reviewed_str} → {current_str})'
+    return f'reviewed for {reviewed_str}, current is {current_str}'
 
 
 # ─── Live Client Data API (in-game) ─────────────────────────────────────────
@@ -619,7 +689,8 @@ class Coach:
 
     DEFAULT_MODEL = 'claude-haiku-4-5'
     DEFAULT_COOLDOWN = 25
-    MAX_TOKENS = 250
+    MAX_TOKENS = 400
+    WATCHDOG_SECONDS = 30
 
     def __init__(self, model=None, cooldown_seconds=None):
         self.model = model or os.environ.get('LEEG_COACH_MODEL', self.DEFAULT_MODEL)
@@ -658,11 +729,6 @@ class Coach:
         self.committed_build = None  # dict: {'time': ..., 'reason': ..., 'items': [...], 'diverged': bool}
         self._last_seen_game_time = None
         self.last_call_game_time = 0.0
-        # Watchdog timeout for a single in-flight API call. If a call is still
-        # marked in_flight after this many seconds, we force-clear so the coach
-        # can fire again. Acts as a backstop on top of the per-request 20s
-        # timeout we set on the SDK client.
-        self.WATCHDOG_SECONDS = 30
 
     def _reset_for_new_game(self):
         """Clear all per-game state. Called when the game time goes backward
@@ -1109,6 +1175,101 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
 
 
+# ─── champion folder scaffolding ────────────────────────────────────────────
+
+_TEMPLATE_README = """\
+# {display}
+
+TL;DR + index for {display}. Fill in.
+
+- [`matchups.md`](matchups.md) — every matchup, ctrl-F the enemy
+- [`build.md`](build.md) — items, runes, spells, skill order
+- [`playbook.md`](playbook.md) — laning, mid/late, teamfighting
+"""
+
+_TEMPLATE_MATCHUPS = """\
+# {display} — Matchups
+
+## Quick index
+
+(Optional summary table.)
+
+## Extreme threats
+
+### Example
+Notes here.
+
+## Major threats
+
+## Even
+
+## Minor
+
+## Tiny
+"""
+
+_TEMPLATE_BUILD = """\
+# {display} — Build
+
+## Summoner spells
+
+## Runes
+
+## Starting items
+
+## Core build
+
+### Standard
+1. First item
+2. Second item
+
+### vs Heavy AP
+
+### vs Heavy AD
+
+## Skill order
+"""
+
+_TEMPLATE_PLAYBOOK = """\
+# {display} — Playbook
+
+## Early game
+
+## Mid game
+
+## Late game
+
+## Teamfighting
+"""
+
+
+def scaffold_champ(name, source_url, current_patch):
+    folder_name = normalize(name)
+    if not folder_name:
+        print(f'invalid champion name: {name!r}', file=sys.stderr)
+        sys.exit(1)
+    folder = LEEG_ROOT / folder_name
+    if folder.exists():
+        print(f'{folder} already exists', file=sys.stderr)
+        sys.exit(1)
+    display = name.strip().title()
+    folder.mkdir()
+    (folder / 'README.md').write_text(_TEMPLATE_README.format(display=display))
+    (folder / 'matchups.md').write_text(_TEMPLATE_MATCHUPS.format(display=display))
+    (folder / 'build.md').write_text(_TEMPLATE_BUILD.format(display=display))
+    (folder / 'playbook.md').write_text(_TEMPLATE_PLAYBOOK.format(display=display))
+    write_meta(folder_name, {
+        'source_url': source_url or '',
+        'source_last_modified': None,
+        'patch_reviewed': current_patch,
+        'last_refreshed_at': None,
+    })
+    print(f'created {folder}')
+    print(f'  patch_reviewed: {current_patch or "unknown"}')
+    print(f'  source_url: {source_url or "(none — add to meta.json before --refresh-notes)"}')
+    print(f'  edit matchups.md / build.md / playbook.md to fill in notes')
+
+
 # ─── LCU API (champ select / lobby) ─────────────────────────────────────────
 
 def find_lockfile(explicit=None):
@@ -1225,10 +1386,13 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
     if coach is not None:
         trigger = coach.maybe_trigger(ev, me, enemies, timers, game_time, champ_folder)
         if trigger:
+            with coach.lock:
+                recent_snapshot = list(coach.recent_responses)
+                committed_snapshot = dict(coach.committed_build) if coach.committed_build else None
             user_msg = build_coach_message(
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
-                recent_responses=list(coach.recent_responses),
-                committed_build=dict(coach.committed_build) if coach.committed_build else None,
+                recent_responses=recent_snapshot,
+                committed_build=committed_snapshot,
             )
             coach.request_async(trigger, champ_folder, user_msg, game_time)
 
@@ -1392,10 +1556,9 @@ def render_idle(hosts, lockfile, lockfile_size, available, override):
     out.append(f'{DIM}Available champ notes: {", ".join(available) or "(none)"}{RESET}\n')
     out.append(f'{DIM}Live Client API hosts: {", ".join(hosts)}{RESET}\n')
     out.append(f'{DIM}Lockfile: {lockfile or "(not found — pass --lockfile to override)"}{RESET}\n')
-    out.append(f'{DIM}On WSL2: if the client is running but nothing connects, you likely need\n')
-    out.append(f'         WSL2 mirrored networking. Add to ~/.wslconfig:\n')
-    out.append(f'           [wsl2]\n           networkingMode=mirrored\n')
-    out.append(f'         Then `wsl --shutdown` from PowerShell.{RESET}\n')
+    out.append(f'{DIM}On WSL2: if the client is running but nothing connects, see README §\n')
+    out.append(f'         "First-time setup (WSL2)". Win11 22H2+ uses mirrored networking;\n')
+    out.append(f'         Win10 needs the netsh portproxy workaround.{RESET}\n')
     return ''.join(out)
 
 
@@ -1408,7 +1571,15 @@ def main():
     ap.add_argument('--lockfile', default=None, help='path to League lockfile (default: auto-detect under /mnt)')
     ap.add_argument('--max-chars', type=int, default=600, help='max chars per matchup body')
     ap.add_argument('--poll', type=float, default=POLL_SECONDS, help='poll interval in seconds')
+    ap.add_argument('--add-champ', dest='add_champ', metavar='NAME',
+                    help='create a new champion folder with template files and exit')
+    ap.add_argument('--source', dest='source', metavar='URL',
+                    help='source guide URL (used with --add-champ; saved to meta.json)')
     args = ap.parse_args()
+
+    if args.add_champ:
+        scaffold_champ(args.add_champ, args.source, fetch_current_patch())
+        return
 
     available = available_champs()
     if not available:
@@ -1427,12 +1598,34 @@ def main():
 
     hosts = candidate_hosts(args.host)
     print(f'leeg live · loading champion + item indices...', flush=True)
-    champ_index = fetch_champion_index()
+    champ_index, champ_aliases = fetch_champion_index()
     if not champ_index:
         print('  warning: could not fetch champion index from CommunityDragon', file=sys.stderr)
+    else:
+        # Audit: champs the Live API may surface (by alias) that we don't classify.
+        # Falls back to Mixed for anything missing — safe but loses build-picker fidelity.
+        unclassified = sorted(
+            normalize(a) for a in champ_aliases
+            if normalize(a) and normalize(a) not in CHAMP_DAMAGE
+        )
+        if unclassified:
+            print(f'  note: {len(unclassified)} champ(s) missing from CHAMP_DAMAGE — '
+                  f'will default to Mixed: {", ".join(unclassified)}', flush=True)
     item_index = fetch_item_index()
     if not item_index:
         print('  warning: could not fetch item index — falling back to archetype-only', file=sys.stderr)
+
+    current_patch = fetch_current_patch()
+    print(f'leeg live · current patch: {current_patch or "unknown"}', flush=True)
+    if current_patch:
+        for folder in available:
+            meta = read_meta(folder)
+            if not meta:
+                print(f'  drift: {folder} — no meta.json (run with --add-champ to scaffold or backfill manually)')
+                continue
+            drift = patch_drift(meta.get('patch_reviewed'), current_patch)
+            if drift:
+                print(f'  drift: {folder} — {drift}')
 
     lockfile = find_lockfile(args.lockfile)
     mode_label = f'override --champ {override}' if override else f'auto-detect ({len(available)} profiles)'

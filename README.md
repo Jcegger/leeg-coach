@@ -100,6 +100,16 @@ Remove-NetFirewallRule -DisplayName "WSL LeagueLiveAPI"
 
 ## Adding a new champion
 
+Fast path — scaffolding command:
+
+```bash
+python tools/live.py --add-champ "Aurora" --source "https://www.mobafire.com/..."
+```
+
+This creates `leeg/aurora/` with template `README.md`, `matchups.md`, `build.md`, `playbook.md`, and `meta.json` (source URL + current patch). Fill in the bodies. The CLI auto-discovers it on next start.
+
+Manual path — if you'd rather hand-build it:
+
 1. Create `leeg/<champ>/matchups.md` using the same structure as `mundo/matchups.md`:
    ```markdown
    # <Champ> — Matchups
