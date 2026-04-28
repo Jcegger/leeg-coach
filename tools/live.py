@@ -204,7 +204,7 @@ def classify_enemy(name, items, item_index):
         item_id = (item or {}).get('itemID')
         if not item_id:
             continue
-        kind = item_index.get(item_id)
+        kind = (item_index.get(item_id) or {}).get('damage')
         if kind == 'AP':
             ap_items += 1
         elif kind == 'AD':
@@ -382,11 +382,142 @@ def classify_item(categories):
     return 'Other'
 
 
+def _clean_build_name(name):
+    """Strip markdown and parentheticals from a build.md item entry."""
+    if not name:
+        return ''
+    name = re.sub(r'\*+', '', name)
+    name = re.sub(r'\s*\([^)]*\)\s*', ' ', name)
+    return name.strip()
+
+
+def component_progress(my_items, build_path_names, item_index):
+    """For each item in build_path_names not yet owned, count components currently
+    in inventory. Returns list of dicts sorted by progress desc, only including
+    items with at least one component owned."""
+    if not item_index or not build_path_names or not my_items:
+        return []
+    name_to_id = {}
+    for iid, info in item_index.items():
+        if iid >= 200000:  # skip ARAM variants
+            continue
+        norm = normalize(info.get('name', ''))
+        if norm:
+            name_to_id[norm] = iid
+    owned_ids = {(i or {}).get('itemID') for i in my_items if (i or {}).get('itemID')}
+    progress = []
+    for raw_name in build_path_names:
+        clean = _clean_build_name(raw_name)
+        if not clean:
+            continue
+        target_id = name_to_id.get(normalize(clean))
+        if not target_id or target_id in owned_ids:
+            continue
+        info = item_index.get(target_id) or {}
+        components = info.get('from') or []
+        if not components:
+            continue
+        owned_components = [c for c in components if c in owned_ids]
+        if not owned_components:
+            continue
+        progress.append({
+            'name': info.get('name', clean),
+            'cost': info.get('cost', 0),
+            'components_owned': len(owned_components),
+            'components_total': len(components),
+            'owned_component_names': [(item_index.get(c) or {}).get('name', '?') for c in owned_components],
+        })
+    progress.sort(key=lambda p: -p['components_owned'])
+    return progress
+
+
+# Items the coach commonly references for situational pivots. Build-path items
+# are added dynamically per game. Components are pulled in transitively from
+# item_index, so listing the parent here is enough.
+COACH_REFERENCE_ITEMS = [
+    "Bramble Vest", "Thornmail",
+    "Plated Steelcaps", "Mercury's Treads", "Boots",
+    "Spectre's Cowl", "Force of Nature", "Spirit Visage",
+    "Hexdrinker", "Maw of Malmortius",
+    "Executioner's Calling", "Mortal Reminder",
+    "Oblivion Orb", "Morellonomicon",
+    "Chempunk Chainsword",
+    "Lord Dominik's Regards",
+    "Frozen Heart",
+    "Randuin's Omen",
+    "Quicksilver Sash", "Silvermere Dawn",
+]
+
+
+def format_item_reference(item_index, extra_names=None):
+    """Return a list of authoritative '<name> (<cost>g) ← components' lines for
+    the coach's reference items plus any extras (build path, owned items).
+    Components referenced by parents are pulled in transitively so the model
+    has component costs too."""
+    if not item_index:
+        return []
+    name_to_id = {}
+    for iid, info in item_index.items():
+        if iid >= 200000:  # skip ARAM variants
+            continue
+        n = normalize(info.get('name', ''))
+        if n and n not in name_to_id:
+            name_to_id[n] = iid
+    seen = set()
+    pending = list(COACH_REFERENCE_ITEMS) + list(extra_names or [])
+    while pending:
+        nm = pending.pop()
+        iid = name_to_id.get(normalize(_clean_build_name(nm) or nm))
+        if not iid or iid in seen:
+            continue
+        seen.add(iid)
+        info = item_index.get(iid) or {}
+        for comp in info.get('from') or []:
+            if comp not in seen:
+                cinfo = item_index.get(comp) or {}
+                cn = cinfo.get('name')
+                if cn:
+                    pending.append(cn)
+    ordered = sorted(seen, key=lambda i: (item_index[i].get('cost') or 0))
+    out = []
+    for iid in ordered:
+        info = item_index[iid]
+        nm = info.get('name', '?')
+        cost = info.get('cost', 0)
+        comps = info.get('from') or []
+        if comps:
+            cs = []
+            for c in comps:
+                ci = item_index.get(c) or {}
+                cs.append(f'{ci.get("name","?")} {ci.get("cost",0)}g')
+            out.append(f'  {nm} ({cost}g) <= {" + ".join(cs)}')
+        else:
+            out.append(f'  {nm} ({cost}g, basic)')
+    return out
+
+
 def fetch_item_index():
-    """Returns {itemID: 'AP'|'AD'|'Tank'|'Other'}. Empty dict on failure."""
+    """Returns {itemID: {'damage', 'name', 'from', 'into', 'cost'}}. Empty dict on failure.
+    'damage' is 'AP'|'AD'|'Tank'|'Other'. 'from'/'into' are component/parent item IDs.
+    Used by classify_enemy() (damage profile) and component_progress() (coach prompt)."""
     try:
         data = _cdragon_get(ITEMS_INDEX_URL)
-        return {it['id']: classify_item(it.get('categories') or []) for it in data if it.get('id')}
+        index = {}
+        for it in data:
+            iid = it.get('id')
+            if not iid:
+                continue
+            cost = it.get('priceTotal')
+            if cost is None:
+                cost = (it.get('gold') or {}).get('total', 0)
+            index[iid] = {
+                'damage': classify_item(it.get('categories') or []),
+                'name': it.get('name', f'#{iid}'),
+                'from': [int(x) for x in (it.get('from') or []) if str(x).isdigit()],
+                'into': [int(x) for x in (it.get('into') or []) if str(x).isdigit()],
+                'cost': int(cost or 0),
+            }
+        return index
     except Exception:
         return {}
 
@@ -771,7 +902,7 @@ class Coach:
             f"- You will produce a JSON object matching the provided schema.\n"
             f"- `bullets`: 1-3 short imperative tactical lines for RIGHT NOW.\n"
             f"- `live_build`: your recommended 4-6 item path for this game. This is rendered persistently on screen, so it must be COHERENT and STABLE across calls. Items the player already owns appear first in their built positions; planned items follow. Once you commit to a path, keep recommending it until the game state materially changes.\n"
-            f"- `build_diverged`: true only if your live_build differs materially from the RULE-BASED BUILD DEFAULT shown in the game state. If you're endorsing the default, set this false and copy its items into live_build.\n"
+            f"- `build_diverged`: true if your live_build differs from the RULE-BASED BUILD DEFAULT in items, ORDER, or both. ORDER COUNTS — `[A, B, C]` and `[A, C, B]` are different builds. If you're endorsing the default (build_diverged=false), live_build MUST be the default's items in the EXACT SAME ORDER, with owned items pulled to the front in their built positions and the un-owned tail preserving default order. Reordering the un-owned tail without setting build_diverged=true is a violation; the user sees this immediately because the displayed build doesn't match the documented one.\n"
             f"- `build_change_reason`: short reason for the deviation (only if diverged).\n\n"
             f"Memory you have access to each call:\n"
             f"- YOUR CURRENT BUILD COMMITMENT — the latest live_build you locked in, with timestamp + reason. This is your game-long anchor for the build path. Stay on it unless something material has changed since the commitment time.\n"
@@ -779,9 +910,29 @@ class Coach:
             f"- TEAM SCORE — kills/drakes/barons/towers per side. Use for macro reads (we're ahead vs behind, contest objectives vs play safe, etc.).\n\n"
             f"Consistency rules (IMPORTANT):\n"
             f"- BUILD COMMITMENT: once you commit to a path, KEEP IT across calls. Only change it when game state has materially changed (enemy team pivots damage profile, a key carry gets fed/falls off, an objective threat changes the game plan). When you do change it, set build_diverged=true and explain in build_change_reason.\n"
+            f"- BULLETS MUST AGREE WITH live_build: when bullets recommend backing/buying/finishing a specific item, name only the next un-owned item(s) in live_build's order. Do not name an item later in live_build while earlier un-owned items still come before it. If you genuinely want to skip ahead (e.g. recommend item N+2 before N+1), reorder live_build first so the bullet and the build stay in sync.\n"
+            f"- AFFORDABILITY (hard rule): the user message contains a CURRENT GOLD line and an ITEM REFERENCE table with authoritative costs + components. NEVER invent or estimate costs from memory — if a price isn't in the table, don't quote one. Before writing any bullet that uses the verbs BACK / RECALL / BUY / FINISH / RUSH / GET, you MUST verify CURRENT GOLD is at least the cost of the cheapest sub-component of the item you'd name (look it up in ITEM REFERENCE). If it isn't, REPLACE the verb (e.g. 'STAY ALIVE — farm to <Xg> for <component name>' where X is the component's cost FROM ITEM REFERENCE).\n"
+            f"- COMPONENTS ARE NOT FULL ITEMS: if you say 'BACK for Bramble Vest', that means stopping at the 1100g component, NOT Thornmail. If you mean Thornmail, name Thornmail and verify the user can afford at least its cheapest component. The ITEM REFERENCE explicitly separates components from parents — use it.\n"
+            f"- BULLETS MAY ONLY NAME ITEMS THAT ARE EITHER (a) in your live_build, (b) already owned by the user, or (c) a component of an item in live_build. If you want to recommend an item not in live_build, FIRST update live_build to include it (set build_diverged=true with a reason). Do not name a counter-item in a bullet without putting it in live_build.\n"
             f"- TACTICAL BULLETS: build on prior advice. If you previously said to skip an item or path, don't later recommend it without a reason that ties to a recent event.\n"
             f"- The 'rule-based build path' is the deterministic default from build.md. REFERENCE only — deviate when warranted, then stick with the deviation.\n"
             f"- Do not yo-yo. If you wouldn't justify the change to a teammate, don't make it.\n\n"
+            f"BEFORE SUBMITTING — run these checks:\n"
+            f"1. If build_diverged=false: walk through live_build's un-owned tail and the rule-based default's un-owned tail item-by-item. They must match in order. If they don't, either fix live_build to match or flip build_diverged=true with a reason.\n"
+            f"2. If a bullet uses BACK / RECALL / BUY / FINISH / RUSH / GET, the item it names must appear in live_build (or be a component of an item in live_build), it must be the FIRST un-owned item in that path, AND the player must have at least the cheapest sub-component's gold cost (look up cost in ITEM REFERENCE).\n"
+            f"3. EVERY item name you mention in any bullet must appear in ITEM REFERENCE (or in the user's items=[...]). If it doesn't, you're hallucinating — replace it with one that does.\n"
+            f"4. EVERY gold figure you quote (item cost, component cost, gold needed) must come from ITEM REFERENCE or CURRENT GOLD verbatim. Do not invent or round.\n\n"
+            f"=== SITUATIONAL COUNTER-ITEMS CHEAT SHEET ===\n"
+            f"When the user message's THREAT ASSESSMENT names an ahead/snowballing enemy, ADAPT the build path. "
+            f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) "
+            f"and slot it where the build guide expects a flex item. Set build_diverged=true and cite the threat.\n"
+            f"- Heavy-AD bruiser/skirmisher pulling ahead (Illaoi, Aatrox, Warwick, Olaf, Nasus, Yi, Tryndamere, Yorick, Volibear, Sett, Renekton, Camille, Garen, Darius): armor + grievous wounds. Tanks/bruisers: Bramble Vest → Thornmail. Squishies: Tabis, Randuin's vs crit.\n"
+            f"- Heavy-AP threat pulling ahead (Veigar, Syndra, Annie, LeBlanc, Vladimir, Cassiopeia, Kassadin, Diana, Akali): magic resist. Bruisers: Spectre's Cowl → Force of Nature / Spirit Visage (if you have healing). Squishies: Hexdrinker → Maw, Mercury's Treads.\n"
+            f"- Enemy team has stacked healing/lifesteal (Soraka, Yuumi, Aatrox, Warwick, Vladimir, Olaf, Trundle, Sylas, Dr. Mundo): grievous wounds is mandatory by mid-game. AD: Executioner's Calling → Mortal Reminder. AP: Oblivion Orb → Morellonomicon. Bruiser/utility: Chempunk Chainsword.\n"
+            f"- Enemy ADC fed: tanks build Randuin's Omen (cuts crit dmg). Squishies/carries: Lord Dominik's Regards (vs HP stacking) or Frozen Heart (if AP/melee).\n"
+            f"- Enemy heavy hard-CC (Malzahar, Skarner, Warwick, Mordekaiser ult, etc.): Mercury's Treads, Silvermere Dawn / Quicksilver Sash, Maw of Malmortius (also gives MR shield).\n"
+            f"- Enemy attack-speed-reliant (Yi, Kayle, Kog'Maw, Tryndamere, Jax): tanks consider Frozen Heart (cuts 20% AS in aura).\n"
+            f"This cheat sheet is suggestive, not prescriptive. The build guide is the starting point; pivot when an enemy starts dominating, then COMMIT to the adjusted path (don't yo-yo).\n\n"
             f"=== CHAMPION MATCHUP NOTES (for enemies you face as {champ_folder}) ===\n"
             f"{matchups_text}\n\n"
             f"=== BUILD GUIDE (reference, not a rigid plan) ===\n"
@@ -892,13 +1043,19 @@ class Coach:
                     'cache_control': {'type': 'ephemeral', 'ttl': '1h'},
                 }],
                 messages=[{'role': 'user', 'content': user}],
-                output_config={'format': {'type': 'json_schema', 'schema': COACH_SCHEMA}},
+                tools=[{
+                    'name': 'submit_coach_response',
+                    'description': 'Submit the structured coach response.',
+                    'input_schema': COACH_SCHEMA,
+                }],
+                tool_choice={'type': 'tool', 'name': 'submit_coach_response'},
             )
-            text = ''.join(b.text for b in resp.content if b.type == 'text').strip()
-            try:
-                parsed = json.loads(text)
-            except json.JSONDecodeError:
-                parsed = {}
+            parsed = {}
+            for block in resp.content:
+                if getattr(block, 'type', None) == 'tool_use' and getattr(block, 'name', None) == 'submit_coach_response':
+                    parsed = block.input or {}
+                    break
+            text = json.dumps(parsed) if parsed else ''
             bullets = [b for b in (parsed.get('bullets') or []) if isinstance(b, str) and b.strip()]
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
             diverged = bool(parsed.get('build_diverged'))
@@ -939,6 +1096,7 @@ class Coach:
             with self.lock:
                 self.errors += 1
                 self.last_response = f'(coach error: {type(e).__name__}: {e})'
+                self.last_response_at = time.time()
                 if self.errors >= 5:
                     self.client = None
                     self.error_msg = f'disabled after {self.errors} errors'
@@ -1080,8 +1238,25 @@ def _team_score_summary(data, ev, your_team):
     return ' · '.join(parts)
 
 
+def _enemy_threat_state(enemy, game_time):
+    sc = enemy.get('scores') or {}
+    k = int(sc.get('kills', 0) or 0)
+    d = int(sc.get('deaths', 0) or 0)
+    a = int(sc.get('assists', 0) or 0)
+    diff = k - d
+    kp = k + a
+    minutes = max(1, game_time // 60)
+    if k >= 6 or diff >= 4 or (kp >= 8 and minutes <= 20):
+        return 'SNOWBALLING'
+    if diff >= 2 or (k >= 3 and d == 0):
+        return 'AHEAD'
+    if d - k >= 3:
+        return 'BEHIND'
+    return None
+
+
 def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trigger,
-                        recent_responses=None, committed_build=None):
+                        recent_responses=None, committed_build=None, item_index=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
@@ -1095,15 +1270,18 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         scores = me.get('scores') or {}
         items = [(i or {}).get('displayName', '?') for i in (me.get('items') or []) if (i or {}).get('itemID')]
         pos = (me.get('position') or '').lower() or '?'
+        gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
         lines.append(
             f'YOU: {me.get("championName")} ({pos}) lvl {me.get("level")} '
             f'{scores.get("kills",0)}/{scores.get("deaths",0)}/{scores.get("assists",0)} '
             f'{scores.get("creepScore",0)}cs items=[{", ".join(items)}]'
         )
+        lines.append(f'CURRENT GOLD: {gold}g  ← AUTHORITATIVE. Do not invent or estimate this number; it is exact.')
         if me.get('isDead'):
             lines.append(f'YOU DEAD ({int(me.get("respawnTimer") or 0)}s)')
 
     lines.append('ENEMIES:')
+    threats = []
     for e in enemies:
         sc = e.get('scores') or {}
         items = [(i or {}).get('displayName', '?') for i in (e.get('items') or []) if (i or {}).get('itemID')]
@@ -1116,13 +1294,63 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         if e.get('isDead'):
             line += f' DEAD({int(e.get("respawnTimer") or 0)}s)'
         lines.append(line)
+        state = _enemy_threat_state(e, game_time)
+        if state in ('SNOWBALLING', 'AHEAD'):
+            threats.append((state, e.get('championName'), pos))
+
+    if threats:
+        lines.append('')
+        lines.append('THREAT ASSESSMENT (ahead/snowballing enemies — ADAPT BUILD if relevant):')
+        for state, champ, pos in threats:
+            lines.append(f'  [{state}] {champ} ({pos})')
+        lines.append(
+            'If a snowballing enemy threatens you, pivot to counter-items '
+            '(armor / MR / grievous wounds / tenacity) per the SITUATIONAL COUNTER-ITEMS '
+            'cheat sheet in the system prompt. Set build_diverged=true and name the threat in build_change_reason.'
+        )
 
     if profile and profile[3] > 0:
         label, ap, ad, _, _ = profile
         lines.append(f'COMP: {label} ({ap:g} AP / {ad:g} AD)')
+    build_names = []
     if build_pick:
         heading, body = build_pick
-        lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_path_summary(body)}')
+        build_summary = build_path_summary(body)
+        lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_summary}')
+        build_names = [n.strip() for n in build_summary.split('·') if n.strip()]
+
+    if me and item_index and build_names:
+        progress = component_progress(me.get('items') or [], build_names, item_index)
+        if progress:
+            lines.append('')
+            lines.append('USER COMPONENT PROGRESS (authoritative — derived directly from inventory):')
+            for p in progress:
+                comps = ', '.join(p['owned_component_names'])
+                lines.append(
+                    f'  {p["name"]} ({p["cost"]}g): {p["components_owned"]}/{p["components_total"]} components owned [{comps}]'
+                )
+            lines.append(
+                'Components in inventory commit the user to that path — selling loses ~30% gold. '
+                'The item with the most progress MUST be the next un-owned position in your live_build; '
+                "if your live_build currently has a different next item, REORDER live_build (set "
+                "build_diverged=true with a reason like 'committing to user's existing component investment') "
+                'so the bullet, the build, and the inventory all agree.'
+            )
+
+    if item_index:
+        owned_names = []
+        if me:
+            owned_names = [(i or {}).get('displayName', '') for i in (me.get('items') or []) if (i or {}).get('itemID')]
+        ref_lines = format_item_reference(item_index, extra_names=build_names + owned_names)
+        if ref_lines:
+            lines.append('')
+            lines.append('ITEM REFERENCE (AUTHORITATIVE costs + components — DO NOT INVENT prices or recipes):')
+            lines.extend(ref_lines)
+            lines.append(
+                'Format: "<full item> (<total g>) <= <component> <component cost>g + ..." or "(basic)" for non-recipe items. '
+                'When you name an item in a bullet (BUY/FINISH/RUSH/GET/etc.), use the EXACT name above and reason from THIS table for cost. '
+                'Never quote a price not in this table. Components are listed separately from their parent — Giant\'s Belt is NOT Sunfire Aegis.'
+            )
 
     drake_t, baron_t = timers.get('drake'), timers.get('baron')
     obj = []
@@ -1375,7 +1603,7 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
     return ''.join(out)
 
 
-def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None):
+def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None):
     your_champ, enemies, me = find_active_team(data)
     ev = parse_events(data)
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
@@ -1393,12 +1621,23 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
                 recent_responses=recent_snapshot,
                 committed_build=committed_snapshot,
+                item_index=item_index,
             )
             coach.request_async(trigger, champ_folder, user_msg, game_time)
 
     notes_label = f'notes: {champ_folder}' if champ_folder else 'no notes'
     out = [CLEAR]
     out.append(header_line(f'leeg live · IN GAME · {your_champ or "?"} · {mins}:{secs:02d} · {host} · {notes_label}'))
+
+    if me:
+        my_scores = me.get('scores') or {}
+        my_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
+        my_items_count = len([i for i in (me.get('items') or []) if (i or {}).get('itemID')])
+        out.append(
+            f'{DIM}you:{RESET} {me.get("championName") or "?"} lvl {me.get("level", "?")} · '
+            f'{my_scores.get("kills",0)}/{my_scores.get("deaths",0)}/{my_scores.get("assists",0)} · '
+            f'{my_scores.get("creepScore",0)}cs · {BOLD}{my_gold}g{RESET} · {my_items_count} items\n\n'
+        )
 
     if your_champ and not champ_folder:
         out.append(f'{TIER_COLOR["Major"]}NOTE: no matchup notes for {your_champ} (add leeg/<champ>/matchups.md){RESET}\n\n')
@@ -1668,7 +1907,7 @@ def main():
                 ],
             }, sort_keys=True)
             if sig != last_sig:
-                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach))
+                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index))
                 sys.stdout.flush()
                 last_sig, last_state = sig, 'game'
             time.sleep(args.poll)
