@@ -26,7 +26,7 @@ Quit with Ctrl-C.
 For per-event tactical coaching synthesized from your matchup + build notes, set an Anthropic API key:
 
 ```bash
-echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc && source ~/.bashrc
+echo 'export LEEG_ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc && source ~/.bashrc
 pip install anthropic
 ```
 
@@ -178,7 +178,7 @@ You're not actually loaded into a match (the Live Client API only runs during ga
 On Win10, champ select isn't supported with the basic portproxy setup — the LCU port is dynamic. Either upgrade to Win11 + mirrored networking, or run the script natively on Windows (install Python on the Windows side and pass `--lockfile "C:\Riot Games\League of Legends\lockfile"`).
 
 **Coach disabled at startup**
-Either `pip install anthropic` is missing, or `ANTHROPIC_API_KEY` isn't set in the shell that launched `leeg`. Re-run `source ~/.bashrc` after setting the key, then relaunch.
+Either `pip install anthropic` is missing, or `LEEG_ANTHROPIC_API_KEY` isn't set in the shell that launched `leeg`. Re-run `source ~/.bashrc` after setting the key, then relaunch.
 
 **"Cannot find …/matchups.md"**
 The `--champ` value doesn't match a folder under `leeg/`. Check spelling.

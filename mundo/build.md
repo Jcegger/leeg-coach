@@ -1,22 +1,34 @@
 # Mundo — Build
 
+Source: [Mobalytics Dr. Mundo Top Build (Patch 26.8)](https://mobalytics.gg/lol/champions/drmundo/build/top) — aggregated from 77K+ matches, Emerald+.
+
+## Summoner spells
+
+Ghost + Teleport (standard).
+
+## Runes
+
+**Primary — Resolve:** Grasp of the Undying · Demolish · Second Wind · Overgrowth
+
+**Secondary — Inspiration:** Approach Velocity · Magical Footwear
+
+**Shards:** +10% Attack Speed · Health Scaling · Health Scaling
+
 ## Starting items
 
-- Doran's Shield
-- Ruby Crystal
-- Health Potion
+Doran's Shield · Health Potion · Stealth Ward
 
-## Build paths
+## Core build
 
-### Current build (author's go-to)
+### Standard
 1. Warmog's Armor
-2. Heartsteel
-3. Boots of Swiftness
+2. Boots of Swiftness
+3. Heartsteel
 4. Titanic Hydra
-5. Dead Man's Plate
-6. Jak'Sho, The Protean
+5. Spirit Visage
+6. Overlord's Bloodmail
 
-### Standard meat (no Warmog's)
+### No Warmog's (good stick / max-HP damage / need to be online fast)
 1. Heartsteel
 2. Boots of Swiftness
 3. Unending Despair
@@ -24,162 +36,45 @@
 5. Jak'Sho, The Protean
 6. Thornmail
 
-### Split push (use Warmog's rune page)
-1. Heartsteel
-2. Warmog's Armor
-3. Boots of Swiftness
-4. Titanic Hydra
-5. Overlord's Bloodmail
+## Situational last items
 
-### Full AP enemy team
-1. Heartsteel
-2. Boots of Swiftness
-3. Hollow Radiance
-4. Spirit Visage
-5. Force of Nature
-6. Jak'Sho
+- Dead Man's Plate (mixed/AD)
+- Thornmail (heavy healing / anti-AD)
+- Randuin's Omen (crit-heavy enemy)
+- Unending Despair (AP damage)
+- Jak'Sho, The Protean (sustained fights)
+- Force of Nature (heavy AP)
 
-### Full AD enemy team
-1. Heartsteel
-2. Plated Steelcaps
-3. Bramble Vest
-4. Dead Man's Plate
-5. Randuin's Omen
-6. Jak'Sho
+## Warmog's: when to take it
 
-### Heavy magic damage (Warmog's variant)
-1. Heartsteel
-2. Warmog's Armor
-3. Boots of Swiftness
-4. Spirit Visage
-5. Unending Despair
-6. Force of Nature
+**GOOD vs:**
+- Lots of poke on enemy team
+- Lack of engage / slow fights
+- You're the only frontline
+- Enemy has bad stick / hard time chasing
+- You will primarily split push
+- Enemy has lots of true damage / not much max-HP damage
+- You need damage (Warmog's IS your damage item)
 
-### Enemy stacked MR
-1. Heartsteel
-2. Boots
-3. Warmog's Armor
-4. Unending Despair
-5. Titanic Hydra
-6. Jak'Sho
+**BAD vs:**
+- Enemy has lots of max-HP damage
+- Enemy has good stick (e.g., Nasus)
+- Enemy lacks poke (every fight is to-the-death)
+- You need to be online fast — Unending Despair is stronger and faster as a 2nd item
 
-### Jungle (funny build)
-1. Heartsteel
-2. Boots of Swiftness
-3. Titanic Hydra
-4. Overlord's Bloodmail
-5. Sundered Sky
-6. Dead Man's Plate
-
-## Last items / situational
-
-- Spirit Visage
-- Jak'Sho, The Protean
-- Sundered Sky
-- Hullbreaker
-- Randuin's Omen
-- Thornmail
-- Experimental Hexplate
-- Iceborn Gauntlet
-- Force of Nature
-- Abyssal Mask
-- Bandlepipes (support)
-- Zeke's Convergence (support)
-
-## Boots options
-
-- Plated Steelcaps (full AD)
-- Boots of Swiftness (default)
-- Crimson Lucidity
+**Important:** Don't combo Warmog's with Titanic + Overlord's Bloodmail — no AD scalings, wasted slot. With Warmog's, your E one-shots casters and Heartsteel proc handles ADCs.
 
 ## Do NOT buy
 
 - Sunfire Aegis (bad on Mundo)
 - Hollow Radiance (only vs full-AP team)
 - Sterak's Gage (graveyard tier)
-- Overlord's Bloodmail with Titanic + Warmog's together (no AD scalings — wasted slot)
-
-## Example of a bad build
-
-Heartsteel → Warmog's → Boots of Swiftness → Sunfire Aegis → Titanic Hydra → Unending Despair (Sunfire is the problem)
-
-## Warmog's: when to take it
-
-**GOOD vs:**
-- Lots of poke on enemy team
-- Lack of engage on enemy team (slow fights)
-- You're your team's only frontline
-- Enemy has bad stick / hard time chasing
-- You will primarily split push
-- Enemy has lots of true damage / not a lot of max-HP damage
-- You weren't winning the all-in even with non-Warmog's build
-- You need damage
-
-**BAD vs:**
-- Enemy has lots of max-HP damage
-- Enemy lacks true damage / penetration
-- Enemy has good stick (e.g., Nasus)
-- Enemy lacks poke (every fight is to-the-death)
-- You need to be online ASAP — Unending Despair is a stronger and faster 2nd item
-
-**Important:** Warmog's IS your damage item. Don't combo it with Titanic + Bloodmail — you'll die before killing anyone. With Warmog's, your E one-shots casters and Heartsteel proc + base kit handles ADCs.
-
-## Runes
-
-### Standard (default)
-- **Resolve (primary):** Grasp of the Undying / Demolish / Second Wind / Overgrowth
-- **Inspiration (secondary):** Magical Footwear / Approach Velocity
-- **Shards:** +10% Attack Speed / +10–180 HP / +10–180 HP
-
-### Phase Rush (kiteable / heavy slow / chase matchups)
-- **Sorcery (primary):** Phase Rush / Axiom Arcanist / Celerity / Scorch
-- **Resolve (secondary):** Overgrowth / Second Wind
-- **Shards:** +10% AS / +HP / +HP
-
-### Conditioning variant
-- **Resolve:** Grasp / Demolish / Conditioning / Overgrowth
-- **Inspiration:** Magical Footwear / Biscuit Delivery
-- **Shards:** +10% AS / +2.5% MS / +15% Tenacity/Slow Resist
-
-### First Strike (split push damage variant)
-- **Inspiration (primary):** First Strike / Magical Footwear / Biscuit Delivery / Approach Velocity
-- **Resolve (secondary):** Demolish / Overgrowth (or Second Wind / Overgrowth)
-
-### Fleet Footwork (Precision)
-- Fleet Footwork / Triumph / Legend: Alacrity / Cut Down
-- Inspiration: Magical Footwear / Approach Velocity
-
-### Unsealed Spellbook (cheese)
-- Inspiration: Unsealed Spellbook / Magical Footwear / Biscuit Delivery / Approach Velocity
-- Resolve: Second Wind / Overgrowth
-
-### Arcane Comet (rare)
-- Sorcery: Arcane Comet / Axiom Arcanist / Celerity / Scorch
-- Resolve: Demolish / Second Wind
-- Shards: +8 Ability Haste / +2.5% MS / +HP
-
-### Cash Back / Warmog's-spike maximizer
-- Inspiration: First Strike / Cash Back / Biscuit Delivery / Approach Velocity
-- Resolve: Second Wind / Overgrowth
-- Shards: +8 AH / +HP / +HP
-
-### Notes from author
-- **Approach Velocity** is the best inspiration minor — better than Biscuit Delivery in almost every case
-- **Last Stand** is the best Precision secondary minor (or Cut Down if precision primary)
-- **Conditioning** is hypothetically good but Second Wind beats it
-- **Biscuit Delivery** is bait — only useful as a learning crutch in lanes you desperately need sustain (Aatrox, but you should ban Aatrox if blind picking)
-
-## Summoner spells
-
-- **Standard:** Ghost + Ignite
-- **Alternate:** Exhaust + Ghost, OR Flash + Ghost (mirror matchups)
-- **Don't do this:** Flash + Teleport
-- **Jungle:** Ghost + Smite
+- Overlord's Bloodmail with Titanic + Warmog's together (no AD scalings)
 
 ## Skill order
 
-**Default top:** R > Q > W > E
+**Q max → E → W.** R at 6/11/16.
 
-**E-max instead of Q-max in these matchups:** Akshan, Vayne, Gnar (preference), Tryndamere (preference, skewed E), Kennen, Quinn, Rengar, Heimerdinger, Kayle, Jayce, Yasuo, Varus, Aurelion Sol, Azir, Corki, Hwei, Kai'Sa, Smolder (3 points Q first then E max), Singed (if proxying)
+**E-max instead of Q-max:** Akshan, Vayne, Gnar, Tryndamere, Kennen, Quinn, Rengar, Heimerdinger, Kayle, Jayce, Yasuo, Varus, Aurelion Sol, Azir, Corki, Hwei, Kai'Sa, Singed (if proxying). Smolder: 3 points Q first then E max.
 
-**Preference matchups:** Akali (Q or E), Camille, Pantheon, Gangplank (E better if not breaking barrels), Vladimir, Riven (skewed Q)
+**Either works:** Akali, Camille, Pantheon, Gangplank (E better if not breaking barrels), Vladimir, Riven.

@@ -128,7 +128,7 @@ You: Dr. Mundo (top)
 
 Layered top → bottom in the in-game view, each adds different signal:
 
-1. **Coach (LLM)** — 1–3 short imperative bullets from Claude Haiku 4.5, fired on significant events (opening, drake/baron taken, your death, laner death, drake spawn windows, kills involving you, ace, periodic). Optional; off if `ANTHROPIC_API_KEY` is unset. See "LLM coach setup" below.
+1. **Coach (LLM)** — 1–3 short imperative bullets from Claude Haiku 4.5, fired on significant events (opening, drake/baron taken, your death, laner death, drake spawn windows, kills involving you, ace, periodic). Optional; off if `LEEG_ANTHROPIC_API_KEY` is unset. See "LLM coach setup" below.
 2. **DO panel** — deterministic rule-based advice (red = immediate, yellow = action window, white = macro). Triggers: you/laner dead → push or track minimap, drake/baron <60s, CS/item gap with laner, fed enemies (≥5 kill lead).
 3. **Build/comp line** — same damage-profile build picker as before. Updates as enemies buy items.
 4. **Objectives line** — drake / baron timers (approximate; based on event-driven last-kill + 5-min/6-min respawn). Also shows count of drakes already taken.
@@ -141,7 +141,7 @@ For richer coaching that synthesizes your matchup notes + build guide + current 
 
 ```bash
 pip install anthropic
-echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc && source ~/.bashrc
+echo 'export LEEG_ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc && source ~/.bashrc
 ```
 
 Get an API key at console.anthropic.com → API Keys, and add a few dollars of credit (Plans & Billing → Add credit). Note: Claude Pro is a separate billing system from the API; Pro doesn't include API credits.
@@ -188,11 +188,11 @@ Per game (~25–30 minutes, 10–15 coach calls):
 
 #### Tunables
 
-- `ANTHROPIC_API_KEY` — required
+- `LEEG_ANTHROPIC_API_KEY` — required (falls back to `ANTHROPIC_API_KEY` if unset, but using the leeg-specific name avoids conflicting with Claude Code subscription auth)
 - `LEEG_COACH_MODEL` — default `claude-haiku-4-5`. Try `claude-sonnet-4-6` for sharper analysis at ~3x cost.
 - `LEEG_COACH_COOLDOWN` — default 25 seconds between calls. Lower = more reactive but more cost.
 
-If `ANTHROPIC_API_KEY` is unset or `pip install anthropic` hasn't been run, the coach disables silently — the rest of the assistant (DO panel, timers, events, enemy details) still works.
+If `LEEG_ANTHROPIC_API_KEY` is unset or `pip install anthropic` hasn't been run, the coach disables silently — the rest of the assistant (DO panel, timers, events, enemy details) still works.
 
 ### Planned: text-to-speech for coach output
 

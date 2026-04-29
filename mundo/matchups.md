@@ -28,6 +28,7 @@ You are the exact champion archetype she thrives on, a tanky brawler with no mob
 
 ### Gnar
 
+Build: no-warmogs
 PREFERENCE, I USUALLY E MAX Not much to say, just keep in mind even late game if you step up too far he can chase and kill you indefinitely. Mega gnar is actually not that much of an issue but mini gnar is basically harder vayne (his w passive gives him a constant ms steroid and magic max health damage). Post 6 if you land a cleaver in lane against him and he doesn't have rage you can look to all-in (you have to juke the boomerang) but beyond that it's just a scale lane where you pray to god someone on your team gets fed
 
 ### Gwen
@@ -106,6 +107,7 @@ He's the third worst jungler (behind Gwen and Bel’Veth). Almost impossible to 
 
 ### Nasus
 
+Build: no-warmogs
 Always Q max. He used to be Mundo’s worst melee lane, but Divine removal made it a lot more playable (still not good tho). Mundo can’t really zone him from farm. Nasus scales extremely fast and wins the 1v1 hard. Swifties + Tenacity shard are mandatory (unless enemy comp is full AD). Dead Man’s Plate as a 4th/5th item is very useful. Playstyle: If your mid laner can just clear the wave versus him its a lot better for your mid to match him later. He just ignores you while taking tower lol. If you HAVE to match him and arent stomping him, you wont win 1v1 but you can kill the wave infront of him before it reaches tower aggro so he cant just take tower. If he has hullbreaker this doesnt work Force teamfights instead; you offer much more value unless he’s giga-fed. Runes: Phase Rush → consistent/safe option. Grasp → try to bully him early, but unreliable. Both are viable here. I personally just run grasp against him because most nasus mains in high elo play AP nasus where grasp is way better but in low/mid elo where matchups arent oh its probably that one OTP in lobby, I would go phase rush more Matchup status: you have a slightly winning pre-6 to get hard outscaled outside of teamfights. He’s a “4” for winning chances since realistically its easy to just make the lane a coinflip, and a “5” for frustration. Ban him if you want to enjoy Mundo in draft pick.
 
 ### Nilah

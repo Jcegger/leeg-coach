@@ -22,7 +22,6 @@ import json
 import os
 import re
 import ssl
-import string
 import sys
 import threading
 import time
@@ -293,8 +292,28 @@ def classify_variant(heading):
     return None  # split push, jungle, etc. — never auto-picked
 
 
-def pick_build_variant(variants, profile_kind):
-    """Match comp profile to a build.md variant. Falls back to Standard."""
+def laner_build_tag(matchup_entry):
+    """Return the 'Build: <tag>' value from a matchup entry body, or None.
+    Lets matchup notes flag which build variant to prefer for a specific laner.
+    E.g. a line 'Build: no-warmogs' in the Nasus note selects ### No Warmog's."""
+    if not matchup_entry:
+        return None
+    _, body, _ = matchup_entry
+    for line in (body or '').splitlines():
+        m = re.match(r'^\s*build:\s*(.+)$', line, re.IGNORECASE)
+        if m:
+            return m.group(1).strip().lower()
+    return None
+
+
+def pick_build_variant(variants, profile_kind, preferred_tag=None):
+    """Match comp profile to a build.md variant. preferred_tag (from a matchup
+    note 'Build:' line) is tried first; falls back to damage profile, then Standard."""
+    if preferred_tag:
+        tag_norm = normalize(preferred_tag)
+        for heading, body in variants:
+            if tag_norm in normalize(heading):
+                return heading, body
     for heading, body in variants:
         if classify_variant(heading) == profile_kind:
             return heading, body
@@ -391,44 +410,168 @@ def _clean_build_name(name):
     return name.strip()
 
 
-def component_progress(my_items, build_path_names, item_index):
-    """For each item in build_path_names not yet owned, count components currently
-    in inventory. Returns list of dicts sorted by progress desc, only including
-    items with at least one component owned."""
-    if not item_index or not build_path_names or not my_items:
-        return []
-    name_to_id = {}
+
+
+# Starter / consumable items that should NEVER occupy a slot in live_build.
+# Match by normalized name so casing/punctuation/possessives don't matter.
+_STARTER_ITEM_NAMES = {
+    "doransshield", "doransblade", "doransring",
+    "cull", "spellthiefsedge", "relicshield", "steelshoulderguards",
+    "spectralsickle", "tearofthegoddess", "darkseal",
+    "healthpotion", "refillablepotion", "corruptingpotion",
+    "stealthward", "oraclelens", "controlward", "wardingtotem",
+    "slightlymagicalfootwear", "boots",
+}
+
+
+def _build_name_to_id(item_index):
+    """Map normalized item name -> id for non-ARAM items."""
+    out = {}
+    if not item_index:
+        return out
     for iid, info in item_index.items():
-        if iid >= 200000:  # skip ARAM variants
+        if iid >= 200000:
             continue
-        norm = normalize(info.get('name', ''))
-        if norm:
-            name_to_id[norm] = iid
-    owned_ids = {(i or {}).get('itemID') for i in my_items if (i or {}).get('itemID')}
-    progress = []
-    for raw_name in build_path_names:
-        clean = _clean_build_name(raw_name)
-        if not clean:
+        n = normalize(info.get('name', ''))
+        if n and n not in out:
+            out[n] = iid
+    return out
+
+
+def resolve_item_id(name, name_to_id):
+    """Resolve a free-form item name to its canonical item id. Tries exact
+    normalized match, then prefix match, then substring match. Returns None
+    if no unambiguous match.
+    Handles e.g. 'Jak\\'Sho' (build.md short form) -> Jak\\'Sho, The Protean."""
+    n = normalize(_clean_build_name(name) or name)
+    if not n or not name_to_id:
+        return None
+    if n in name_to_id:
+        return name_to_id[n]
+    pref = [iid for k, iid in name_to_id.items() if k.startswith(n) or n.startswith(k)]
+    if len(set(pref)) == 1:
+        return pref[0]
+    sub = [iid for k, iid in name_to_id.items() if n in k or k in n]
+    if len(set(sub)) == 1:
+        return sub[0]
+    return None
+
+
+def validate_item_names(item_names, item_index):
+    """Drop any name that doesn't resolve to a real item in item_index.
+    Stops hallucinated items from reaching live_build."""
+    if not item_index:
+        return list(item_names or [])
+    name_to_id = _build_name_to_id(item_index)
+    out = []
+    for name in item_names or []:
+        if resolve_item_id(name, name_to_id) is not None:
+            out.append(name)
+    return out
+
+
+def compute_build_diverged(live_build, build_pick, my_items, item_index=None):
+    """Returns True if live_build's un-owned tail differs from the rule-based
+    default's un-owned tail. Comparison is by item ID when item_index is
+    provided so 'Jak\\'Sho' and 'Jak\\'Sho, The Protean' compare equal.
+    Owned items are removed from both sides first so 'owned pulled to front'
+    doesn't register as divergence."""
+    if not build_pick or not live_build:
+        return False
+    _heading, body = build_pick
+    summary = build_path_summary(body)
+    default_names = [n.strip() for n in summary.split('·') if n.strip()]
+
+    name_to_id = _build_name_to_id(item_index) if item_index else {}
+    owned_ids = {it.get('itemID') for it in (my_items or []) if it and it.get('itemID')}
+
+    def to_keys(items):
+        keys = []
+        for raw in items:
+            cleaned = _clean_build_name(raw) or raw
+            if not cleaned:
+                continue
+            iid = resolve_item_id(cleaned, name_to_id) if name_to_id else None
+            key = iid if iid is not None else normalize(cleaned)
+            if key in owned_ids:
+                continue
+            # Also skip if key is the normalized name of an owned item (when
+            # we couldn't resolve to an id, fall back to name comparison).
+            keys.append(key)
+        return keys
+
+    return to_keys(live_build) != to_keys(default_names)
+
+
+_BUY_VERBS = ('BACK', 'RECALL', 'BUY', 'FINISH', 'RUSH', 'GET')
+
+
+def affordability_postcheck(bullets, current_gold, item_index):
+    """Server-side enforcement of the affordability rule. For each bullet that
+    uses a BACK/BUY-class verb and names an item whose cheapest component cost
+    exceeds current_gold, replace the verb with FARM and append the shortfall.
+    Stops the LLM from telling the user to BACK at 300g."""
+    if not item_index or not bullets:
+        return list(bullets or [])
+    name_to_id = _build_name_to_id(item_index)
+    sorted_keys = sorted(name_to_id.keys(), key=len, reverse=True)
+    out = []
+    for b in bullets:
+        # Only treat as a buy intent if the verb is near the start of the
+        # bullet (first 3 words). Avoids rewriting incidental uses like
+        # "stay alive — back off the wave" or "GET behind tower".
+        head = ' '.join(b.split()[:3])
+        verb_match = None
+        for v in _BUY_VERBS:
+            m = re.search(rf'\b{v}\b', head, flags=re.IGNORECASE)
+            if m and (verb_match is None or m.start() < verb_match.start()):
+                verb_match = m
+        if not verb_match:
+            out.append(b)
             continue
-        target_id = name_to_id.get(normalize(clean))
-        if not target_id or target_id in owned_ids:
+        # Re-find against the full bullet so substitution targets the right span.
+        verb_match = re.search(rf'\b{verb_match.group(0)}\b', b, flags=re.IGNORECASE)
+        # Find the EARLIEST item name appearing after the verb. That's the
+        # target the user is being told to back/buy/finish for.
+        remainder_norm = re.sub(r'[^a-z0-9]', '', b[verb_match.end():].lower())
+        target_id = None
+        target_pos = len(remainder_norm) + 1
+        for nm in sorted_keys:
+            if len(nm) < 5 or nm in _STARTER_ITEM_NAMES:
+                continue
+            pos = remainder_norm.find(nm)
+            if pos == -1 or pos >= target_pos:
+                continue
+            target_pos = pos
+            target_id = name_to_id[nm]
+        if target_id is None:
+            out.append(b)
             continue
         info = item_index.get(target_id) or {}
-        components = info.get('from') or []
-        if not components:
+        target_cost = info.get('cost') or 0
+        target_name = info.get('name', '?')
+        if target_cost <= 0 or current_gold >= target_cost:
+            out.append(b)
             continue
-        owned_components = [c for c in components if c in owned_ids]
-        if not owned_components:
+        shortfall = target_cost - current_gold
+        verb_hit = verb_match.group(0)
+        rewritten = re.sub(rf'\b{verb_hit}\b', 'FARM', b, count=1)
+        rewritten = re.sub(r'\b[Nn]ow\b\s*[—–-]?\s*', '', rewritten, count=1).strip()
+        rewritten = re.sub(r'\s{2,}', ' ', rewritten).strip(' ,—–-')
+        out.append(f'{rewritten} (need {shortfall}g more for {target_name})')
+    return out
+
+
+def strip_starters(item_names):
+    """Drop starter/consumable items from a live_build list. The LLM sometimes
+    pulls owned starters into live_build and bumps a core item out; this is the
+    deterministic backstop."""
+    out = []
+    for name in item_names or []:
+        if normalize(_clean_build_name(name) or name) in _STARTER_ITEM_NAMES:
             continue
-        progress.append({
-            'name': info.get('name', clean),
-            'cost': info.get('cost', 0),
-            'components_owned': len(owned_components),
-            'components_total': len(components),
-            'owned_component_names': [(item_index.get(c) or {}).get('name', '?') for c in owned_components],
-        })
-    progress.sort(key=lambda p: -p['components_owned'])
-    return progress
+        out.append(name)
+    return out
 
 
 # Items the coach commonly references for situational pivots. Build-path items
@@ -499,7 +642,7 @@ def format_item_reference(item_index, extra_names=None):
 def fetch_item_index():
     """Returns {itemID: {'damage', 'name', 'from', 'into', 'cost'}}. Empty dict on failure.
     'damage' is 'AP'|'AD'|'Tank'|'Other'. 'from'/'into' are component/parent item IDs.
-    Used by classify_enemy() (damage profile) and component_progress() (coach prompt)."""
+    Used by classify_enemy() (damage profile) and format_item_reference() (coach prompt)."""
     try:
         data = _cdragon_get(ITEMS_INDEX_URL)
         index = {}
@@ -719,7 +862,47 @@ def format_event(e):
     return None
 
 
-def tactical_advice(data, me, enemies, ev, timers):
+def _next_buy_hint(me, build_pick, item_index, current_gold):
+    """Deterministic 'what to back for' line. Walks build_pick's path, finds
+    the first un-owned item, suggests the cheapest meaningful buy now (full
+    item if affordable, else cheapest un-owned component, else how much to
+    farm for that component). Returns a string or None."""
+    if not build_pick or not me or not item_index:
+        return None
+    summary = build_path_summary(build_pick[1])
+    names = [n.strip() for n in summary.split('·') if n.strip()]
+    if not names:
+        return None
+    name_to_id = _build_name_to_id(item_index)
+    owned_ids = {(i or {}).get('itemID') for i in (me.get('items') or []) if (i or {}).get('itemID')}
+    for raw in names:
+        iid = resolve_item_id(raw, name_to_id)
+        if not iid or iid in owned_ids:
+            continue
+        info = item_index.get(iid) or {}
+        item_name = info.get('name', raw)
+        item_cost = info.get('cost') or 0
+        components = info.get('from') or []
+        unowned_comps = [c for c in components if c not in owned_ids]
+        if unowned_comps:
+            costs = sorted(
+                ((c, (item_index.get(c) or {}).get('cost') or 0) for c in unowned_comps),
+                key=lambda x: x[1],
+            )
+            cheap_id, cheap_cost = costs[0]
+            cheap_name = (item_index.get(cheap_id) or {}).get('name', '?')
+            if current_gold >= item_cost:
+                return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
+            if current_gold >= cheap_cost:
+                return f'BACK — {current_gold}g covers {cheap_name} ({cheap_cost}g) toward {item_name}'
+            return f'next: {item_name} ({item_cost}g) — farm {cheap_cost - current_gold}g for {cheap_name}'
+        if current_gold >= item_cost:
+            return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
+        return f'next: {item_name} ({item_cost}g) — farm {item_cost - current_gold}g'
+    return None
+
+
+def tactical_advice(data, me, enemies, ev, timers, build_pick=None, item_index=None):
     """Return list of (priority, message). 0=immediate threat, 1=push, 2=objective, 3=macro."""
     advice = []
     if not me:
@@ -779,6 +962,13 @@ def tactical_advice(data, me, enemies, ev, timers):
         if k - d >= 5 and k >= 5:
             advice.append((1, f'{e.get("championName")} fed ({k}/{d}/{a}) — peel, no 1v1'))
 
+    if build_pick and item_index:
+        current_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
+        hint = _next_buy_hint(me, build_pick, item_index, current_gold)
+        if hint:
+            prio = 1 if hint.startswith('BACK') else 3
+            advice.append((prio, hint))
+
     advice.sort(key=lambda x: x[0])
     return advice[:5]
 
@@ -796,18 +986,14 @@ COACH_SCHEMA = {
         "live_build": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Your recommended 4-6 item build path for this game, in build order. Items already in the player's inventory should appear first in their built positions, then planned items. This is meant to be displayed persistently on screen — keep it coherent across calls and only change it when game state materially shifts (e.g., enemy hard pivots damage profile, fed enemy carry, new objective threat).",
-        },
-        "build_diverged": {
-            "type": "boolean",
-            "description": "True if live_build differs materially from the RULE-BASED BUILD DEFAULT shown in the game state. False if you're endorsing the rule-based default as-is.",
+            "description": "Your recommended 4-6 core-item build path for this game, in build order. Owned core items appear first in their built positions; planned core items follow. Stable across calls — only change when game state materially shifts (enemy pivots damage profile, fed carry, new objective threat).",
         },
         "build_change_reason": {
             "type": "string",
-            "description": "If build_diverged is true, a short reason (<=100 chars) for the deviation. Empty string if false.",
+            "description": "If you intentionally deviated from the RULE-BASED BUILD DEFAULT, a short reason (<=100 chars). Empty string if you're following the default.",
         },
     },
-    "required": ["bullets", "live_build", "build_diverged", "build_change_reason"],
+    "required": ["bullets", "live_build", "build_change_reason"],
     "additionalProperties": False,
 }
 
@@ -828,13 +1014,14 @@ class Coach:
         self.cooldown_seconds = cooldown_seconds or self.DEFAULT_COOLDOWN
         self.client = None
         self.error_msg = None
+        api_key = os.environ.get('LEEG_ANTHROPIC_API_KEY') or os.environ.get('ANTHROPIC_API_KEY')
         if not _ANTHROPIC_AVAILABLE:
             self.error_msg = 'anthropic SDK not installed (pip install anthropic)'
-        elif not os.environ.get('ANTHROPIC_API_KEY'):
-            self.error_msg = 'ANTHROPIC_API_KEY not set'
+        elif not api_key:
+            self.error_msg = 'LEEG_ANTHROPIC_API_KEY not set'
         else:
             try:
-                self.client = anthropic.Anthropic()
+                self.client = anthropic.Anthropic(api_key=api_key)
             except Exception as e:
                 self.error_msg = f'init failed: {e}'
         self.lock = threading.Lock()
@@ -844,8 +1031,6 @@ class Coach:
         self.last_response_at = 0.0
         self.last_trigger = ''
         self.last_event_count = 0
-        self.last_laner_dead = False
-        self.drake_warned = False
         self.errors = 0
         self._system_cache = (None, None)  # (champ_folder, prompt)
         self.recent_responses = []  # list of dicts; last 5
@@ -868,8 +1053,6 @@ class Coach:
         self.last_response_at = 0.0
         self.last_trigger = ''
         self.last_event_count = 0
-        self.last_laner_dead = False
-        self.drake_warned = False
         self.last_bullets = []
         self.last_live_build = []
         self.last_diverged = False
@@ -901,37 +1084,30 @@ class Coach:
             f"Output format:\n"
             f"- You will produce a JSON object matching the provided schema.\n"
             f"- `bullets`: 1-3 short imperative tactical lines for RIGHT NOW.\n"
-            f"- `live_build`: your recommended 4-6 item path for this game. This is rendered persistently on screen, so it must be COHERENT and STABLE across calls. Items the player already owns appear first in their built positions; planned items follow. Once you commit to a path, keep recommending it until the game state materially changes.\n"
-            f"- `build_diverged`: true if your live_build differs from the RULE-BASED BUILD DEFAULT in items, ORDER, or both. ORDER COUNTS — `[A, B, C]` and `[A, C, B]` are different builds. If you're endorsing the default (build_diverged=false), live_build MUST be the default's items in the EXACT SAME ORDER, with owned items pulled to the front in their built positions and the un-owned tail preserving default order. Reordering the un-owned tail without setting build_diverged=true is a violation; the user sees this immediately because the displayed build doesn't match the documented one.\n"
-            f"- `build_change_reason`: short reason for the deviation (only if diverged).\n\n"
+            f"- `live_build`: your recommended CORE 6-item path for this game. Starters/consumables/wards/basic boots are stripped server-side, so don't include them. Owned core items go first in their built positions; planned core items follow. Stable across calls.\n"
+            f"- `build_change_reason`: short reason if you intentionally deviated from the rule-based default. Empty string otherwise. Whether you actually diverged is computed server-side by comparing your live_build to the default — you only have to write the reason when you mean to deviate.\n\n"
             f"Memory you have access to each call:\n"
             f"- YOUR CURRENT BUILD COMMITMENT — the latest live_build you locked in, with timestamp + reason. This is your game-long anchor for the build path. Stay on it unless something material has changed since the commitment time.\n"
             f"- YOUR RECENT TACTICAL ADVICE — bullets from your last 5 calls. Use to avoid contradicting recent tactical guidance.\n"
             f"- TEAM SCORE — kills/drakes/barons/towers per side. Use for macro reads (we're ahead vs behind, contest objectives vs play safe, etc.).\n\n"
             f"Consistency rules (IMPORTANT):\n"
-            f"- BUILD COMMITMENT: once you commit to a path, KEEP IT across calls. Only change it when game state has materially changed (enemy team pivots damage profile, a key carry gets fed/falls off, an objective threat changes the game plan). When you do change it, set build_diverged=true and explain in build_change_reason.\n"
+            f"- BUILD COMMITMENT: once you commit to a path, KEEP IT across calls. Only change it when game state has materially changed (enemy team pivots damage profile, a key carry gets fed/falls off, an objective threat changes the game plan). When you do change it, fill in build_change_reason.\n"
             f"- BULLETS MUST AGREE WITH live_build: when bullets recommend backing/buying/finishing a specific item, name only the next un-owned item(s) in live_build's order. Do not name an item later in live_build while earlier un-owned items still come before it. If you genuinely want to skip ahead (e.g. recommend item N+2 before N+1), reorder live_build first so the bullet and the build stay in sync.\n"
-            f"- AFFORDABILITY (hard rule): the user message contains a CURRENT GOLD line and an ITEM REFERENCE table with authoritative costs + components. NEVER invent or estimate costs from memory — if a price isn't in the table, don't quote one. Before writing any bullet that uses the verbs BACK / RECALL / BUY / FINISH / RUSH / GET, you MUST verify CURRENT GOLD is at least the cost of the cheapest sub-component of the item you'd name (look it up in ITEM REFERENCE). If it isn't, REPLACE the verb (e.g. 'STAY ALIVE — farm to <Xg> for <component name>' where X is the component's cost FROM ITEM REFERENCE).\n"
-            f"- COMPONENTS ARE NOT FULL ITEMS: if you say 'BACK for Bramble Vest', that means stopping at the 1100g component, NOT Thornmail. If you mean Thornmail, name Thornmail and verify the user can afford at least its cheapest component. The ITEM REFERENCE explicitly separates components from parents — use it.\n"
-            f"- BULLETS MAY ONLY NAME ITEMS THAT ARE EITHER (a) in your live_build, (b) already owned by the user, or (c) a component of an item in live_build. If you want to recommend an item not in live_build, FIRST update live_build to include it (set build_diverged=true with a reason). Do not name a counter-item in a bullet without putting it in live_build.\n"
+            f"- LIVE_BUILD STABILITY (HARD RULES): (1) every item the user already owns MUST appear in live_build — owned items are sunk costs, never remove them. (2) Do not shrink live_build below 4 items. (3) Adding a counter-item means EXTENDING live_build (or replacing an UN-OWNED tail item) — NEVER remove an owned item or a previously-committed counter-item. (4) Once a counter-item is committed, it stays for the rest of the game. Removing/swapping items across calls is the worst failure mode — the user sees the build line flicker and loses trust.\n"
             f"- TACTICAL BULLETS: build on prior advice. If you previously said to skip an item or path, don't later recommend it without a reason that ties to a recent event.\n"
             f"- The 'rule-based build path' is the deterministic default from build.md. REFERENCE only — deviate when warranted, then stick with the deviation.\n"
             f"- Do not yo-yo. If you wouldn't justify the change to a teammate, don't make it.\n\n"
-            f"BEFORE SUBMITTING — run these checks:\n"
-            f"1. If build_diverged=false: walk through live_build's un-owned tail and the rule-based default's un-owned tail item-by-item. They must match in order. If they don't, either fix live_build to match or flip build_diverged=true with a reason.\n"
-            f"2. If a bullet uses BACK / RECALL / BUY / FINISH / RUSH / GET, the item it names must appear in live_build (or be a component of an item in live_build), it must be the FIRST un-owned item in that path, AND the player must have at least the cheapest sub-component's gold cost (look up cost in ITEM REFERENCE).\n"
-            f"3. EVERY item name you mention in any bullet must appear in ITEM REFERENCE (or in the user's items=[...]). If it doesn't, you're hallucinating — replace it with one that does.\n"
-            f"4. EVERY gold figure you quote (item cost, component cost, gold needed) must come from ITEM REFERENCE or CURRENT GOLD verbatim. Do not invent or round.\n\n"
             f"=== SITUATIONAL COUNTER-ITEMS CHEAT SHEET ===\n"
             f"When the user message's THREAT ASSESSMENT names an ahead/snowballing enemy, ADAPT the build path. "
             f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) "
-            f"and slot it where the build guide expects a flex item. Set build_diverged=true and cite the threat.\n"
+            f"and slot it where the build guide expects a flex item. Cite the threat in build_change_reason.\n"
             f"- Heavy-AD bruiser/skirmisher pulling ahead (Illaoi, Aatrox, Warwick, Olaf, Nasus, Yi, Tryndamere, Yorick, Volibear, Sett, Renekton, Camille, Garen, Darius): armor + grievous wounds. Tanks/bruisers: Bramble Vest → Thornmail. Squishies: Tabis, Randuin's vs crit.\n"
             f"- Heavy-AP threat pulling ahead (Veigar, Syndra, Annie, LeBlanc, Vladimir, Cassiopeia, Kassadin, Diana, Akali): magic resist. Bruisers: Spectre's Cowl → Force of Nature / Spirit Visage (if you have healing). Squishies: Hexdrinker → Maw, Mercury's Treads.\n"
             f"- Enemy team has stacked healing/lifesteal (Soraka, Yuumi, Aatrox, Warwick, Vladimir, Olaf, Trundle, Sylas, Dr. Mundo): grievous wounds is mandatory by mid-game. AD: Executioner's Calling → Mortal Reminder. AP: Oblivion Orb → Morellonomicon. Bruiser/utility: Chempunk Chainsword.\n"
-            f"- Enemy ADC fed: tanks build Randuin's Omen (cuts crit dmg). Squishies/carries: Lord Dominik's Regards (vs HP stacking) or Frozen Heart (if AP/melee).\n"
+            f"- Enemy ADC fed: tanks build Randuin's Omen (cuts crit dmg). Squishies/carries: Lord Dominik's Regards (vs HP stacking).\n"
             f"- Enemy heavy hard-CC (Malzahar, Skarner, Warwick, Mordekaiser ult, etc.): Mercury's Treads, Silvermere Dawn / Quicksilver Sash, Maw of Malmortius (also gives MR shield).\n"
-            f"- Enemy attack-speed-reliant (Yi, Kayle, Kog'Maw, Tryndamere, Jax): tanks consider Frozen Heart (cuts 20% AS in aura).\n"
+            f"- Enemy comp is attack-speed-DEPENDENT (TWO OR MORE of Kog'Maw, Yi, Kayle, late Tryndamere, late Jax with on-hit): tanks may consider Frozen Heart for the AS aura. A single AS bruiser is NOT enough — Jax alone, Yone alone, etc. don't justify it.\n"
+            f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. The build guide author already weighed late-game; counter-pivots should land in slots 3-4 where matchup-counter items have the most impact. Only swap the last item if a SPECIFIC late-game threat is named in the threat assessment.\n"
             f"This cheat sheet is suggestive, not prescriptive. The build guide is the starting point; pivot when an enemy starts dominating, then COMMIT to the adjusted path (don't yo-yo).\n\n"
             f"=== CHAMPION MATCHUP NOTES (for enemies you face as {champ_folder}) ===\n"
             f"{matchups_text}\n\n"
@@ -973,7 +1149,9 @@ class Coach:
         if self.last_response is None and game_time > 60:
             return 'opening'
 
-        # New significant events
+        # Game-shifting events only. The rule-based panel handles drake/baron
+        # spawn timers, "PUSH WAVE laner dead", and periodic reminders without
+        # spending API credits.
         new_events = ev['raw'][self.last_event_count:]
         self.last_event_count = len(ev['raw'])
         you_name = me.get('riotIdGameName') or (me.get('summonerName') or '').split('#', 1)[0]
@@ -981,41 +1159,12 @@ class Coach:
             en = e.get('EventName')
             if en in ('FirstBlood', 'Ace', 'BaronKill', 'InhibKilled'):
                 return en.lower()
-            if en == 'DragonKill':
-                return 'drake_taken'
-            if en == 'ChampionKill':
-                if e.get('VictimName') == you_name:
-                    return 'you_died'
-                if e.get('KillerName') == you_name:
-                    return 'you_killed'
-
-        # Laner state transition
-        my_pos = (me.get('position') or '').upper()
-        if my_pos:
-            for e in enemies:
-                if (e.get('position') or '').upper() == my_pos:
-                    dead_now = bool(e.get('isDead'))
-                    if dead_now and not self.last_laner_dead:
-                        self.last_laner_dead = True
-                        return 'laner_died'
-                    if not dead_now:
-                        self.last_laner_dead = False
-                    break
-
-        # Drake about to spawn
-        drake = timers.get('drake')
-        if drake is not None and 20 <= drake <= 40 and not self.drake_warned:
-            self.drake_warned = True
-            return 'drake_soon'
-        if drake is not None and drake > 60:
-            self.drake_warned = False
-
-        # Periodic
-        if time.time() - self.last_call > 90:
-            return 'periodic'
+            if en == 'ChampionKill' and e.get('VictimName') == you_name:
+                return 'you_died'
         return None
 
-    def request_async(self, trigger, champ_folder, user_message, game_time):
+    def request_async(self, trigger, champ_folder, user_message, game_time,
+                      build_pick=None, my_items=None, item_index=None, current_gold=0):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -1024,11 +1173,12 @@ class Coach:
         self.last_call_game_time = game_time
         threading.Thread(
             target=self._call,
-            args=(self.build_system(champ_folder), user_message),
+            args=(self.build_system(champ_folder), user_message,
+                  build_pick, list(my_items or []), item_index, current_gold),
             daemon=True,
         ).start()
 
-    def _call(self, system, user):
+    def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -1057,9 +1207,12 @@ class Coach:
                     break
             text = json.dumps(parsed) if parsed else ''
             bullets = [b for b in (parsed.get('bullets') or []) if isinstance(b, str) and b.strip()]
+            bullets = affordability_postcheck(bullets, current_gold, item_index)
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
-            diverged = bool(parsed.get('build_diverged'))
-            reason = (parsed.get('build_change_reason') or '').strip()
+            live_build = strip_starters(live_build)
+            live_build = validate_item_names(live_build, item_index)
+            diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
+            reason = (parsed.get('build_change_reason') or '').strip() if diverged else ''
             with self.lock:
                 self.last_response = text
                 self.last_bullets = bullets
@@ -1093,19 +1246,31 @@ class Coach:
                             'diverged': diverged,
                         }
         except Exception as e:
+            msg = str(e).lower()
+            if 'credit balance is too low' in msg or 'credit balance' in msg:
+                permanent_reason = 'out of API credits — using rule-based advice only'
+            elif 'authentication_error' in msg or 'invalid x-api-key' in msg or 'invalid api key' in msg:
+                permanent_reason = 'API auth failed — using rule-based advice only'
+            else:
+                permanent_reason = None
             with self.lock:
                 self.errors += 1
                 self.last_response = f'(coach error: {type(e).__name__}: {e})'
                 self.last_response_at = time.time()
-                if self.errors >= 5:
+                if permanent_reason:
                     self.client = None
-                    self.error_msg = f'disabled after {self.errors} errors'
+                    self.error_msg = permanent_reason
+                elif self.errors >= 5:
+                    self.client = None
+                    self.error_msg = f'disabled after {self.errors} errors — last: {type(e).__name__}: {str(e)[:120]}'
         finally:
             with self.lock:
                 self.in_flight = False
 
     def display_block(self):
         with self.lock:
+            if self.error_msg and self.client is None:
+                return f'{TIER_COLOR["Major"]}coach disabled: {self.error_msg}{RESET}\n\n'
             if not self.last_bullets and not self.in_flight and not self.last_response:
                 return ''
             out = []
@@ -1300,13 +1465,14 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
     if threats:
         lines.append('')
-        lines.append('THREAT ASSESSMENT (ahead/snowballing enemies — ADAPT BUILD if relevant):')
+        lines.append('THREAT ASSESSMENT (ADVISORY — do not auto-change build):')
         for state, champ, pos in threats:
             lines.append(f'  [{state}] {champ} ({pos})')
         lines.append(
-            'If a snowballing enemy threatens you, pivot to counter-items '
-            '(armor / MR / grievous wounds / tenacity) per the SITUATIONAL COUNTER-ITEMS '
-            'cheat sheet in the system prompt. Set build_diverged=true and name the threat in build_change_reason.'
+            'Build changes are warranted ONLY if (a) the enemy is SNOWBALLING (not just AHEAD), '
+            '(b) they directly threaten YOU based on lane/role/damage type, AND (c) you have not '
+            'already pivoted for them. If you do pivot, ADD ONE counter-item to live_build '
+            '(do NOT remove other items) and KEEP that counter-item for the rest of the game.'
         )
 
     if profile and profile[3] > 0:
@@ -1318,24 +1484,6 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         build_summary = build_path_summary(body)
         lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_summary}')
         build_names = [n.strip() for n in build_summary.split('·') if n.strip()]
-
-    if me and item_index and build_names:
-        progress = component_progress(me.get('items') or [], build_names, item_index)
-        if progress:
-            lines.append('')
-            lines.append('USER COMPONENT PROGRESS (authoritative — derived directly from inventory):')
-            for p in progress:
-                comps = ', '.join(p['owned_component_names'])
-                lines.append(
-                    f'  {p["name"]} ({p["cost"]}g): {p["components_owned"]}/{p["components_total"]} components owned [{comps}]'
-                )
-            lines.append(
-                'Components in inventory commit the user to that path — selling loses ~30% gold. '
-                'The item with the most progress MUST be the next un-owned position in your live_build; '
-                "if your live_build currently has a different next item, REORDER live_build (set "
-                "build_diverged=true with a reason like 'committing to user's existing component investment') "
-                'so the bullet, the build, and the inventory all agree.'
-            )
 
     if item_index:
         owned_names = []
@@ -1385,8 +1533,8 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(f'Reason: {committed_build.get("reason") or "(none)"}')
         lines.append(f'Path: {" · ".join(committed_build["items"])}')
         lines.append('KEEP THIS PATH unless game state has materially changed since the commitment time.')
-        lines.append('If you keep it, return the SAME items in live_build and set build_diverged accordingly.')
-        lines.append('If you change it, set build_diverged=true and explain why in build_change_reason.')
+        lines.append('If you keep it, return the SAME items in live_build (whether or not it diverged from default is computed for you).')
+        lines.append('If you change it, explain why in build_change_reason.')
 
     if recent_responses:
         lines.append('')
@@ -1398,7 +1546,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                     lines.append(f'    - {b}')
 
     lines.append('')
-    lines.append('Now: emit JSON with bullets + live_build + build_diverged + build_change_reason. Anchor live_build to your committed path above. Tactical bullets should react to current state.')
+    lines.append('Now: emit JSON with bullets + live_build + build_change_reason. Anchor live_build to your committed path above. Tactical bullets should react to current state.')
     return '\n'.join(lines)
 
 
@@ -1483,9 +1631,9 @@ def scaffold_champ(name, source_url, current_patch):
     display = name.strip().title()
     folder.mkdir()
     (folder / 'README.md').write_text(_TEMPLATE_README.format(display=display))
+    (folder / 'playbook.md').write_text(_TEMPLATE_PLAYBOOK.format(display=display))
     (folder / 'matchups.md').write_text(_TEMPLATE_MATCHUPS.format(display=display))
     (folder / 'build.md').write_text(_TEMPLATE_BUILD.format(display=display))
-    (folder / 'playbook.md').write_text(_TEMPLATE_PLAYBOOK.format(display=display))
     write_meta(folder_name, {
         'source_url': source_url or '',
         'source_last_modified': None,
@@ -1494,7 +1642,7 @@ def scaffold_champ(name, source_url, current_patch):
     })
     print(f'created {folder}')
     print(f'  patch_reviewed: {current_patch or "unknown"}')
-    print(f'  source_url: {source_url or "(none — add to meta.json before --refresh-notes)"}')
+    print(f'  source_url: {source_url or "(none — add to meta.json)"}')
     print(f'  edit matchups.md / build.md / playbook.md to fill in notes')
 
 
@@ -1505,7 +1653,7 @@ def find_lockfile(explicit=None):
         p = Path(explicit)
         return p if p.exists() else None
     candidates = []
-    for letter in string.ascii_lowercase:
+    for letter in 'cd':  # covers the vast majority of Windows installs
         base = f'/mnt/{letter}'
         candidates.extend([
             Path(base) / 'Riot Games/League of Legends/lockfile',
@@ -1609,7 +1757,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     timers = objective_timers(game_time, ev)
-    advice = tactical_advice(data, me, enemies, ev, timers)
+    advice = tactical_advice(data, me, enemies, ev, timers, build_pick, item_index)
 
     if coach is not None:
         trigger = coach.maybe_trigger(ev, me, enemies, timers, game_time, champ_folder)
@@ -1623,7 +1771,13 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 committed_build=committed_snapshot,
                 item_index=item_index,
             )
-            coach.request_async(trigger, champ_folder, user_msg, game_time)
+            coach.request_async(
+                trigger, champ_folder, user_msg, game_time,
+                build_pick=build_pick,
+                my_items=(me.get('items') or []) if me else [],
+                item_index=item_index,
+                current_gold=int((data.get('activePlayer') or {}).get('currentGold') or 0),
+            )
 
     notes_label = f'notes: {champ_folder}' if champ_folder else 'no notes'
     out = [CLEAR]
@@ -1883,7 +2037,7 @@ def main():
         # Mode 1: in-game
         data, host = fetch_game(hosts)
         if data:
-            your_champ_api, enemies, _ = find_active_team(data)
+            your_champ_api, enemies, me_game = find_active_team(data)
             if override:
                 champ_folder = override
             else:
@@ -1893,7 +2047,11 @@ def main():
                 last_champ = champ_folder
 
             profile = compute_damage_profile(enemies, item_index)
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0]) if cdata['build_variants'] else None
+            my_pos = (me_game.get('position') or '').upper() if me_game else ''
+            laner = next((e for e in enemies if my_pos and (e.get('position') or '').upper() == my_pos), None)
+            laner_entry = cdata['matchups'].get(normalize(laner.get('championName', ''))) if laner else None
+            laner_tag = laner_build_tag(laner_entry)
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag) if cdata['build_variants'] else None
 
             sig = json.dumps({
                 'mode': 'game',
