@@ -158,7 +158,7 @@ def parse_matchups(md_path):
 
 # ─── TTS (Edge neural voices via powershell.exe from WSL) ───────────────────
 
-TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AriaNeural')
+TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')
 
 
 def _speak_worker(text):
