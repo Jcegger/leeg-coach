@@ -176,35 +176,32 @@ def _speak_worker(text):
     try:
         import asyncio
         import edge_tts
-        import tempfile
-        fd, path = tempfile.mkstemp(suffix='.mp3')
-        os.close(fd)
-        try:
-            asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(path))
-            win_path = subprocess.check_output(
-                ['wslpath', '-w', path], stderr=subprocess.DEVNULL,
-            ).decode().strip().replace('\\', '/')
-            ps_cmd = (
-                '$p = New-Object -ComObject WMPlayer.OCX; '
-                f'$m = $p.newMedia("file:///{win_path}"); '
-                '$p.currentPlaylist.appendItem($m); $p.controls.play(); '
-                'while ($p.playState -eq 3) { Start-Sleep -Milliseconds 200 }; $p.close()'
+        mp3 = '/mnt/c/Windows/Temp/leeg_tts.mp3'
+        ps1 = '/mnt/c/Windows/Temp/leeg_tts.ps1'
+        asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(mp3))
+        with open(ps1, 'w') as f:
+            f.write(
+                "Add-Type -TypeDefinition '"
+                "using System; using System.Runtime.InteropServices; "
+                "public class WinMCI { "
+                '[DllImport("winmm.dll", CharSet=CharSet.Auto)] '
+                "public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); "
+                "}'\n"
+                r'[WinMCI]::mciSendString(\'open "C:\Windows\Temp\leeg_tts.mp3" type mpegvideo alias leeg\', $null, 0, [IntPtr]::Zero) | Out-Null' + '\n'
+                "[WinMCI]::mciSendString('play leeg wait', $null, 0, [IntPtr]::Zero) | Out-Null\n"
+                "[WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null\n"
             )
-            proc = subprocess.Popen(
-                ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command', ps_cmd],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            )
-            with _tts_lock:
-                _tts_proc = proc
-            proc.wait(timeout=30)
-            with _tts_lock:
-                if _tts_proc is proc:
-                    _tts_proc = None
-        finally:
-            try:
-                os.unlink(path)
-            except Exception:
-                pass
+        proc = subprocess.Popen(
+            ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+             '-WindowStyle', 'Hidden', '-File', r'C:\Windows\Temp\leeg_tts.ps1'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        with _tts_lock:
+            _tts_proc = proc
+        proc.wait(timeout=30)
+        with _tts_lock:
+            if _tts_proc is proc:
+                _tts_proc = None
     except ImportError:
         safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
         subprocess.Popen(
