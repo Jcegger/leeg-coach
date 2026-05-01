@@ -156,20 +156,57 @@ def parse_matchups(md_path):
     return sections
 
 
-# ─── TTS (Windows SAPI via powershell.exe from WSL) ─────────────────────────
+# ─── TTS (Edge neural voices via powershell.exe from WSL) ───────────────────
+
+TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AriaNeural')
+
+
+def _speak_worker(text):
+    try:
+        import asyncio
+        import edge_tts
+        import tempfile
+        fd, path = tempfile.mkstemp(suffix='.mp3')
+        os.close(fd)
+        try:
+            asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(path))
+            win_path = subprocess.check_output(
+                ['wslpath', '-w', path], stderr=subprocess.DEVNULL,
+            ).decode().strip().replace('\\', '/')
+            ps_cmd = (
+                '$p = New-Object -ComObject WMPlayer.OCX; '
+                f'$m = $p.newMedia("file:///{win_path}"); '
+                '$p.currentPlaylist.appendItem($m); $p.controls.play(); '
+                'while ($p.playState -eq 3) { Start-Sleep -Milliseconds 200 }; $p.close()'
+            )
+            proc = subprocess.Popen(
+                ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command', ps_cmd],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
+            proc.wait(timeout=30)
+        finally:
+            try:
+                os.unlink(path)
+            except Exception:
+                pass
+    except ImportError:
+        safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
+        subprocess.Popen(
+            ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command',
+             f'Add-Type -AssemblyName System.Speech; '
+             f'(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        pass
+
 
 def speak_async(text):
-    """Speak text via Windows SAPI. Fire-and-forget daemon process."""
+    """Speak text via Edge TTS (Aria neural voice). Falls back to SAPI if edge-tts missing."""
     safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
     if not safe:
         return
-    subprocess.Popen(
-        ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command',
-         f'Add-Type -AssemblyName System.Speech; '
-         f'(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")'],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    threading.Thread(target=_speak_worker, args=(safe,), daemon=True).start()
 
 
 # ─── champ folder discovery & lazy loading ──────────────────────────────────
