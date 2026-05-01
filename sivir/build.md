@@ -100,6 +100,15 @@ Yun Tal · Mercury's Treads · Navori Flickerblade · Infinity Edge · Lord Domi
 Yun Tal · Plated Steelcaps · Navori Flickerblade · Infinity Edge · Lord Dominik's · Guardian Angel · Bloodthirster · Elixir of Wrath
 > Great tankiness against heavy AD with good damage.
 
+## Situational item swaps (quick reference)
+
+- Plated Steelcaps over Berserker's → Navori over IE — heavy AD
+- Mercury's Treads over Berserker's → Navori over IE — heavy AP / CC
+- Mortal Reminder over Lord Dominik's — enemy has significant healing
+- Mercurial Scimitar over Guardian Angel — heavy AP or hard CC (provides QSS)
+- Maw of Malmortius over Guardian Angel — AP team with low CC
+- Both Scimitar + Maw as last 2 — all-AP team
+
 ## Skill order
 
 **Q max first**, R at 6/11/16.

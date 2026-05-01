@@ -1,6 +1,6 @@
 # Shen — Build
 
-Source: [Mobalytics — Shen Build (patch 16.8)](https://mobalytics.gg/lol/champions/shen/build). Auto-generated from `__PRELOADED_STATE__`; refresh with the live-loop or `--refresh-notes`. Do not hand-edit (changes will be overwritten on the next refresh) — see `playbook.md` for hand-curated notes.
+Source: [Mobalytics — Shen Build (patch 16.9)](https://mobalytics.gg/lol/champions/shen/build). Auto-generated from `__PRELOADED_STATE__`; refresh with the live-loop or `--refresh-notes`. Do not hand-edit (changes will be overwritten on the next refresh) — see `playbook.md` for hand-curated notes.
 
 ## Summoner spells
 
@@ -37,15 +37,7 @@ Source: [Mobalytics — Shen Build (patch 16.8)](https://mobalytics.gg/lol/champ
 5. Kaenic Rookern
 6. Unending Despair
 
-### vs Heavy AD
-1. Titanic Hydra
-2. Plated Steelcaps
-3. Dusk and Dawn
-4. Bandlepipes
-5. Thornmail
-6. Protoplasm Harness
-
-### Optional variant (56.6% WR over 4,990 games)
+### Heartsteel-first variant (56.6% WR over 4,990 games)
 1. Heartsteel
 2. Plated Steelcaps
 3. Titanic Hydra
@@ -53,34 +45,19 @@ Source: [Mobalytics — Shen Build (patch 16.8)](https://mobalytics.gg/lol/champ
 5. Hollow Radiance
 6. Kaenic Rookern
 
-### Alternative variant (53.2% WR over 2,962 games)
-1. Titanic Hydra
-2. Mercury's Treads
-3. Hollow Radiance
-4. Thornmail
-5. Kaenic Rookern
-6. Unending Despair
-
-### Off Meta variant (52.5% WR over 1,875 games)
-1. Hollow Radiance
-2. Mercury's Treads
-3. Titanic Hydra
-4. Thornmail
-5. Kaenic Rookern
-6. Randuin's Omen
-
 ## First-back (early items)
 
 - Long Sword + Long Sword + Boots (Most Popular path)
 
-## Situational items
+## Situational item swaps (from standard path)
 
-- Kaenic Rookern
-- Unending Despair
-- Randuin's Omen
-- Dead Man's Plate
-- Hollow Radiance
-- Jak'Sho, The Protean
+- Mercury's Treads over Plated Steelcaps — heavy AP or CC-heavy
+- Hollow Radiance over Dusk and Dawn — full AP team
+- Kaenic Rookern over Protoplasm Harness — heavy AP burst
+- Unending Despair over Protoplasm Harness — sustained AP damage
+- Randuin's Omen over Protoplasm Harness — heavy crit ADC
+- Dead Man's Plate over Protoplasm Harness — mixed AD / need chase
+- Jak'Sho, The Protean over Protoplasm Harness — sustained teamfights
 
 ## Skill order
 

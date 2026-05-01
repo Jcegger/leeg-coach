@@ -1,6 +1,6 @@
 # Mundo — Build
 
-Source: [Mobalytics Dr. Mundo Top Build (Patch 26.8)](https://mobalytics.gg/lol/champions/drmundo/build/top) — aggregated from 77K+ matches, Emerald+.
+Source: [Mobalytics Dr. Mundo Top Build (Patch 26.9)](https://mobalytics.gg/lol/champions/drmundo/build/top) — aggregated from 77K+ matches, Emerald+.
 
 ## Summoner spells
 
@@ -36,14 +36,17 @@ Doran's Shield · Health Potion · Stealth Ward
 5. Jak'Sho, The Protean
 6. Thornmail
 
-## Situational last items
+## Situational item swaps (from standard path)
 
-- Dead Man's Plate (mixed/AD)
-- Thornmail (heavy healing / anti-AD)
-- Randuin's Omen (crit-heavy enemy)
-- Unending Despair (AP damage)
-- Jak'Sho, The Protean (sustained fights)
-- Force of Nature (heavy AP)
+- Plated Steelcaps over Boots of Swiftness — enemy team is heavy AD
+- Randuin's Omen over Overlord's Bloodmail — heavy crit (ADC + Yone/Yasuo)
+- Thornmail over Spirit Visage — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth)
+- Unending Despair over Spirit Visage — heavy AP poke
+- Force of Nature over Overlord's Bloodmail — full AP team
+- Jak'Sho, The Protean over Overlord's Bloodmail — sustained teamfights
+- Dead Man's Plate over Overlord's Bloodmail — mixed AD, need chase
+
+Early buy: Warden's Mail before first legendary vs heavy AS tops (Irelia, Urgot, Tryndamere)
 
 ## Warmog's: when to take it
 

@@ -22,6 +22,7 @@ import json
 import os
 import re
 import ssl
+import subprocess
 import sys
 import threading
 import time
@@ -36,6 +37,7 @@ except ImportError:
     _ANTHROPIC_AVAILABLE = False
 
 LEEG_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = LEEG_ROOT / 'data'
 POLL_SECONDS = 3
 TIER_ORDER = {'Extreme': 0, 'Major': 1, 'Even': 2, 'Minor': 3, 'Tiny': 4}
 
@@ -154,13 +156,29 @@ def parse_matchups(md_path):
     return sections
 
 
+# ─── TTS (Windows SAPI via powershell.exe from WSL) ─────────────────────────
+
+def speak_async(text):
+    """Speak text via Windows SAPI. Fire-and-forget daemon process."""
+    safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
+    if not safe:
+        return
+    subprocess.Popen(
+        ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command',
+         f'Add-Type -AssemblyName System.Speech; '
+         f'(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
 # ─── champ folder discovery & lazy loading ──────────────────────────────────
 
 def available_champs():
-    """Folder names under LEEG_ROOT that contain a matchups.md."""
+    """Folder names under LEEG_ROOT that contain a build.md or matchups.md."""
     return sorted(
         d.name for d in LEEG_ROOT.iterdir()
-        if d.is_dir() and (d / 'matchups.md').exists()
+        if d.is_dir() and ((d / 'matchups.md').exists() or (d / 'build.md').exists())
     )
 
 
@@ -252,9 +270,38 @@ def compute_damage_profile(enemies, item_index=None):
     return label, ap, ad, known, overrides
 
 
+_SWAP_LINE_RE = re.compile(r'^\s*-\s*(.+?)\s+over\s+(.+?)\s+[—–-]+\s+(.+)$')
+
+
+def _parse_situational_swaps(text):
+    """Parse '## Situational item swaps' lines into (new_item, old_item, condition) triples."""
+    swaps, in_swaps = [], False
+    for line in text.splitlines():
+        if line.startswith('## '):
+            in_swaps = 'situational item swap' in line.lower()
+            continue
+        if not in_swaps:
+            continue
+        m = _SWAP_LINE_RE.match(line)
+        if m:
+            swaps.append((m.group(1).strip(), m.group(2).strip(), m.group(3).strip()))
+    return swaps
+
+
+def _swap_damage_label(condition):
+    """Map a swap condition string to the damage profile it applies to, or None."""
+    c = condition.lower()
+    if re.search(r'\bheavy (ad|crit)\b|full ad', c):
+        return 'AD'
+    if re.search(r'\b(heavy|full) ap\b', c):
+        return 'AP'
+    return None
+
+
 def parse_build_variants(md_path):
     """Find ### sections under any ## that mentions 'build' or 'example'.
-    Returns list of (heading, body)."""
+    Returns list of (heading, body). Synthesizes AD/AP variants from the
+    '## Situational item swaps' section when no explicit variant exists."""
     text = md_path.read_text()
     variants = []
     in_build_section = False
@@ -278,6 +325,20 @@ def parse_build_variants(md_path):
         elif current_heading is not None:
             current_body.append(line)
     flush()
+
+    swaps = _parse_situational_swaps(text)
+    if swaps:
+        std_body = next((b for h, b in variants if classify_variant(h) == 'Standard'), None)
+        if std_body:
+            for label in ('AD', 'AP'):
+                if not any(classify_variant(h) == label for h, b in variants):
+                    body = std_body
+                    for new_item, old_item, cond in swaps:
+                        if _swap_damage_label(cond) == label:
+                            body = body.replace(old_item, new_item)
+                    if body != std_body:
+                        variants.append((f'vs Heavy {label} (auto)', body))
+
     return variants
 
 
@@ -415,7 +476,7 @@ def _clean_build_name(name):
 # Starter / consumable items that should NEVER occupy a slot in live_build.
 # Match by normalized name so casing/punctuation/possessives don't matter.
 _STARTER_ITEM_NAMES = {
-    "doransshield", "doransblade", "doransring",
+    "doransshield", "doransblade", "doransring", "doransbow", "doranshelm",
     "cull", "spellthiefsedge", "relicshield", "steelshoulderguards",
     "spectralsickle", "tearofthegoddess", "darkseal",
     "healthpotion", "refillablepotion", "corruptingpotion",
@@ -862,15 +923,18 @@ def format_event(e):
     return None
 
 
-def _next_buy_hint(me, build_pick, item_index, current_gold):
-    """Deterministic 'what to back for' line. Walks build_pick's path, finds
-    the first un-owned item, suggests the cheapest meaningful buy now (full
-    item if affordable, else cheapest un-owned component, else how much to
-    farm for that component). Returns a string or None."""
-    if not build_pick or not me or not item_index:
+def _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=None):
+    """Deterministic 'what to back for' line. Walks committed_items (coach's
+    locked-in path) when available, else build_pick's path. Returns a string or None."""
+    if not me or not item_index:
         return None
-    summary = build_path_summary(build_pick[1])
-    names = [n.strip() for n in summary.split('·') if n.strip()]
+    if committed_items:
+        names = committed_items
+    elif build_pick:
+        summary = build_path_summary(build_pick[1])
+        names = [n.strip() for n in summary.split('·') if n.strip()]
+    else:
+        return None
     if not names:
         return None
     name_to_id = _build_name_to_id(item_index)
@@ -891,18 +955,20 @@ def _next_buy_hint(me, build_pick, item_index, current_gold):
             )
             cheap_id, cheap_cost = costs[0]
             cheap_name = (item_index.get(cheap_id) or {}).get('name', '?')
+            big_id, big_cost = costs[-1]
+            big_name = (item_index.get(big_id) or {}).get('name', '?')
             if current_gold >= item_cost:
                 return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
             if current_gold >= cheap_cost:
                 return f'BACK — {current_gold}g covers {cheap_name} ({cheap_cost}g) toward {item_name}'
-            return f'next: {item_name} ({item_cost}g) — farm {cheap_cost - current_gold}g for {cheap_name}'
+            return f'next: {item_name} ({item_cost}g) — farm {big_cost - current_gold}g for {big_name}'
         if current_gold >= item_cost:
             return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
         return f'next: {item_name} ({item_cost}g) — farm {item_cost - current_gold}g'
     return None
 
 
-def tactical_advice(data, me, enemies, ev, timers, build_pick=None, item_index=None):
+def tactical_advice(data, me, enemies, ev, timers, build_pick=None, item_index=None, committed_items=None):
     """Return list of (priority, message). 0=immediate threat, 1=push, 2=objective, 3=macro."""
     advice = []
     if not me:
@@ -962,9 +1028,9 @@ def tactical_advice(data, me, enemies, ev, timers, build_pick=None, item_index=N
         if k - d >= 5 and k >= 5:
             advice.append((1, f'{e.get("championName")} fed ({k}/{d}/{a}) — peel, no 1v1'))
 
-    if build_pick and item_index:
+    if item_index and (build_pick or committed_items):
         current_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
-        hint = _next_buy_hint(me, build_pick, item_index, current_gold)
+        hint = _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=committed_items)
         if hint:
             prio = 1 if hint.startswith('BACK') else 3
             advice.append((prio, hint))
@@ -996,6 +1062,95 @@ COACH_SCHEMA = {
     "required": ["bullets", "live_build", "build_change_reason"],
     "additionalProperties": False,
 }
+
+
+class ChampDB:
+    """Universal per-opponent champion notes, lazily generated by Haiku and cached to disk.
+
+    Notes are generated once per champion on first encounter and reused across games.
+    Generation runs in a daemon thread so it never blocks the render loop.
+    """
+
+    _NOTES_PATH = DATA_DIR / 'champ_notes.json'
+
+    def __init__(self, client=None, patch=None):
+        self._lock = threading.Lock()
+        self._notes = {}   # normalized_name -> {display_name, patch, notes}
+        self._pending = set()
+        self.client = client
+        self.patch = patch or 'unknown'
+        self._load()
+
+    def _load(self):
+        if self._NOTES_PATH.exists():
+            try:
+                data = json.loads(self._NOTES_PATH.read_text())
+                self._notes = data.get('champions', {})
+            except Exception:
+                pass
+
+    def _save(self):
+        DATA_DIR.mkdir(exist_ok=True)
+        self._NOTES_PATH.write_text(
+            json.dumps({'version': 1, 'champions': self._notes}, indent=2)
+        )
+
+    def get_note(self, champ_name):
+        """Return cached note string, or None if not yet generated."""
+        key = normalize(champ_name)
+        with self._lock:
+            entry = self._notes.get(key)
+        return entry['notes'] if entry else None
+
+    def ensure_note_async(self, champ_name):
+        """Kick off background note generation if note is missing or 3+ patches stale."""
+        if not self.client:
+            return
+        key = normalize(champ_name)
+        with self._lock:
+            if key in self._pending:
+                return
+            entry = self._notes.get(key)
+            if entry:
+                current = parse_patch(self.patch)
+                stored = parse_patch(entry.get('patch', ''))
+                if current and stored:
+                    stale = (current[1] - stored[1] >= 3) if current[0] == stored[0] else True
+                    if not stale:
+                        return
+                else:
+                    return  # can't compare, keep existing
+            self._pending.add(key)
+        threading.Thread(target=self._generate, args=(champ_name, key), daemon=True).start()
+
+    def _generate(self, display_name, key):
+        try:
+            resp = self.client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=200,
+                messages=[{
+                    'role': 'user',
+                    'content': (
+                        f'League of Legends: describe in 3-4 terse sentences how to play against {display_name}. '
+                        f'Cover: their core kit, what makes them dangerous and when, '
+                        f'windows to exploit and generic counter tips. '
+                        f'No emojis, no preamble, imperative tone.'
+                    ),
+                }],
+            )
+            notes = resp.content[0].text.strip()
+            with self._lock:
+                self._notes[key] = {
+                    'display_name': display_name,
+                    'patch': self.patch,
+                    'generated_at': time.strftime('%Y-%m-%d'),
+                    'notes': notes,
+                }
+                self._pending.discard(key)
+                self._save()
+        except Exception:
+            with self._lock:
+                self._pending.discard(key)
 
 
 class Coach:
@@ -1045,6 +1200,7 @@ class Coach:
         self.committed_build = None  # dict: {'time': ..., 'reason': ..., 'items': [...], 'diverged': bool}
         self._last_seen_game_time = None
         self.last_call_game_time = 0.0
+        self.tts = False
 
     def _reset_for_new_game(self):
         """Clear all per-game state. Called when the game time goes backward
@@ -1070,8 +1226,14 @@ class Coach:
             return cached_prompt
         matchups_path = LEEG_ROOT / champ_folder / 'matchups.md'
         build_path = LEEG_ROOT / champ_folder / 'build.md'
+        playbook_path = LEEG_ROOT / champ_folder / 'playbook.md'
         matchups_text = matchups_path.read_text() if matchups_path.exists() else '(no matchup notes)'
         build_text = build_path.read_text() if build_path.exists() else '(no build notes)'
+        playbook_raw = playbook_path.read_text() if playbook_path.exists() else ''
+        # Only include playbook if it has substantive content beyond markdown headers
+        playbook_text = playbook_raw if any(
+            l.strip() and not l.startswith('#') for l in playbook_raw.splitlines()
+        ) else None
         prompt = (
             f"You are an in-game League of Legends coach for someone playing {champ_folder}. "
             f"Watch the live game state and tell them what to do RIGHT NOW.\n\n"
@@ -1109,6 +1271,11 @@ class Coach:
             f"- Enemy comp is attack-speed-DEPENDENT (TWO OR MORE of Kog'Maw, Yi, Kayle, late Tryndamere, late Jax with on-hit): tanks may consider Frozen Heart for the AS aura. A single AS bruiser is NOT enough — Jax alone, Yone alone, etc. don't justify it.\n"
             f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. The build guide author already weighed late-game; counter-pivots should land in slots 3-4 where matchup-counter items have the most impact. Only swap the last item if a SPECIFIC late-game threat is named in the threat assessment.\n"
             f"This cheat sheet is suggestive, not prescriptive. The build guide is the starting point; pivot when an enemy starts dominating, then COMMIT to the adjusted path (don't yo-yo).\n\n"
+            + (
+            f"=== CHAMPION PLAYBOOK (strategy, win conditions, teamfighting) ===\n"
+            f"{playbook_text}\n\n"
+            if playbook_text else ''
+            ) +
             f"=== CHAMPION MATCHUP NOTES (for enemies you face as {champ_folder}) ===\n"
             f"{matchups_text}\n\n"
             f"=== BUILD GUIDE (reference, not a rigid plan) ===\n"
@@ -1161,6 +1328,14 @@ class Coach:
                 return en.lower()
             if en == 'ChampionKill' and e.get('VictimName') == you_name:
                 return 'you_died'
+
+        # Periodic fallback: fire if the game has been quiet for 3+ minutes.
+        # Requires at least one prior call so a build is already committed.
+        if (self.last_response is not None
+                and game_time > 8 * 60
+                and time.time() - self.last_call > 180):
+            return 'periodic'
+
         return None
 
     def request_async(self, trigger, champ_folder, user_message, game_time,
@@ -1221,6 +1396,8 @@ class Coach:
                 self.last_change_reason = reason
                 self.last_response_at = time.time()
                 self.errors = 0
+                if self.tts and bullets:
+                    speak_async(' · '.join(bullets))
                 gt = getattr(self, 'last_call_game_time', 0)
                 mins, secs = divmod(int(gt), 60)
                 ts = f'{mins}:{secs:02d}'
@@ -1421,10 +1598,13 @@ def _enemy_threat_state(enemy, game_time):
 
 
 def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trigger,
-                        recent_responses=None, committed_build=None, item_index=None):
+                        recent_responses=None, committed_build=None, item_index=None,
+                        champ_db=None, is_aram=False):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
+    if is_aram:
+        lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
     your_team = me.get('team') if me else None
     score = _team_score_summary(data, ev, your_team)
@@ -1474,6 +1654,18 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             'already pivoted for them. If you do pivot, ADD ONE counter-item to live_build '
             '(do NOT remove other items) and KEEP that counter-item for the rest of the game.'
         )
+
+    if champ_db:
+        note_lines = []
+        for e in enemies:
+            name = e.get('championName', '')
+            note = champ_db.get_note(name) if name else None
+            if note:
+                note_lines.append(f'  {name}: {note}')
+        if note_lines:
+            lines.append('')
+            lines.append('OPPONENT NOTES (general kit + counter tips):')
+            lines.extend(note_lines)
 
     if profile and profile[3] > 0:
         label, ap, ad, _, _ = profile
@@ -1751,13 +1943,25 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
     return ''.join(out)
 
 
-def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None):
+def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None):
     your_champ, enemies, me = find_active_team(data)
     ev = parse_events(data)
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
-    timers = objective_timers(game_time, ev)
-    advice = tactical_advice(data, me, enemies, ev, timers, build_pick, item_index)
+    is_aram = (data.get('gameData') or {}).get('gameMode', '').upper() == 'ARAM'
+    timers = {} if is_aram else objective_timers(game_time, ev)
+    committed_items = None
+    if coach is not None:
+        with coach.lock:
+            if coach.committed_build:
+                committed_items = list(coach.committed_build.get('items') or [])
+    advice = tactical_advice(data, me, enemies, ev, timers, build_pick, item_index, committed_items=committed_items)
+
+    if champ_db is not None:
+        for e in enemies:
+            name = e.get('championName', '')
+            if name:
+                champ_db.ensure_note_async(name)
 
     if coach is not None:
         trigger = coach.maybe_trigger(ev, me, enemies, timers, game_time, champ_folder)
@@ -1770,6 +1974,8 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 recent_responses=recent_snapshot,
                 committed_build=committed_snapshot,
                 item_index=item_index,
+                champ_db=champ_db,
+                is_aram=is_aram,
             )
             coach.request_async(
                 trigger, champ_folder, user_msg, game_time,
@@ -1779,9 +1985,10 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 current_gold=int((data.get('activePlayer') or {}).get('currentGold') or 0),
             )
 
+    mode_label = 'ARAM' if is_aram else 'IN GAME'
     notes_label = f'notes: {champ_folder}' if champ_folder else 'no notes'
     out = [CLEAR]
-    out.append(header_line(f'leeg live · IN GAME · {your_champ or "?"} · {mins}:{secs:02d} · {host} · {notes_label}'))
+    out.append(header_line(f'leeg live · {mode_label} · {your_champ or "?"} · {mins}:{secs:02d} · {host} · {notes_label}'))
 
     if me:
         my_scores = me.get('scores') or {}
@@ -1814,17 +2021,18 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
     if coach_build_line:
         out.append(coach_build_line)
 
-    drake_t, baron_t = timers.get('drake'), timers.get('baron')
-    drake_str = f'{TIER_COLOR["Major"]}UP{RESET}' if drake_t == 0 else fmt_mmss(drake_t)
-    baron_str = f'{TIER_COLOR["Major"]}UP{RESET}' if baron_t == 0 else fmt_mmss(baron_t)
-    obj_line = f'{DIM}objectives:{RESET} drake {drake_str}  ·  baron {baron_str}'
-    if ev['drakes']:
-        obj_line += f'  ·  drakes: {len(ev["drakes"])}'
-    if ev['barons']:
-        obj_line += f'  ·  baron taken x{len(ev["barons"])}'
-    if ev['grubs']:
-        obj_line += f'  ·  grubs: {ev["grubs"]}'
-    out.append(obj_line + '\n\n')
+    if not is_aram:
+        drake_t, baron_t = timers.get('drake'), timers.get('baron')
+        drake_str = f'{TIER_COLOR["Major"]}UP{RESET}' if drake_t == 0 else fmt_mmss(drake_t)
+        baron_str = f'{TIER_COLOR["Major"]}UP{RESET}' if baron_t == 0 else fmt_mmss(baron_t)
+        obj_line = f'{DIM}objectives:{RESET} drake {drake_str}  ·  baron {baron_str}'
+        if ev['drakes']:
+            obj_line += f'  ·  drakes: {len(ev["drakes"])}'
+        if ev['barons']:
+            obj_line += f'  ·  baron taken x{len(ev["barons"])}'
+        if ev['grubs']:
+            obj_line += f'  ·  grubs: {ev["grubs"]}'
+        out.append(obj_line + '\n\n')
 
     formatted = []
     for e in reversed(ev['raw']):
@@ -1968,6 +2176,8 @@ def main():
                     help='create a new champion folder with template files and exit')
     ap.add_argument('--source', dest='source', metavar='URL',
                     help='source guide URL (used with --add-champ; saved to meta.json)')
+    ap.add_argument('--tts', action='store_true', default=False,
+                    help='speak coach bullets aloud via Windows SAPI (WSL only)')
     args = ap.parse_args()
 
     if args.add_champ:
@@ -1976,13 +2186,14 @@ def main():
 
     available = available_champs()
     if not available:
-        print(f'No champ folders with matchups.md found under {LEEG_ROOT}', file=sys.stderr)
+        print(f'No champ folders with build.md or matchups.md found under {LEEG_ROOT}', file=sys.stderr)
         sys.exit(1)
 
     override = args.champ
     if override:
-        if not (LEEG_ROOT / override / 'matchups.md').exists():
-            print(f'Cannot find {LEEG_ROOT / override / "matchups.md"}', file=sys.stderr)
+        folder = LEEG_ROOT / override
+        if not folder.is_dir() or not any((folder / f).exists() for f in ('matchups.md', 'build.md')):
+            print(f'Cannot find {LEEG_ROOT / override} (need at least a build.md)', file=sys.stderr)
             sys.exit(1)
 
     champ_cache = {}
@@ -2025,10 +2236,19 @@ def main():
     print(f'leeg live · live API hosts={hosts}  lockfile={lockfile}  notes={mode_label}', flush=True)
 
     coach = Coach()
+    coach.tts = args.tts
     if coach.enabled:
-        print(f'leeg live · coach: enabled (model={coach.model}, cooldown={coach.cooldown_seconds}s)', flush=True)
+        tts_label = ' · tts=on' if args.tts else ''
+        print(f'leeg live · coach: enabled (model={coach.model}, cooldown={coach.cooldown_seconds}s{tts_label})', flush=True)
     else:
         print(f'leeg live · coach: disabled — {coach.error_msg}', flush=True)
+
+    champ_db = ChampDB(
+        client=coach.client if coach.enabled else None,
+        patch=current_patch,
+    )
+    db_count = len(champ_db._notes)
+    print(f'leeg live · champ db: {db_count} champion note(s) cached', flush=True)
 
     last_sig = None
     last_state = None
@@ -2065,7 +2285,7 @@ def main():
                 ],
             }, sort_keys=True)
             if sig != last_sig:
-                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index))
+                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db))
                 sys.stdout.flush()
                 last_sig, last_state = sig, 'game'
             time.sleep(args.poll)
