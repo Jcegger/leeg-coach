@@ -180,17 +180,12 @@ def _speak_worker(text):
         ps1 = '/mnt/c/Windows/Temp/leeg_tts.ps1'
         asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(mp3))
         with open(ps1, 'w') as f:
-            f.write(
-                "Add-Type -TypeDefinition '"
-                "using System; using System.Runtime.InteropServices; "
-                "public class WinMCI { "
-                '[DllImport("winmm.dll", CharSet=CharSet.Auto)] '
-                "public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); "
-                "}'\n"
-                r'[WinMCI]::mciSendString(\'open "C:\Windows\Temp\leeg_tts.mp3" type mpegvideo alias leeg\', $null, 0, [IntPtr]::Zero) | Out-Null' + '\n'
-                "[WinMCI]::mciSendString('play leeg wait', $null, 0, [IntPtr]::Zero) | Out-Null\n"
-                "[WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null\n"
-            )
+            f.write("""\
+Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class WinMCI { [DllImport("winmm.dll", CharSet=CharSet.Auto)] public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); }'
+[WinMCI]::mciSendString('open "C:\\Windows\\Temp\\leeg_tts.mp3" type mpegvideo alias leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString('play leeg wait', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+""")
         proc = subprocess.Popen(
             ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
              '-WindowStyle', 'Hidden', '-File', r'C:\Windows\Temp\leeg_tts.ps1'],
