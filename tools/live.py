@@ -159,9 +159,20 @@ def parse_matchups(md_path):
 # ─── TTS (Edge neural voices via powershell.exe from WSL) ───────────────────
 
 TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')
+_tts_proc = None
+_tts_lock = threading.Lock()
 
 
 def _speak_worker(text):
+    global _tts_proc
+    # Kill any in-progress playback before starting new audio
+    with _tts_lock:
+        if _tts_proc is not None:
+            try:
+                _tts_proc.kill()
+            except Exception:
+                pass
+            _tts_proc = None
     try:
         import asyncio
         import edge_tts
@@ -183,7 +194,12 @@ def _speak_worker(text):
                 ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command', ps_cmd],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
+            with _tts_lock:
+                _tts_proc = proc
             proc.wait(timeout=30)
+            with _tts_lock:
+                if _tts_proc is proc:
+                    _tts_proc = None
         finally:
             try:
                 os.unlink(path)
@@ -202,7 +218,7 @@ def _speak_worker(text):
 
 
 def speak_async(text):
-    """Speak text via Edge TTS (Aria neural voice). Falls back to SAPI if edge-tts missing."""
+    """Speak text via Edge TTS neural voice. Interrupts any current playback."""
     safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
     if not safe:
         return
