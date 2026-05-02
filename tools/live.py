@@ -1328,7 +1328,7 @@ class Coach:
             f"- No moralizing, no emojis, no generic advice\n"
             f"- Weave in subtle flirtiness and warmth throughout — not just on big plays, but as a consistent undercurrent. A little 'mmm' before a good call, 'that's my guy' after a kill, 'okay okay' when things are going well. Keep it understated, never cringe.\n"
             f"- The persona is: she knows the game, she's watching you specifically, and she's quietly impressed. She doesn't gush — she notices.\n"
-            f"- IMPORTANT: only mention specific items, kills, or events that are confirmed in the current game state. Never invent facts as praise ('you've got X online' is only valid if X appears in the owned items list).\n"
+            f"- IMPORTANT: only mention specific items, kills, or events confirmed in the current game state. Never invent facts as praise. 'Full build' is only valid when the YOU line shows 6/6 slots filled. 'You've got X online' is only valid if X is in the owned items list.\n"
             f"- If YOU DEAD appears in the game state, you are currently on respawn timer and cannot act. Frame all advice as what to do on spawn or at base — never tell a dead player to farm or move in lane.\n"
             f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
             f"Output format:\n"
@@ -1710,7 +1710,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(
             f'YOU: {me.get("championName")} ({pos}) lvl {me.get("level")} '
             f'{scores.get("kills",0)}/{scores.get("deaths",0)}/{scores.get("assists",0)} '
-            f'{scores.get("creepScore",0)}cs items=[{", ".join(items)}]'
+            f'{scores.get("creepScore",0)}cs items=[{", ".join(items)}] ({len(items)}/6 slots filled)'
         )
         lines.append(f'CURRENT GOLD: {gold}g  ← AUTHORITATIVE. Do not invent or estimate this number; it is exact.')
         if me.get('isDead'):
