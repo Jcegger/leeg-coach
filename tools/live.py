@@ -2214,7 +2214,11 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             disp, body, tier = entry
             out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
         else:
-            out.append(render_matchup(champ, pos, None, '', max_chars, extras=extras + '  — no notes'))
+            db_note = champ_db.get_note(champ) if champ_db else None
+            if db_note:
+                out.append(render_matchup(champ, pos, None, db_note, max_chars, extras=extras))
+            else:
+                out.append(render_matchup(champ, pos, None, '', max_chars, extras=extras + '  — no notes'))
     return ''.join(out)
 
 
