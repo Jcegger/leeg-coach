@@ -1693,6 +1693,46 @@ def _enemy_threat_state(enemy, game_time):
     return None
 
 
+def remaining_item_costs(build_names, owned_names, item_index):
+    """For each unowned build item, subtract owned component costs and return
+    lines like 'Warmog's Armor: have Giant's Belt → 2300g remaining (of 3100g)'."""
+    if not item_index or not build_names:
+        return []
+    name_to_id = {}
+    for iid, info in item_index.items():
+        if iid >= 200000:
+            continue
+        n = normalize(info.get('name', ''))
+        if n and n not in name_to_id:
+            name_to_id[n] = iid
+    owned_norm = {normalize(_clean_build_name(n) or n) for n in owned_names if n}
+    out = []
+    for bname in build_names:
+        norm = normalize(_clean_build_name(bname) or bname)
+        if norm in owned_norm:
+            continue  # already owned
+        iid = name_to_id.get(norm)
+        if not iid:
+            continue
+        info = item_index[iid]
+        total = info.get('cost', 0)
+        comp_ids = info.get('from') or []
+        owned_comps = []
+        comp_cost = 0
+        for cid in comp_ids:
+            cinfo = item_index.get(cid) or {}
+            cname = cinfo.get('name', '')
+            if normalize(cname) in owned_norm:
+                owned_comps.append(cname)
+                comp_cost += cinfo.get('cost', 0)
+        remaining = total - comp_cost
+        if owned_comps:
+            out.append(f'  {info["name"]}: have {", ".join(owned_comps)} → {remaining}g remaining (of {total}g total)')
+        else:
+            out.append(f'  {info["name"]}: {total}g (no components owned)')
+    return out
+
+
 def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trigger,
                         recent_responses=None, committed_build=None, item_index=None,
                         champ_db=None, is_aram=False):
@@ -1787,6 +1827,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                 'When you name an item in a bullet (BUY/FINISH/RUSH/GET/etc.), use the EXACT name above and reason from THIS table for cost. '
                 'Never quote a price not in this table. Components are listed separately from their parent — Giant\'s Belt is NOT Sunfire Aegis.'
             )
+        if item_index and build_names and me:
+            remaining = remaining_item_costs(build_names, owned_names, item_index)
+            if remaining:
+                lines.append('')
+                lines.append('REMAINING COSTS (owned components already deducted — use these numbers when telling the player how much they need):')
+                lines.extend(remaining)
 
     drake_t, baron_t = timers.get('drake'), timers.get('baron')
     obj = []
