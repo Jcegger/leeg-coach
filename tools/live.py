@@ -235,6 +235,8 @@ def _normalize_for_tts(text):
     text = re.sub(r'([.!?]) · ', r'\1 ', text)   # already punctuated — just space
     text = re.sub(r' · ', '. ', text)             # no punctuation — add period
     text = text.replace(' — ', ', ').replace('—', ', ')
+    text = re.sub(r'(\d+)/(\d+)/(\d+)', r'\1 and \2 and \3', text)  # KDA
+    text = re.sub(r'(\d+)/(\d+)', r'\1 and \2', text)               # K/D
     text = re.sub(r'\((\d+)s\)', r'\1 seconds', text)
     text = re.sub(r'(\d+)s\b', r'\1 seconds', text)
     text = re.sub(r'\((\d+)g\b\)', r'\1 gold', text)
