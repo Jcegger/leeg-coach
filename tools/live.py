@@ -2212,6 +2212,8 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         entry = matchups.get(normalize(champ))
         if entry:
             disp, body, tier = entry
+            if not body.strip() and champ_db:
+                body = champ_db.get_note(champ) or ''
             out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
         else:
             db_note = champ_db.get_note(champ) if champ_db else None
