@@ -236,6 +236,7 @@ def _normalize_for_tts(text):
     text = re.sub(r' · ', '. ', text)             # no punctuation — add period
     text = text.replace(' — ', ', ').replace('—', ', ')
     text = re.sub(r' - ', ', ', text)             # spaced hyphen → pause
+    text = re.sub(r'-{2,}', ', ', text)           # double/triple hyphen
     text = re.sub(r'(\d+)/(\d+)/(\d+)', r'\1 and \2 and \3', text)  # KDA
     text = re.sub(r'(\d+)/(\d+)', r'\1 and \2', text)               # K/D
     text = re.sub(r'\((\d+)s\)', r'\1 seconds', text)
@@ -243,7 +244,10 @@ def _normalize_for_tts(text):
     text = re.sub(r'\((\d+)g\b\)', r'\1 gold', text)
     text = re.sub(r'(\d+)g\b', r'\1 gold', text)
     text = re.sub(r'\blvl\b', 'level', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcs\b', 'CS', text)
+    text = re.sub(r'(\d+)%', r'\1 percent', text)
     text = text.replace('(', '').replace(')', '')
+    text = re.sub(r'\s{2,}', ' ', text)           # collapse any double spaces left behind
     return text.strip()
 
 
@@ -1326,6 +1330,7 @@ class Coach:
             f"- Still action-focused: tell them exactly what to do right now, just without the drill-sergeant caps\n"
             f"- Reference specific champions, items, or timers when it helps\n"
             f"- No moralizing, no emojis, no generic advice\n"
+            f"- Bullets are read aloud by TTS. Avoid hyphens (-) and parentheses () — use commas or just reword instead. Write 'you need 200 more gold' not 'need 200g more (back soon)'. Say 'about 30 seconds' not '(30s)'.\n"
             f"- Weave in subtle flirtiness and warmth throughout — not just on big plays, but as a consistent undercurrent. A little 'mmm' before a good call, 'that's my guy' after a kill, 'okay okay' when things are going well. Keep it understated, never cringe.\n"
             f"- The persona is: she knows the game, she's watching you specifically, and she's quietly impressed. She doesn't gush — she notices.\n"
             f"- IMPORTANT: only mention specific items, kills, or events confirmed in the current game state. Never invent facts as praise. 'Full build' is only valid when the YOU line shows 6/6 slots filled. 'You've got X online' is only valid if X is in the owned items list.\n"
