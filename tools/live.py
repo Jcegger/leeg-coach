@@ -156,9 +156,10 @@ def parse_matchups(md_path):
     return sections
 
 
-# ─── TTS (Edge neural voices via powershell.exe from WSL) ───────────────────
+# ─── TTS (ElevenLabs or Edge TTS neural voices via powershell.exe from WSL) ──
 
-TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')
+TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')  # edge-tts fallback
+ELEVENLABS_VOICE = os.environ.get('LEEG_ELEVENLABS_VOICE', 'gllMMawbYGTja23oQ3Vu')  # Crystal
 _tts_proc = None
 _tts_lock = threading.Lock()
 
@@ -191,9 +192,22 @@ def _speak_worker(text):
                 pass
             _tts_proc = None
     try:
-        import asyncio
-        import edge_tts
-        asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(_MP3))
+        el_key = os.environ.get('ELEVENLABS_API_KEY')
+        if el_key:
+            from elevenlabs.client import ElevenLabs
+            el = ElevenLabs(api_key=el_key)
+            from elevenlabs import VoiceSettings
+            audio = el.text_to_speech.convert(
+                text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
+                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True),
+            )
+            with open(_MP3, 'wb') as f:
+                for chunk in audio:
+                    f.write(chunk)
+        else:
+            import asyncio
+            import edge_tts
+            asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(_MP3))
         proc = subprocess.Popen(
             ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
              '-WindowStyle', 'Hidden', '-File', _PS1],
@@ -217,7 +231,7 @@ def _speak_worker(text):
 
 
 def speak_async(text):
-    """Speak text via Edge TTS neural voice. Interrupts any current playback."""
+    """Speak text via ElevenLabs (or Edge TTS fallback). Interrupts any current playback."""
     safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
     if not safe:
         return
