@@ -199,7 +199,7 @@ def _speak_worker(text):
             from elevenlabs import VoiceSettings
             audio = el.text_to_speech.convert(
                 text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
-                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True),
+                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True, speed=1.2),
             )
             with open(_MP3, 'wb') as f:
                 for chunk in audio:
@@ -232,7 +232,7 @@ def _speak_worker(text):
 
 def speak_async(text):
     """Speak text via ElevenLabs (or Edge TTS fallback). Interrupts any current playback."""
-    safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
+    safe = re.sub(r'["\\\r\n]', ' ', text).strip()
     if not safe:
         return
     threading.Thread(target=_speak_worker, args=(safe,), daemon=True).start()
