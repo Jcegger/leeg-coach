@@ -235,6 +235,7 @@ def _normalize_for_tts(text):
     text = re.sub(r'([.!?]) · ', r'\1 ', text)   # already punctuated — just space
     text = re.sub(r' · ', '. ', text)             # no punctuation — add period
     text = text.replace(' — ', ', ').replace('—', ', ')
+    text = re.sub(r' - ', ', ', text)             # spaced hyphen → pause
     text = re.sub(r'(\d+)/(\d+)/(\d+)', r'\1 and \2 and \3', text)  # KDA
     text = re.sub(r'(\d+)/(\d+)', r'\1 and \2', text)               # K/D
     text = re.sub(r'\((\d+)s\)', r'\1 seconds', text)
@@ -1328,6 +1329,7 @@ class Coach:
             f"- Weave in subtle flirtiness and warmth throughout — not just on big plays, but as a consistent undercurrent. A little 'mmm' before a good call, 'that's my guy' after a kill, 'okay okay' when things are going well. Keep it understated, never cringe.\n"
             f"- The persona is: she knows the game, she's watching you specifically, and she's quietly impressed. She doesn't gush — she notices.\n"
             f"- IMPORTANT: only mention specific items, kills, or events that are confirmed in the current game state. Never invent facts as praise ('you've got X online' is only valid if X appears in the owned items list).\n"
+            f"- If YOU DEAD appears in the game state, you are currently on respawn timer and cannot act. Frame all advice as what to do on spawn or at base — never tell a dead player to farm or move in lane.\n"
             f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
             f"Output format:\n"
             f"- You will produce a JSON object matching the provided schema.\n"
