@@ -1414,15 +1414,23 @@ class Coach:
         # spending API credits.
         new_events = ev['raw'][self.last_event_count:]
         self.last_event_count = len(ev['raw'])
-        you_name = me.get('riotIdGameName') or (me.get('summonerName') or '').split('#', 1)[0]
+        # Build a set of all name forms the API might use for this player —
+        # the Live Client mixes riotIdGameName and old summonerName across events,
+        # especially after a name change.
+        you_names = set()
+        for field in ('riotIdGameName', 'riotId', 'summonerName'):
+            v = me.get(field) or ''
+            if v:
+                you_names.add(v)
+                you_names.add(v.split('#', 1)[0])
         for e in new_events:
             en = e.get('EventName')
             if en in ('FirstBlood', 'Ace', 'BaronKill', 'InhibKilled'):
                 return en.lower()
             if en == 'ChampionKill':
-                if e.get('VictimName') == you_name:
+                if e.get('VictimName') in you_names:
                     return 'you_died'
-                if e.get('KillerName') == you_name:
+                if e.get('KillerName') in you_names:
                     return 'you_killed'
 
         # Periodic fallback: fire if the game has been quiet for 90s+.
