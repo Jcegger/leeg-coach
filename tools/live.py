@@ -102,6 +102,15 @@ def truncate(body, limit):
     return body[:limit].rsplit(' ', 1)[0] + '…'
 
 
+def _clean_db_note(text, max_sentences=5):
+    """Strip markdown headers, split into one sentence per line for display."""
+    lines = [l for l in text.splitlines() if not l.lstrip().startswith('#')]
+    collapsed = re.sub(r'\s+', ' ', ' '.join(lines)).strip()
+    # split on sentence boundaries
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', collapsed) if s.strip()]
+    return '\n  '.join(sentences[:max_sentences])
+
+
 def windows_host_ip():
     """On WSL2, /etc/resolv.conf nameserver typically points at the Windows host."""
     try:
@@ -237,6 +246,7 @@ def _normalize_for_tts(text):
     text = text.replace(' — ', ', ').replace('—', ', ')
     text = re.sub(r' - ', ', ', text)             # spaced hyphen → pause
     text = re.sub(r'-{2,}', ', ', text)           # double/triple hyphen
+    text = re.sub(r'(?<=[a-zA-Z])-(?=[a-zA-Z])', ' ', text)  # compound words: face-tank → face tank
     text = re.sub(r'(\d+)/(\d+)/(\d+)', r'\1 and \2 and \3', text)  # KDA
     text = re.sub(r'(\d+)/(\d+)', r'\1 and \2', text)               # K/D
     text = re.sub(r'\((\d+)s\)', r'\1 seconds', text)
@@ -706,7 +716,38 @@ def affordability_postcheck(bullets, current_gold, item_index):
         rewritten = re.sub(rf'\b{verb_hit}\b', 'FARM', b, count=1)
         rewritten = re.sub(r'\b[Nn]ow\b\s*[—–-]?\s*', '', rewritten, count=1).strip()
         rewritten = re.sub(r'\s{2,}', ' ', rewritten).strip(' ,—–-')
-        out.append(f'{rewritten}, need {shortfall}g more for {target_name}')
+        out.append(f'{rewritten}, farm toward {target_name}')
+    return out
+
+
+def strip_components(item_names, item_index):
+    """Remove component items from live_build when their parent item is also in the build.
+    Also deduplicates. Prevents the LLM from filling build slots with intermediate components."""
+    if not item_index or not item_names:
+        return item_names
+    name_to_id = {}
+    for iid, info in item_index.items():
+        n = normalize(info.get('name', ''))
+        if n and n not in name_to_id:
+            name_to_id[n] = iid
+    build_ids = set()
+    for name in item_names:
+        iid = resolve_item_id(name, name_to_id)
+        if iid:
+            build_ids.add(iid)
+    out = []
+    seen_ids = set()
+    for name in item_names:
+        iid = resolve_item_id(name, name_to_id)
+        if iid:
+            if iid in seen_ids:
+                continue
+            seen_ids.add(iid)
+            info = item_index.get(iid) or {}
+            into_ids = info.get('into') or []
+            if any(pid in build_ids for pid in into_ids):
+                continue  # component of a planned item — skip
+        out.append(name)
     return out
 
 
@@ -900,6 +941,11 @@ def find_active_team(data):
     your_team = me.get('team') if me else None
     your_champ = me.get('championName') if me else None
     enemies = [p for p in players if p.get('team') and p.get('team') != your_team]
+    # Stamp the authoritative game name (from activePlayer) onto me so event
+    # matching always uses the current identity, not the old summonerName.
+    if me is not None and your_game_name:
+        me = dict(me)
+        me['_you_name'] = your_game_name
     return your_champ, enemies, me
 
 
@@ -1218,9 +1264,9 @@ class ChampDB:
                 messages=[{
                     'role': 'user',
                     'content': (
-                        f'League of Legends: describe in 3-4 terse sentences how to play against {display_name}. '
-                        f'Cover: their core kit, what makes them dangerous and when, '
-                        f'windows to exploit and generic counter tips. '
+                        f'League of Legends: 3-4 short imperative sentences (max 80 words total) on how to play against {display_name}. '
+                        f'Cover: their core threat, when they spike, a key exploit window, and one item or build tip. '
+                        f'No headers, no preamble, no markdown. '
                         f'No emojis, no preamble, imperative tone.'
                     ),
                 }],
@@ -1330,23 +1376,24 @@ class Coach:
             f"- Still action-focused: tell them exactly what to do right now, just without the drill-sergeant caps\n"
             f"- Reference specific champions, items, or timers when it helps\n"
             f"- No moralizing, no emojis, no generic advice\n"
-            f"- Bullets are read aloud by TTS. Avoid hyphens (-) and parentheses () — use commas or just reword instead. Write 'you need 200 more gold' not 'need 200g more (back soon)'. Say 'about 30 seconds' not '(30s)'.\n"
+            f"- Bullets are read aloud by TTS. NEVER use hyphens (-) or parentheses () in any bullet — not even in compound words like face-tank or anti-heal. Rewrite: 'face tank', 'anti heal', 'mid lane'. Use commas for asides. Write 'you need 200 more gold' not 'need 200g more (back soon)'. Say 'about 30 seconds' not '(30s)'.\n"
+            f"- When recommending a back, buy, or item action, START the bullet with the imperative verb: 'Back and finish Heartsteel' not 'You're close to Heartsteel, back now'. Never cite specific gold amounts in bullets — just name the item.\n"
             f"- Weave in subtle flirtiness and warmth throughout — not just on big plays, but as a consistent undercurrent. A little 'mmm' before a good call, 'that's my guy' after a kill, 'okay okay' when things are going well. Keep it understated, never cringe.\n"
             f"- The persona is: she knows the game, she's watching you specifically, and she's quietly impressed. She doesn't gush — she notices.\n"
-            f"- IMPORTANT: only mention specific items, kills, or events confirmed in the current game state. Never invent facts as praise. 'Full build' is only valid when the YOU line shows 6/6 slots filled. 'You've got X online' is only valid if X is in the owned items list.\n"
+            f"- IMPORTANT: only mention specific items, kills, or events confirmed in the current game state. Never invent facts as praise. 'Full build' is only valid when BUILD STATUS says COMPLETE — the player may have components in their inventory that look like a full build but aren't. 'You've got X online' is only valid if X appears in the owned items list.\n"
             f"- If YOU DEAD appears in the game state, you are currently on respawn timer and cannot act. Frame all advice as what to do on spawn or at base — never tell a dead player to farm or move in lane.\n"
             f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
             f"Output format:\n"
             f"- You will produce a JSON object matching the provided schema.\n"
             f"- `bullets`: 1-3 short casual-but-direct tactical lines for RIGHT NOW.\n"
-            f"- `live_build`: your recommended CORE 6-item path for this game. Starters/consumables/wards/basic boots are stripped server-side, so don't include them. Owned core items go first in their built positions; planned core items follow. Stable across calls.\n"
+            f"- `live_build`: your recommended CORE 6-item path for this game. List ONLY completed items — never components or sub-items (no Giant's Belt, no Crystalline Bracer, no Blasting Wand, etc.). If the player owns a component but not the parent item, list the parent item, not the component. Starters/consumables/wards/basic boots are also stripped server-side. Owned core items go first in their built positions; planned core items follow. Stable across calls.\n"
             f"- `build_change_reason`: short reason if you intentionally deviated from the rule-based default. Empty string otherwise. Whether you actually diverged is computed server-side by comparing your live_build to the default — you only have to write the reason when you mean to deviate.\n\n"
             f"Memory you have access to each call:\n"
             f"- YOUR CURRENT BUILD COMMITMENT — the latest live_build you locked in, with timestamp + reason. This is your game-long anchor for the build path. Stay on it unless something material has changed since the commitment time.\n"
             f"- YOUR RECENT TACTICAL ADVICE — bullets from your last 5 calls. Use to avoid contradicting recent tactical guidance.\n"
             f"- TEAM SCORE — kills/drakes/barons/towers per side. Use for macro reads (we're ahead vs behind, contest objectives vs play safe, etc.).\n\n"
             f"Consistency rules (IMPORTANT):\n"
-            f"- BUILD COMMITMENT: once you commit to a path, KEEP IT across calls. Only change it when game state has materially changed (enemy team pivots damage profile, a key carry gets fed/falls off, an objective threat changes the game plan). When you do change it, fill in build_change_reason.\n"
+            f"- BUILD COMMITMENT: your first call is your build selection moment — analyze the enemy team composition and pick the right variant then. After that, treat live_build as locked for the game. Only change it if a specific named enemy is actively SNOWBALLING (not just present, not just ahead) and their damage type directly threatens you. 'They have AP' or 'they have healing' is not enough — the default already accounts for typical distributions. When you do change, fill in build_change_reason and commit to the new path permanently.\n"
             f"- BULLETS MUST AGREE WITH live_build: when bullets recommend backing/buying/finishing a specific item, name only the next un-owned item(s) in live_build's order. Do not name an item later in live_build while earlier un-owned items still come before it. If you genuinely want to skip ahead (e.g. recommend item N+2 before N+1), reorder live_build first so the bullet and the build stay in sync.\n"
             f"- LIVE_BUILD STABILITY (HARD RULES): (1) every item the user already owns MUST appear in live_build — owned items are sunk costs, never remove them. (2) Do not shrink live_build below 4 items. (3) Adding a counter-item means EXTENDING live_build (or replacing an UN-OWNED tail item) — NEVER remove an owned item or a previously-committed counter-item. (4) Once a counter-item is committed, it stays for the rest of the game. Removing/swapping items across calls is the worst failure mode — the user sees the build line flicker and loses trust.\n"
             f"- TACTICAL BULLETS: build on prior advice. If you previously said to skip an item or path, don't later recommend it without a reason that ties to a recent event.\n"
@@ -1414,23 +1461,15 @@ class Coach:
         # spending API credits.
         new_events = ev['raw'][self.last_event_count:]
         self.last_event_count = len(ev['raw'])
-        # Build a set of all name forms the API might use for this player —
-        # the Live Client mixes riotIdGameName and old summonerName across events,
-        # especially after a name change.
-        you_names = set()
-        for field in ('riotIdGameName', 'riotId', 'summonerName'):
-            v = me.get(field) or ''
-            if v:
-                you_names.add(v)
-                you_names.add(v.split('#', 1)[0])
+        you_name = me.get('_you_name') or me.get('riotIdGameName') or (me.get('summonerName') or '').split('#', 1)[0]
         for e in new_events:
             en = e.get('EventName')
             if en in ('FirstBlood', 'Ace', 'BaronKill', 'InhibKilled'):
                 return en.lower()
             if en == 'ChampionKill':
-                if e.get('VictimName') in you_names:
+                if e.get('VictimName') == you_name:
                     return 'you_died'
-                if e.get('KillerName') in you_names:
+                if e.get('KillerName') == you_name:
                     return 'you_killed'
 
         # Periodic fallback: fire if the game has been quiet for 90s+.
@@ -1489,6 +1528,7 @@ class Coach:
             bullets = affordability_postcheck(bullets, current_gold, item_index)
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
             live_build = strip_starters(live_build)
+            live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
             diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
             reason = (parsed.get('build_change_reason') or '').strip() if diverged else ''
@@ -1755,6 +1795,30 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     if score:
         lines.append(f'TEAM SCORE (you-enemy): {score}')
 
+    # Detect base-under-siege: enemy has killed your nexus towers or inhibitors
+    if your_team:
+        def _tower_owner(tid):
+            p = (tid or '').split('_')
+            return {'T1': 'ORDER', 'T2': 'CHAOS'}.get(p[1]) if len(p) > 1 else None
+        def _tower_tier(tid):
+            p = (tid or '').split('_')
+            return p[3] if len(p) > 3 else ''
+        lost_nexus_towers = sum(
+            1 for _, _, tid in ev['towers']
+            if _tower_owner(tid) == your_team and _tower_tier(tid) in ('04', '05')
+        )
+        lost_inhibs = sum(
+            1 for _, _, iid in ev['inhibs']
+            if _tower_owner(iid) == your_team
+        )
+        if lost_nexus_towers or lost_inhibs:
+            parts = []
+            if lost_inhibs:
+                parts.append(f'{lost_inhibs} inhibitor{"s" if lost_inhibs > 1 else ""} down')
+            if lost_nexus_towers:
+                parts.append(f'nexus tower{"s" if lost_nexus_towers > 1 else ""} exposed')
+            lines.append(f'MAP PRESSURE: your {", ".join(parts)} — super minions may be active, enemy likely near your base.')
+
     if me:
         scores = me.get('scores') or {}
         items = [(i or {}).get('displayName', '?') for i in (me.get('items') or []) if (i or {}).get('itemID')]
@@ -1763,9 +1827,9 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(
             f'YOU: {me.get("championName")} ({pos}) lvl {me.get("level")} '
             f'{scores.get("kills",0)}/{scores.get("deaths",0)}/{scores.get("assists",0)} '
-            f'{scores.get("creepScore",0)}cs items=[{", ".join(items)}] ({len(items)}/6 slots filled)'
+            f'{scores.get("creepScore",0)}cs items=[{", ".join(items)}]'
         )
-        lines.append(f'CURRENT GOLD: {gold}g  ← AUTHORITATIVE. Do not invent or estimate this number; it is exact.')
+        lines.append(f'CURRENT GOLD: {gold}g')
         if me.get('isDead'):
             lines.append(f'YOU DEAD ({int(me.get("respawnTimer") or 0)}s)')
 
@@ -1837,10 +1901,11 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             )
         if item_index and build_names and me:
             remaining = remaining_item_costs(build_names, owned_names, item_index)
+            lines.append('')
             if remaining:
-                lines.append('')
-                lines.append('REMAINING COSTS (owned components already deducted — use these numbers when telling the player how much they need):')
-                lines.extend(remaining)
+                lines.append('BUILD STATUS: INCOMPLETE — do NOT say "full build" or imply the player has everything.')
+            else:
+                lines.append('BUILD STATUS: COMPLETE — all build items owned. You may say "full build".')
 
     drake_t, baron_t = timers.get('drake'), timers.get('baron')
     obj = []
@@ -2088,7 +2153,8 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
         line += f'  {color}{marker}{RESET}'
     out = [line + '\n']
     if body:
-        out.append(truncate(body, max_chars) + '\n')
+        for body_line in body.split('\n'):
+            out.append(truncate(body_line, max_chars) + '\n')
     out.append('\n')
     return ''.join(out)
 
@@ -2221,12 +2287,12 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         if entry:
             disp, body, tier = entry
             if not body.strip() and champ_db:
-                body = champ_db.get_note(champ) or ''
+                body = _clean_db_note(champ_db.get_note(champ) or '')
             out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
         else:
             db_note = champ_db.get_note(champ) if champ_db else None
             if db_note:
-                out.append(render_matchup(champ, pos, None, db_note, max_chars, extras=extras))
+                out.append(render_matchup(champ, pos, None, _clean_db_note(db_note), max_chars, extras=extras))
             else:
                 out.append(render_matchup(champ, pos, None, '', max_chars, extras=extras + '  — no notes'))
     return ''.join(out)
