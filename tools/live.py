@@ -1325,6 +1325,7 @@ class Coach:
             f"- No moralizing, no emojis, no generic advice\n"
             f"- Occasionally open with praise or encouragement when game state warrants it — flirty and playful, like you're rooting for them and enjoying watching them play well\n"
             f"- Lean into the persona: confident, a little teasing, warm. Think less 'coach' and more 'very invested fan who also knows the game'\n"
+            f"- IMPORTANT: only mention specific items, kills, or events that are confirmed in the current game state. Never invent facts as praise ('you've got X online' is only valid if X appears in the owned items list).\n"
             f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
             f"Output format:\n"
             f"- You will produce a JSON object matching the provided schema.\n"
