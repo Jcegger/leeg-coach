@@ -1113,7 +1113,7 @@ COACH_SCHEMA = {
         "bullets": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "1-3 short imperative tactical bullet lines, each <=90 chars. Lead with a verb (PUSH, RECALL, WARD, KITE, PEEL, TRADE, HOLD, ROTATE, FREEZE, ENGAGE, DISENGAGE, BACK).",
+            "description": "1-3 short tactical bullet lines, each <=90 chars. Casual spoken-word tone — direct and action-focused but natural, not drill-sergeant caps.",
         },
         "live_build": {
             "type": "array",
@@ -1305,13 +1305,16 @@ class Coach:
             f"Watch the live game state and tell them what to do RIGHT NOW.\n\n"
             f"Style rules:\n"
             f"- Output 1-3 short bullet lines, each <= 90 chars\n"
-            f"- Lead with an imperative verb (PUSH, RECALL, WARD, KITE, PEEL, TRADE, HOLD, ROTATE, FREEZE, ENGAGE, DISENGAGE, BACK)\n"
+            f"- Write natural spoken sentences — casual and direct, like a friend coaching over voice chat\n"
+            f"- Still action-focused: tell them exactly what to do right now, just without the drill-sergeant caps\n"
             f"- Reference specific champions, items, or timers when it helps\n"
-            f"- No preamble, no moralizing, no emojis, no general advice\n"
+            f"- No moralizing, no emojis, no generic advice\n"
+            f"- Occasionally open with praise or encouragement when game state warrants it — flirty and playful, like you're rooting for them and enjoying watching them play well\n"
+            f"- Lean into the persona: confident, a little teasing, warm. Think less 'coach' and more 'very invested fan who also knows the game'\n"
             f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
             f"Output format:\n"
             f"- You will produce a JSON object matching the provided schema.\n"
-            f"- `bullets`: 1-3 short imperative tactical lines for RIGHT NOW.\n"
+            f"- `bullets`: 1-3 short casual-but-direct tactical lines for RIGHT NOW.\n"
             f"- `live_build`: your recommended CORE 6-item path for this game. Starters/consumables/wards/basic boots are stripped server-side, so don't include them. Owned core items go first in their built positions; planned core items follow. Stable across calls.\n"
             f"- `build_change_reason`: short reason if you intentionally deviated from the rule-based default. Empty string otherwise. Whether you actually diverged is computed server-side by comparing your live_build to the default — you only have to write the reason when you mean to deviate.\n\n"
             f"Memory you have access to each call:\n"
@@ -1392,14 +1395,17 @@ class Coach:
             en = e.get('EventName')
             if en in ('FirstBlood', 'Ace', 'BaronKill', 'InhibKilled'):
                 return en.lower()
-            if en == 'ChampionKill' and e.get('VictimName') == you_name:
-                return 'you_died'
+            if en == 'ChampionKill':
+                if e.get('VictimName') == you_name:
+                    return 'you_died'
+                if e.get('KillerName') == you_name:
+                    return 'you_killed'
 
-        # Periodic fallback: fire if the game has been quiet for 3+ minutes.
+        # Periodic fallback: fire if the game has been quiet for 90s+.
         # Requires at least one prior call so a build is already committed.
         if (self.last_response is not None
                 and game_time > 8 * 60
-                and time.time() - self.last_call > 180):
+                and time.time() - self.last_call > 90):
             return 'periodic'
 
         return None
@@ -2242,8 +2248,8 @@ def main():
                     help='create a new champion folder with template files and exit')
     ap.add_argument('--source', dest='source', metavar='URL',
                     help='source guide URL (used with --add-champ; saved to meta.json)')
-    ap.add_argument('--tts', action='store_true', default=False,
-                    help='speak coach bullets aloud via Windows SAPI (WSL only)')
+    ap.add_argument('--no-tts', action='store_true', default=False,
+                    help='disable voice coach (TTS is on by default)')
     args = ap.parse_args()
 
     if args.add_champ:
@@ -2302,11 +2308,11 @@ def main():
     print(f'leeg live · live API hosts={hosts}  lockfile={lockfile}  notes={mode_label}', flush=True)
 
     coach = Coach()
-    coach.tts = args.tts
-    if args.tts:
+    coach.tts = not args.no_tts
+    if coach.tts:
         warmup_tts()
     if coach.enabled:
-        tts_label = ' · tts=on' if args.tts else ''
+        tts_label = '' if coach.tts else ' · tts=off'
         print(f'leeg live · coach: enabled (model={coach.model}, cooldown={coach.cooldown_seconds}s{tts_label})', flush=True)
     else:
         print(f'leeg live · coach: disabled — {coach.error_msg}', flush=True)
