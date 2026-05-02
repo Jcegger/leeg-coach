@@ -706,7 +706,7 @@ def affordability_postcheck(bullets, current_gold, item_index):
         rewritten = re.sub(rf'\b{verb_hit}\b', 'FARM', b, count=1)
         rewritten = re.sub(r'\b[Nn]ow\b\s*[—–-]?\s*', '', rewritten, count=1).strip()
         rewritten = re.sub(r'\s{2,}', ' ', rewritten).strip(' ,—–-')
-        out.append(f'{rewritten} (need {shortfall}g more for {target_name})')
+        out.append(f'{rewritten}, need {shortfall}g more for {target_name}')
     return out
 
 
@@ -1428,7 +1428,7 @@ class Coach:
         # Periodic fallback: fire if the game has been quiet for 90s+.
         # Requires at least one prior call so a build is already committed.
         if (self.last_response is not None
-                and game_time > 8 * 60
+                and game_time > 4 * 60
                 and time.time() - self.last_call > 90):
             return 'periodic'
 
