@@ -156,56 +156,62 @@ def parse_matchups(md_path):
     return sections
 
 
-# ─── TTS (Edge neural voices via persistent PowerShell + MCI) ────────────────
+# ─── TTS (Edge neural voices via powershell.exe from WSL) ───────────────────
 
 TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')
+_tts_proc = None
 _tts_lock = threading.Lock()
-_ps_proc = None
 
-# Sent once to the persistent PS process to define the MCI P/Invoke type.
-_PS_MCI_INIT = (
-    "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; "
-    'public class WinMCI { [DllImport("winmm.dll", CharSet=CharSet.Auto)] '
-    "public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); }'\n"
-)
-
-
-def _ps_send(cmd):
-    """Write one PowerShell command to the persistent process, restarting if dead."""
-    global _ps_proc
-    if _ps_proc is None or _ps_proc.poll() is not None:
-        _ps_proc = subprocess.Popen(
-            ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', '-'],
-            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
-        _ps_proc.stdin.write(_PS_MCI_INIT.encode())
-        _ps_proc.stdin.flush()
-    _ps_proc.stdin.write((cmd + '\n').encode())
-    _ps_proc.stdin.flush()
+_PS1 = r'C:\Windows\Temp\leeg_tts.ps1'
+_MP3 = '/mnt/c/Windows/Temp/leeg_tts.mp3'
+_PS1_CONTENT = """\
+Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class WinMCI { [DllImport("winmm.dll", CharSet=CharSet.Auto)] public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); }'
+[WinMCI]::mciSendString('open "C:\\Windows\\Temp\\leeg_tts.mp3" type mpegvideo alias leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString('play leeg wait', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+"""
 
 
 def warmup_tts():
-    """Start the persistent PowerShell process and compile the MCI type ahead of time."""
-    def _warmup():
-        with _tts_lock:
-            _ps_send('# warmup')
-    threading.Thread(target=_warmup, daemon=True).start()
+    """Write the PS1 script to disk at startup so it's ready for the first call."""
+    try:
+        with open('/mnt/c/Windows/Temp/leeg_tts.ps1', 'w') as f:
+            f.write(_PS1_CONTENT)
+    except Exception:
+        pass
 
 
 def _speak_worker(text):
+    global _tts_proc
+    with _tts_lock:
+        if _tts_proc is not None:
+            try:
+                _tts_proc.kill()
+            except Exception:
+                pass
+            _tts_proc = None
     try:
         import asyncio
         import edge_tts
-        asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save('/mnt/c/Windows/Temp/leeg_tts.mp3'))
+        asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(_MP3))
+        proc = subprocess.Popen(
+            ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+             '-WindowStyle', 'Hidden', '-File', _PS1],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
         with _tts_lock:
-            _ps_send('[WinMCI]::mciSendString(\'stop leeg\', $null, 0, [IntPtr]::Zero) | Out-Null')
-            _ps_send('[WinMCI]::mciSendString(\'close leeg\', $null, 0, [IntPtr]::Zero) | Out-Null')
-            _ps_send('[WinMCI]::mciSendString("open `"C:\\Windows\\Temp\\leeg_tts.mp3`" type mpegvideo alias leeg", $null, 0, [IntPtr]::Zero) | Out-Null')
-            _ps_send('[WinMCI]::mciSendString(\'play leeg\', $null, 0, [IntPtr]::Zero) | Out-Null')
+            _tts_proc = proc
+        proc.wait(timeout=30)
+        with _tts_lock:
+            if _tts_proc is proc:
+                _tts_proc = None
     except ImportError:
         safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
-        with _tts_lock:
-            _ps_send(f'Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")')
+        subprocess.Popen(
+            ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command',
+             f'Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
     except Exception:
         pass
 
