@@ -199,7 +199,7 @@ def _speak_worker(text):
             from elevenlabs import VoiceSettings
             audio = el.text_to_speech.convert(
                 text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
-                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True, speed=1.2),
+                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True, speed=1.1),
             )
             with open(_MP3, 'wb') as f:
                 for chunk in audio:
@@ -230,12 +230,26 @@ def _speak_worker(text):
         pass
 
 
+def _normalize_for_tts(text):
+    """Expand gaming shorthand so it reads naturally aloud."""
+    text = re.sub(r'([.!?]) · ', r'\1 ', text)   # already punctuated — just space
+    text = re.sub(r' · ', '. ', text)             # no punctuation — add period
+    text = text.replace(' — ', ', ').replace('—', ', ')
+    text = re.sub(r'\((\d+)s\)', r'\1 seconds', text)
+    text = re.sub(r'(\d+)s\b', r'\1 seconds', text)
+    text = re.sub(r'\((\d+)g\b\)', r'\1 gold', text)
+    text = re.sub(r'(\d+)g\b', r'\1 gold', text)
+    text = re.sub(r'\blvl\b', 'level', text, flags=re.IGNORECASE)
+    text = text.replace('(', '').replace(')', '')
+    return text.strip()
+
+
 def speak_async(text):
     """Speak text via ElevenLabs (or Edge TTS fallback). Interrupts any current playback."""
     safe = re.sub(r'["\\\r\n]', ' ', text).strip()
     if not safe:
         return
-    threading.Thread(target=_speak_worker, args=(safe,), daemon=True).start()
+    threading.Thread(target=_speak_worker, args=(_normalize_for_tts(safe),), daemon=True).start()
 
 
 # ─── champ folder discovery & lazy loading ──────────────────────────────────
