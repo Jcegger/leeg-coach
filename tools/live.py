@@ -1727,9 +1727,9 @@ def remaining_item_costs(build_names, owned_names, item_index):
                 comp_cost += cinfo.get('cost', 0)
         remaining = total - comp_cost
         if owned_comps:
-            out.append(f'  {info["name"]}: have {", ".join(owned_comps)} → {remaining}g remaining (of {total}g total)')
+            out.append(f'  {info["name"]}: {remaining}g still needed, already have {", ".join(owned_comps)}')
         else:
-            out.append(f'  {info["name"]}: {total}g (no components owned)')
+            out.append(f'  {info["name"]}: {total}g, no components owned yet')
     return out
 
 
