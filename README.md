@@ -1,104 +1,99 @@
-# leeg
+# leeg-coach
 
-Personal League of Legends notes + a small CLI that surfaces them while a game is running.
+An in-game League of Legends tactical assistant that runs in a terminal alongside your client. Polls Riot's [Live Client Data API](https://hextechdocs.dev/getting-started-with-the-live-client-data-api/) every 3 seconds and surfaces live enemy stats, threat-sorted lineup, objective timers, rule-based coaching, and an optional AI coach powered by [Claude](https://www.anthropic.com).
+
+The champion notes in this repo (`mundo/`, `sivir/`) are my own, but the tool works with any champion — drop in a `matchups.md` and it auto-discovers it.
+
+## Features
+
+- **Live enemy panel** — all 5 enemies sorted by threat tier with KDA, CS, gold, items, level
+- **Objective timers** — drake and baron spawn countdowns, with lane-open callouts when towers fall
+- **Rule-based DO panel** — deterministic advice: push windows, objective windows, fed-enemy alerts, next buy hint, dead-laner callouts
+- **Event feed** — last 8 events (kills, towers, objectives) with timestamps
+- **AI coach** (optional) — fires on significant events with 1–2 tactical bullets tuned to your champion's matchup notes and current game state
+- **Voice output** (optional) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
 
 ## Quickstart
 
-Before you queue, in any terminal:
-
 ```bash
-leeg
+git clone https://github.com/Jcegger/leeg-coach.git
+cd leeg-coach
+python tools/live.py
 ```
 
-(Or `python3 ~/projects/leeg/tools/live.py` directly. The `leeg` alias lives in `~/.bashrc`.)
+Leave it running. It waits at "WAITING FOR GAME" until you load into a match, then renders. Auto-detects your champion from the live API — pass `--champ <name>` to force a specific profile.
 
-Leave it running. It sits idle until League opens, then:
+### AI coach setup (optional)
 
-- **In game** → live tactical assistant: enemy lineup with KDA / CS / items / level (sorted by threat), objective timers (drake / baron), recent events feed, rule-based "DO" advice (push windows, drake spawns, fed enemies), and an optional LLM coach (Claude Haiku 4.5) that fires on significant events.
-- **Champ select** → bans + enemy picks with matchup notes, lane opponent highlighted. *(Win11-only with mirrored networking; Win10 portproxy setup below covers in-game only.)*
-
-The CLI auto-detects which champion you're playing and loads the matching profile (one of the folders below). Pass `--champ <name>` only if you want to force a specific profile.
-
-Quit with Ctrl-C.
-
-### Optional: LLM coach
-
-For per-event tactical coaching synthesized from your matchup + build notes, set an Anthropic API key:
+Get a key at [console.anthropic.com](https://console.anthropic.com) → API Keys. Note: Claude Pro and the API are separate billing systems.
 
 ```bash
-echo 'export LEEG_ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc && source ~/.bashrc
 pip install anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Get a key at console.anthropic.com → API Keys, and add a few dollars of credit (Plans & Billing → Add credit). Note: Claude Pro and the API are separate billing systems; Pro doesn't include API credits. Cost is ~$0.05–$0.10/game thanks to prompt caching. Without a key, the rule-based DO panel still works.
+Cost: ~$0.05–$0.10/game with Claude Sonnet, thanks to prompt caching. The rule-based DO panel still works without a key.
 
-Offline reference? Open the notes directly:
+### Voice output setup (optional)
 
-- [`mundo/matchups.md`](mundo/matchups.md) — every matchup, ctrl-F the enemy
-- [`mundo/build.md`](mundo/build.md) — every build path + runes + spells
-- [`mundo/playbook.md`](mundo/playbook.md) — laning, mid/late, teamfighting
-
-## Layout
-
-```
-leeg/
-├── README.md           ← you are here
-├── mundo/              ← Mundo top notes
-│   ├── README.md       ← TL;DR + index
-│   ├── build.md        ← items, runes, spells, skill order
-│   ├── playbook.md     ← lane/mid/late + teamfighting
-│   └── matchups.md     ← all 164 matchups by tier
-├── sivir/              ← Sivir bot notes (ADC + support matchups)
-│   ├── README.md
-│   ├── build.md
-│   ├── playbook.md
-│   └── matchups.md
-└── tools/
-    ├── README.md       ← detailed CLI docs
-    └── live.py         ← in-game / champ select CLI
+**ElevenLabs** (best quality):
+```bash
+pip install elevenlabs
+export ELEVENLABS_API_KEY=...
 ```
 
-## First-time setup (WSL2)
+**edge-tts** (free fallback — Windows only, no install needed): works automatically if ElevenLabs isn't configured. Uses PowerShell's `edge-tts` neural voices via a temp `.ps1` script in `C:\Windows\Temp`.
 
-By default, WSL2 can't reach Windows-side `127.0.0.1`, which is where League's services bind. Two paths depending on your Windows version.
+## How the AI coach works
 
-### Windows 11 22H2+ (preferred — both modes work)
+On game-shifting events (first blood, ace, baron, inhibitor, your kills and deaths, multikills, tower takes), the coach fires a short 1–2 bullet response using:
 
-Enable WSL2 mirrored networking:
+- Your champion's `matchups.md` + `build.md` as the system prompt (prompt-cached, 1h TTL — full cost paid once, cheap reads after)
+- Current game state: enemy items/scores, gold, threat tier, last 8 events, objective timers, tower state
+- A persistent build commitment — the coach picks a 6-item path at game start and stays on it unless the enemy comp demands a pivot
+- Rolling 5-call history for tactical consistency
 
-1. Edit `/mnt/c/Users/<windows-user>/.wslconfig` and add:
-   ```
-   [wsl2]
-   networkingMode=mirrored
-   ```
-2. From **PowerShell on Windows**, run `wsl --shutdown`.
-3. Reopen WSL.
+Server-side validators run after every LLM response:
+- Strip hallucinated or component items before they reach the screen
+- Strip starters/consumables from the build display
+- Rewrite unaffordable BACK bullets to FARM with the gold deficit shown
 
-Verify: `cat /etc/resolv.conf` shows `127.0.0.53` (or similar) instead of `172.x.x.x`.
+A 90-second periodic fallback fires if the game has been quiet. A 25-second cooldown between calls prevents spam.
 
-Both in-game (port 2999) and champ select (dynamic LCU port) work after this.
+## Setup — WSL2 / Windows
+
+The Riot Live Client Data API binds to Windows `127.0.0.1:2999`. WSL2 can't reach that by default.
+
+### Windows 11 22H2+ (preferred — both in-game and champ select work)
+
+Add to `/mnt/c/Users/<you>/.wslconfig`:
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+Then from PowerShell: `wsl --shutdown`, then reopen WSL.
 
 ### Windows 10 (in-game only)
 
-Mirrored networking is Win11-only. Workaround: forward port 2999 from the WSL gateway to Windows loopback. From **Admin PowerShell**:
+Forward port 2999 from the WSL gateway to Windows loopback. Run from **Admin PowerShell**:
 
 ```powershell
+# Replace 172.22.64.1 with your WSL gateway IP (run: ip route | grep default  in WSL)
 netsh interface portproxy add v4tov4 listenport=2999 listenaddress=172.22.64.1 connectport=2999 connectaddress=127.0.0.1
 New-NetFirewallRule -DisplayName "WSL LeagueLiveAPI" -Direction Inbound -Protocol TCP -LocalPort 2999 -Action Allow
 ```
 
-Replace `172.22.64.1` with your WSL gateway IP if different (`ip route | grep default` in WSL prints it). The `listenaddress=172.22.64.1` form (vs `0.0.0.0`) is important — it avoids a self-loop where the proxy intercepts Windows-side `127.0.0.1:2999` traffic instead of forwarding it.
+Use your WSL gateway IP as `listenaddress`, **not** `0.0.0.0`. Using `0.0.0.0` causes the proxy to intercept Windows-side `127.0.0.1:2999` and loop, silently breaking both WSL access and the Windows browser.
 
-This covers the Live Client Data API (port 2999, used during a match). The LCU API (champ select) uses a dynamic port that changes each client launch, so champ select notes won't work without mirrored networking. To remove later:
+Champ select notes require Win11 mirrored networking or running the script natively on Windows (pass `--lockfile "C:\Riot Games\League of Legends\lockfile"`).
 
+To remove later:
 ```powershell
 netsh interface portproxy delete v4tov4 listenport=2999 listenaddress=172.22.64.1
 Remove-NetFirewallRule -DisplayName "WSL LeagueLiveAPI"
 ```
 
-**Status on this machine:** Win10 portproxy in place; mirrored networking unavailable.
-
-## Adding a new champion
+## Adding a champion
 
 Fast path — scaffolding command:
 
@@ -106,82 +101,94 @@ Fast path — scaffolding command:
 python tools/live.py --add-champ "Aurora" --source "https://www.mobafire.com/..."
 ```
 
-This creates `leeg/aurora/` with template `README.md`, `matchups.md`, `build.md`, `playbook.md`, and `meta.json` (source URL + current patch). Fill in the bodies. The CLI auto-discovers it on next start.
+Creates `aurora/` with template `README.md`, `matchups.md`, `build.md`, `playbook.md`, and `meta.json`. Fill in the bodies. The CLI auto-discovers it the next time you queue that champion.
 
-Manual path — if you'd rather hand-build it:
+Manual path — create `<champ>/matchups.md` with this structure:
 
-1. Create `leeg/<champ>/matchups.md` using the same structure as `mundo/matchups.md`:
-   ```markdown
-   # <Champ> — Matchups
+```markdown
+# Champ — Matchups
 
-   ## Extreme threats
-   ### Aatrox
-   <body>
+## Extreme threats
+### Aatrox
+<notes>
 
-   ### Bel Veth
-   <body>
+## Major threats
+### Fiora
+<notes>
 
-   ## Major threats
-   ...
-   ```
-   Section names the parser recognizes: `## Extreme threats`, `## Major threats`, `## Even`, `## Minor`, `## Tiny` (case-insensitive prefix match).
-2. (Optional) Add `build.md`, `playbook.md`, `README.md` mirroring the Mundo pattern.
-3. The CLI will pick it up automatically the next time you queue that champ — no flags required. If the champion's API name doesn't match your folder name (e.g., `DrMundo` → `mundo`), add an entry to `CHAMP_ALIASES` in `tools/live.py`.
+## Even
+...
+```
+
+Section names the parser recognizes: `Extreme threats`, `Major threats`, `Even`, `Minor`, `Tiny` (case-insensitive prefix match).
+
+If the champion's Riot API alias differs from your folder name (e.g., `DrMundo` → `mundo`), add an entry to `CHAMP_ALIASES` in `tools/live.py`.
 
 ## Updating notes from a Mobafire guide
 
-Mobafire blocks the default WebFetch User-Agent (HTTP 403). Use curl with a browser UA:
+Mobafire blocks the default user agent (HTTP 403). Use curl with a browser UA:
 
 ```bash
 curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-  -o /tmp/guide.html "<URL>"
+  -o /tmp/guide.html "<mobafire url>"
 ```
 
-Then strip HTML/scripts and parse the threats section. Ask Claude to refresh the matchup files when the source guide updates — the Mundo notes were extracted that way.
+Then strip HTML/scripts and parse the threats section manually or with Claude.
 
-## Sources
+## Project structure
 
-- **Mundo (top):** [Belle19's "Too Big to Fail"](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) — NA Challenger Mundo main, Mobafire
-- **Sivir (bot):** [heeiseenbeerg's "The Ultimate Sivir Build"](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305) — Mobafire (build-only; playbook + most matchups in this repo are general Sivir/ADC knowledge — see `sivir/README.md` for per-file provenance)
+```
+leeg-coach/
+├── mundo/              ← Mundo top (Belle19's NA Challenger guide)
+│   ├── build.md
+│   ├── matchups.md
+│   ├── playbook.md
+│   ├── README.md
+│   └── meta.json
+├── sivir/              ← Sivir bot (heeiseenbeerg's guide + general ADC knowledge)
+│   └── ...
+└── tools/
+    ├── live.py         ← entire CLI, ~2700 lines, stdlib + anthropic
+    └── README.md       ← detailed technical docs (coach internals, cost model, triggers)
+```
 
-## Status & roadmap
+## Notes sources
 
-### Working today (Win10 + WSL2 + portproxy)
-- ✅ In-game tactical assistant: live enemy stats, threat-tier sort, KDA/CS/items/level
-- ✅ Damage-profile build picker (rule-based) + AP/AD enemy classification with item-aware overrides
-- ✅ Rule-based "DO" advice panel (push windows, drake/baron timers, fed-enemy alerts, CS/item gap)
-- ✅ Objective timers (drake / baron) and rolling recent-events feed
-- ✅ LLM coach (Claude Haiku 4.5) with prompt caching, structured JSON output, per-game build commitment, team-score awareness, history of last 5 calls
-- ✅ Game-transition detection (resets coach state on new game)
-- ✅ API watchdog (per-call 20s timeout + 30s backstop)
+- **Mundo (top):** [Belle19's "Too Big to Fail"](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) — NA Challenger Mundo main
+- **Sivir (bot):** [heeiseenbeerg's "The Ultimate Sivir Build"](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305) — build only; playbook + matchups are general ADC knowledge (see `sivir/README.md`)
+
+## Status
+
+### Working
+- Live enemy panel: threat sort, KDA, CS, gold, items, level
+- Rule-based DO panel: push windows, drake/baron timers, buy hint, fed-enemy alerts, dead-laner callouts
+- AI coach: Claude Sonnet 4.6, prompt caching, build commitment, 5-call history, 10+ event triggers
+- Voice output: ElevenLabs neural voice, edge-tts free fallback
+- Tower state tracking with lane-open callouts
+- Game-transition detection (resets coach state on new game), API watchdog
 
 ### Not working / blocked
-- ❌ Champ select notes — needs WSL2 mirrored networking (Win11 22H2+) or running the script natively on Windows; the Win10 portproxy doesn't cover the LCU's dynamic port
-- ❌ ARAM / non-SR mode awareness — drake timers and matchup notes still render even when irrelevant
+- Champ select notes on Windows 10 (needs Win11 mirrored networking or native Windows Python)
+- ARAM mode awareness (drake/baron timers still render in ARAM)
 
 ### Planned
-- 📌 **Text-to-speech** for coach output. Win10 SAPI from WSL is the easiest path:
-  ```bash
-  powershell.exe -NoProfile -Command "(New-Object -ComObject SAPI.SpVoice).Speak('text')"
-  ```
-  Approach: add a `speak` field to the coach JSON schema (TTS-optimized 1-sentence summary, ≤80 chars), fire it via a background thread on each successful call, interrupt previous speech when new event triggers. Higher-quality alternatives later: ElevenLabs (~$1–2/game) or OpenAI TTS (~$0.10/game). See `tools/README.md` for details when implemented.
-- 📌 **Add more champion notes.** Currently `mundo/` and `sivir/`. Pattern is documented above.
-- 📌 **ARAM-aware coach.** Detect `gameData.gameMode == 'ARAM'`, skip drake/baron timers, swap to ARAM-specific prompt focused on poke/all-in/cooldown windows.
-- 📌 **Mute hotkey** for the coach (relevant once TTS lands — silent mute mid-game).
+- More champion folders
+- ARAM-aware coach (skip drake/baron timers, use ARAM-specific prompt)
+- Mute hotkey
 
 ## Troubleshooting
 
-**Script shows "WAITING" forever even though League is open**
-You're not actually loaded into a match (the Live Client API only runs during gameplay, not in lobby/champ select/loading/post-game). Wait until you're on the map. If still WAITING in-match: from Admin PowerShell, `netstat -an | findstr "LISTENING" | findstr ":2999"` — should show `127.0.0.1:2999 LISTENING` plus your portproxy listener. If the Windows-side listener is missing, Vanguard or another anti-cheat may be suppressing it; verify by hitting `https://127.0.0.1:2999/liveclientdata/allgamedata` in a Windows browser.
-
-**Live API connects but champ select doesn't (or vice versa)**
-On Win10, champ select isn't supported with the basic portproxy setup — the LCU port is dynamic. Either upgrade to Win11 + mirrored networking, or run the script natively on Windows (install Python on the Windows side and pass `--lockfile "C:\Riot Games\League of Legends\lockfile"`).
+**Script shows "WAITING" forever in-game**
+From Admin PowerShell: `netstat -an | findstr "LISTENING" | findstr ":2999"` — should show `127.0.0.1:2999 LISTENING`. If missing, Vanguard may be suppressing the API listener. Verify by hitting `https://127.0.0.1:2999/liveclientdata/allgamedata` in a Windows browser mid-match.
 
 **Coach disabled at startup**
-Either `pip install anthropic` is missing, or `LEEG_ANTHROPIC_API_KEY` isn't set in the shell that launched `leeg`. Re-run `source ~/.bashrc` after setting the key, then relaunch.
+Either `pip install anthropic` is missing or `ANTHROPIC_API_KEY` isn't exported in the current shell. Run `source ~/.bashrc` and relaunch.
 
-**"Cannot find …/matchups.md"**
-The `--champ` value doesn't match a folder under `leeg/`. Check spelling.
+**"Cannot find .../matchups.md"**
+The `--champ` value doesn't match a folder under the repo root. Check spelling.
 
-**Champion index says 0 entries on startup**
-CommunityDragon is unreachable (network down, or its CDN refused the request). The script still runs — IDs just show as `#<id>` instead of names.
+**Champion index shows 0 entries**
+CommunityDragon is unreachable. The script still runs — item IDs just show as `#<id>` instead of names.
+
+**Vanguard blocks the API**
+If `League of Legends.exe` is running but nothing listens on `127.0.0.1:2999` mid-match, Vanguard is suppressing the Live API listener. No clean tooling workaround — try restarting the client.
