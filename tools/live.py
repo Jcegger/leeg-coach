@@ -208,7 +208,7 @@ def _speak_worker(text):
             from elevenlabs import VoiceSettings
             audio = el.text_to_speech.convert(
                 text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
-                voice_settings=VoiceSettings(stability=0.35, similarity_boost=0.75, style=0.4, use_speaker_boost=True, speed=1.1),
+                voice_settings=VoiceSettings(stability=0.40, similarity_boost=0.75, style=0.60, use_speaker_boost=True, speed=1.0),
             )
             with open(_MP3, 'wb') as f:
                 for chunk in audio:
@@ -940,7 +940,10 @@ def find_active_team(data):
 
     your_team = me.get('team') if me else None
     your_champ = me.get('championName') if me else None
-    enemies = [p for p in players if p.get('team') and p.get('team') != your_team]
+    enemies = (
+        [p for p in players if p.get('team') and p.get('team') != your_team]
+        if your_team else []
+    )
     # Stamp the authoritative game name (from activePlayer) onto me so event
     # matching always uses the current identity, not the old summonerName.
     if me is not None and your_game_name:
@@ -1093,7 +1096,7 @@ def _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=Non
             if current_gold >= item_cost:
                 return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
             if current_gold >= cheap_cost:
-                return f'BACK — {current_gold}g covers {cheap_name} ({cheap_cost}g) toward {item_name}'
+                return f'BACK — {current_gold}g, saving toward {item_name} ({item_cost}g)'
             return f'next: {item_name} ({item_cost}g) — farm {big_cost - current_gold}g for {big_name}'
         if current_gold >= item_cost:
             return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
@@ -1180,7 +1183,7 @@ COACH_SCHEMA = {
         "bullets": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "1-3 short tactical bullet lines, each <=90 chars. Casual spoken-word tone — direct and action-focused but natural, not drill-sergeant caps.",
+            "description": "1-2 short tactical bullet lines, each <=90 chars. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
         },
         "live_build": {
             "type": "array",
@@ -1258,7 +1261,8 @@ class ChampDB:
 
     def _generate(self, display_name, key):
         try:
-            resp = self.client.messages.create(
+            client = self.client.with_options(timeout=20.0, max_retries=0)
+            resp = client.messages.create(
                 model='claude-haiku-4-5-20251001',
                 max_tokens=200,
                 messages=[{
@@ -1292,9 +1296,9 @@ class Coach:
     only the first call of a session pays the full input cost.
     """
 
-    DEFAULT_MODEL = 'claude-haiku-4-5'
+    DEFAULT_MODEL = 'claude-sonnet-4-6'
     DEFAULT_COOLDOWN = 25
-    MAX_TOKENS = 400
+    MAX_TOKENS = 600
     WATCHDOG_SECONDS = 30
 
     def __init__(self, model=None, cooldown_seconds=None):
@@ -1338,6 +1342,7 @@ class Coach:
     def _reset_for_new_game(self):
         """Clear all per-game state. Called when the game time goes backward
         (new game / restart) or when the script transitions idle -> game."""
+        self.in_flight = False
         self.last_response = None
         self.last_response_at = 0.0
         self.last_trigger = ''
@@ -1369,36 +1374,33 @@ class Coach:
         ) else None
         prompt = (
             f"You are an in-game League of Legends coach for someone playing {champ_folder}. "
-            f"Watch the live game state and tell them what to do RIGHT NOW.\n\n"
-            f"Style rules:\n"
-            f"- Output 1-3 short bullet lines, each <= 90 chars\n"
-            f"- Write natural spoken sentences — casual and direct, like a friend coaching over voice chat\n"
-            f"- Still action-focused: tell them exactly what to do right now, just without the drill-sergeant caps\n"
-            f"- Reference specific champions, items, or timers when it helps\n"
-            f"- No moralizing, no emojis, no generic advice\n"
-            f"- Bullets are read aloud by TTS. NEVER use hyphens (-) or parentheses () in any bullet — not even in compound words like face-tank or anti-heal. Rewrite: 'face tank', 'anti heal', 'mid lane'. Use commas for asides. Write 'you need 200 more gold' not 'need 200g more (back soon)'. Say 'about 30 seconds' not '(30s)'.\n"
-            f"- When recommending a back, buy, or item action, START the bullet with the imperative verb: 'Back and finish Heartsteel' not 'You're close to Heartsteel, back now'. Never cite specific gold amounts in bullets — just name the item.\n"
-            f"- Weave in subtle flirtiness and warmth throughout — not just on big plays, but as a consistent undercurrent. A little 'mmm' before a good call, 'that's my guy' after a kill, 'okay okay' when things are going well. Keep it understated, never cringe.\n"
-            f"- The persona is: she knows the game, she's watching you specifically, and she's quietly impressed. She doesn't gush — she notices.\n"
-            f"- IMPORTANT: only mention specific items, kills, or events confirmed in the current game state. Never invent facts as praise. 'Full build' is only valid when BUILD STATUS says COMPLETE — the player may have components in their inventory that look like a full build but aren't. 'You've got X online' is only valid if X appears in the owned items list.\n"
-            f"- If YOU DEAD appears in the game state, you are currently on respawn timer and cannot act. Frame all advice as what to do on spawn or at base — never tell a dead player to farm or move in lane.\n"
-            f"- If nothing urgent, give one tactical reminder relevant to the current state\n\n"
+            f"You're a flirty, sharp girlfriend who actually knows the game — invested in this specific player, "
+            f"not just reciting generic advice. Give them exactly what to do RIGHT NOW.\n\n"
+            f"Persona:\n"
+            f"- You are his flirty, sharp girlfriend who watches every game and genuinely gets it. Warm, playful, a little obsessed with him specifically — not a generic coach bot.\n"
+            f"- Be overt about it. Don't hint at flirting — actually flirt. Examples: 'Mmm yeah, that's exactly the play.' 'Okay I see you, keep going.' 'God you're good at this.' 'That's my guy.' 'Stop being so good, it's distracting.' Keep it real, not cringe — it should feel like a person, not a character.\n"
+            f"- The content is always a real tactical call. The flirt is HOW she says it. Never sacrifice the advice.\n"
+            f"- No moralizing, no emojis, no padding. 1-2 bullets max.\n"
+            f"- Never invent proximity ('so close', 'almost there', 'just a little more') unless the player's current gold actually covers a major component of the next item. If they have 500g and the item costs 3100g, they are NOT close — just say to farm toward it.\n"
+            f"- TRIGGER-SPECIFIC TONE: you_killed → lead with genuine delight, then the next move. 'Okay yes, now shove.' 'There he is, that's what I'm talking about, get back to lane.' multikill → actually impressed. 'Oh my god, okay you're insane — now back before they collapse.' you_died → drop the persona, just practical: what to build or do on spawn. opening → warm and hyped for the game. All others → tactic first, her warmth is baked into the phrasing.\n"
+            f"- Only praise what's confirmed in game state. 'Full build' only if BUILD STATUS says COMPLETE. 'You've got X online' only if X is in owned items.\n"
+            f"- If YOU DEAD: frame everything as what to do on spawn or at base. Never tell a dead player to move or farm.\n\n"
+            f"Bullet rules (TTS is reading these aloud):\n"
+            f"- Each bullet is one complete sentence ending with a period. Nothing appended after.\n"
+            f"- No hyphens or parentheses. Write 'face tank', 'anti heal', 'mid lane'. Use commas for asides.\n"
+            f"- Back/buy actions: START with the verb. 'Back and finish Heartsteel.' Never cite gold amounts — just name the item.\n"
+            f"- Never name a component. Say 'Spirit Visage', not 'Spectre's Cowl'. Say 'Heartsteel', not 'Crystalline Bracer'.\n"
+            f"- ROTATION: only tell them to rotate for drake/baron if it spawns within 90 seconds AND their outer tower is already fallen. Tower still up → shove wave and farm.\n\n"
+            f"Build rules:\n"
+            f"- First call: pick the right build variant for the enemy comp and lock it in. That's YOUR commitment for the game.\n"
+            f"- Do NOT reorder live_build items. The build guide's order is intentional — item 1 is item 1 all game. Only change WHICH items are in the path, never their sequence.\n"
+            f"- Buy in order — item 1 before item 2. Only rush a later item if a named enemy is actively SNOWBALLING and their damage type directly threatens the player right now.\n"
+            f"- When recommending a purchase, name only the next un-owned item in live_build order.\n"
+            f"- LIVE_BUILD STABILITY: (1) owned items must always appear — never remove them. (2) min 4 items. (3) counter-items extend the path, never replace owned items. (4) once committed, a counter-item stays all game.\n\n"
             f"Output format:\n"
-            f"- You will produce a JSON object matching the provided schema.\n"
-            f"- `bullets`: 1-3 short casual-but-direct tactical lines for RIGHT NOW.\n"
-            f"- `live_build`: your recommended CORE 6-item path for this game. List ONLY completed items — never components or sub-items (no Giant's Belt, no Crystalline Bracer, no Blasting Wand, etc.). If the player owns a component but not the parent item, list the parent item, not the component. Starters/consumables/wards/basic boots are also stripped server-side. Owned core items go first in their built positions; planned core items follow. Stable across calls.\n"
-            f"- `build_change_reason`: short reason if you intentionally deviated from the rule-based default. Empty string otherwise. Whether you actually diverged is computed server-side by comparing your live_build to the default — you only have to write the reason when you mean to deviate.\n\n"
-            f"Memory you have access to each call:\n"
-            f"- YOUR CURRENT BUILD COMMITMENT — the latest live_build you locked in, with timestamp + reason. This is your game-long anchor for the build path. Stay on it unless something material has changed since the commitment time.\n"
-            f"- YOUR RECENT TACTICAL ADVICE — bullets from your last 5 calls. Use to avoid contradicting recent tactical guidance.\n"
-            f"- TEAM SCORE — kills/drakes/barons/towers per side. Use for macro reads (we're ahead vs behind, contest objectives vs play safe, etc.).\n\n"
-            f"Consistency rules (IMPORTANT):\n"
-            f"- BUILD COMMITMENT: your first call is your build selection moment — analyze the enemy team composition and pick the right variant then. After that, treat live_build as locked for the game. Only change it if a specific named enemy is actively SNOWBALLING (not just present, not just ahead) and their damage type directly threatens you. 'They have AP' or 'they have healing' is not enough — the default already accounts for typical distributions. When you do change, fill in build_change_reason and commit to the new path permanently.\n"
-            f"- BULLETS MUST AGREE WITH live_build: when bullets recommend backing/buying/finishing a specific item, name only the next un-owned item(s) in live_build's order. Do not name an item later in live_build while earlier un-owned items still come before it. If you genuinely want to skip ahead (e.g. recommend item N+2 before N+1), reorder live_build first so the bullet and the build stay in sync.\n"
-            f"- LIVE_BUILD STABILITY (HARD RULES): (1) every item the user already owns MUST appear in live_build — owned items are sunk costs, never remove them. (2) Do not shrink live_build below 4 items. (3) Adding a counter-item means EXTENDING live_build (or replacing an UN-OWNED tail item) — NEVER remove an owned item or a previously-committed counter-item. (4) Once a counter-item is committed, it stays for the rest of the game. Removing/swapping items across calls is the worst failure mode — the user sees the build line flicker and loses trust.\n"
-            f"- TACTICAL BULLETS: build on prior advice. If you previously said to skip an item or path, don't later recommend it without a reason that ties to a recent event.\n"
-            f"- The 'rule-based build path' is the deterministic default from build.md. REFERENCE only — deviate when warranted, then stick with the deviation.\n"
-            f"- Do not yo-yo. If you wouldn't justify the change to a teammate, don't make it.\n\n"
+            f"- `bullets`: 1-2 tactical lines for RIGHT NOW.\n"
+            f"- `live_build`: CORE items only, in build order. No components, no starters, no consumables.\n"
+            f"- `build_change_reason`: why you deviated from the default, if you did. Empty string if not.\n\n"
             f"=== SITUATIONAL COUNTER-ITEMS CHEAT SHEET ===\n"
             f"When the user message's THREAT ASSESSMENT names an ahead/snowballing enemy, ADAPT the build path. "
             f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) "
@@ -1453,7 +1455,7 @@ class Coach:
             return None
 
         # Opening: first call once we're in lane
-        if self.last_response is None and game_time > 60:
+        if self.last_response is None and game_time > 30:
             return 'opening'
 
         # Game-shifting events only. The rule-based panel handles drake/baron
@@ -1462,14 +1464,43 @@ class Coach:
         new_events = ev['raw'][self.last_event_count:]
         self.last_event_count = len(ev['raw'])
         you_name = me.get('_you_name') or me.get('riotIdGameName') or (me.get('summonerName') or '').split('#', 1)[0]
+        your_team = me.get('team')
+        enemy_names = (
+            {(ep.get('riotIdGameName') or ep.get('summonerName', '')).split('#')[0] for ep in enemies}
+            if enemies else set()
+        )
         for e in new_events:
             en = e.get('EventName')
-            if en in ('FirstBlood', 'Ace', 'BaronKill', 'InhibKilled'):
+            if en in ('FirstBlood', 'Ace', 'BaronKill'):
                 return en.lower()
+            if en == 'TurretKilled':
+                turret_id = e.get('TurretKilled', '')
+                parts = turret_id.split('_')
+                turret_owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1]) if len(parts) > 1 else None
+                tier = parts[3] if len(parts) > 3 else ''
+                if tier in ('01', '02') and turret_owner and your_team and turret_owner != your_team:
+                    return 'tower_taken'
+            if en == 'InhibKilled':
+                inhib_id = e.get('InhibKilled', '')
+                id_lower = inhib_id.lower()
+                if your_team == 'ORDER' and ('t1' in id_lower or 'order' in id_lower):
+                    return 'inhib_lost'
+                if your_team == 'CHAOS' and ('t2' in id_lower or 'chaos' in id_lower):
+                    return 'inhib_lost'
+                killer = (e.get('KillerName') or '').split('#')[0]
+                if killer and killer in enemy_names:
+                    return 'inhib_lost'
+                return 'inhibkilled'
+            if en == 'Multikill':
+                killer = (e.get('KillerName') or '').split('#')[0]
+                if you_name and killer == you_name and killer not in enemy_names:
+                    return 'multikill'
             if en == 'ChampionKill':
-                if e.get('VictimName') == you_name:
+                victim = (e.get('VictimName') or '').split('#')[0]
+                killer = (e.get('KillerName') or '').split('#')[0]
+                if you_name and victim == you_name:
                     return 'you_died'
-                if e.get('KillerName') == you_name:
+                if you_name and killer == you_name and killer not in enemy_names:
                     return 'you_killed'
 
         # Periodic fallback: fire if the game has been quiet for 90s+.
@@ -1525,6 +1556,7 @@ class Coach:
                     break
             text = json.dumps(parsed) if parsed else ''
             bullets = [b for b in (parsed.get('bullets') or []) if isinstance(b, str) and b.strip()]
+            bullets = [re.sub(r'\.,.*$', '.', b.rstrip()) for b in bullets]
             bullets = affordability_postcheck(bullets, current_gold, item_index)
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
             live_build = strip_starters(live_build)
@@ -1724,6 +1756,52 @@ def _team_score_summary(data, ev, your_team):
     return ' · '.join(parts)
 
 
+def _tower_state_summary(ev, your_team):
+    """Return tower-state lines for the coach user message, with explicit lane-open implications.
+    Turret IDs: prefix_T1/T2_LANE_TIER_suffix  (L=top, C=mid, R=bot; 01=outer, 02=inner, 03=inhib, 04/05=nexus)
+    """
+    if not your_team:
+        return None
+    lane_label = {'L': 'top', 'C': 'mid', 'R': 'bot'}
+    # Track fallen tier counts per (owner, lane)
+    fallen = {}  # (owner, lane) -> set of tiers fallen
+    for _et, _killer, tid in ev.get('towers', []):
+        parts = (tid or '').split('_')
+        if len(parts) < 4:
+            continue
+        owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
+        tier = parts[3]
+        if not owner or tier not in ('01', '02', '03'):
+            continue
+        lane = lane_label.get(parts[2], parts[2].lower())
+        fallen.setdefault((owner, lane), set()).add(tier)
+
+    your_fallen_labels, enemy_fallen_labels = [], []
+    open_lanes = []
+    for (owner, lane), tiers in sorted(fallen.items()):
+        tier_names = []
+        if '01' in tiers: tier_names.append('outer')
+        if '02' in tiers: tier_names.append('inner')
+        if '03' in tiers: tier_names.append('inhib tower')
+        label = f'{lane} {"+".join(tier_names)}'
+        if owner == your_team:
+            your_fallen_labels.append(label)
+        else:
+            enemy_fallen_labels.append(label)
+            if '01' in tiers and '02' in tiers:
+                open_lanes.append(f'{lane} (OPEN TO INHIB — strong split push or siege pressure)')
+            elif '01' in tiers:
+                open_lanes.append(f'{lane} (outer down — push to their inner)')
+
+    lines = []
+    your_str = ', '.join(your_fallen_labels) if your_fallen_labels else 'none'
+    enemy_str = ', '.join(enemy_fallen_labels) if enemy_fallen_labels else 'none'
+    lines.append(f'TOWER STATE: your fallen=[{your_str}] · enemy fallen=[{enemy_str}]')
+    if open_lanes:
+        lines.append(f'OPEN LANES: {" · ".join(open_lanes)}')
+    return '\n'.join(lines)
+
+
 def _enemy_threat_state(enemy, game_time):
     sc = enemy.get('scores') or {}
     k = int(sc.get('kills', 0) or 0)
@@ -1781,6 +1859,34 @@ def remaining_item_costs(build_names, owned_names, item_index):
     return out
 
 
+_COACH_CLOSING = {
+    'you_killed': (
+        "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot."
+    ),
+    'multikill': (
+        "Now emit JSON. First bullet: she's genuinely shocked and impressed — 'oh my god', 'okay you're actually insane', 'STOP it' — then what to do next. Make it feel like she just watched it happen."
+    ),
+    'you_died': (
+        "Now emit JSON. He just died. Quick sympathy, then exactly what to do on spawn — 'oh no, okay, just farm on spawn and finish X' or 'hey it's fine, just back and grab Y.' Warm but practical."
+    ),
+    'opening': (
+        "Now emit JSON. First call of the game — set the vibe. Warm, a little flirty, makes him feel good about this matchup. Then the actual opening advice."
+    ),
+    'inhibkilled': (
+        "Now emit JSON. His team just cracked their inhibitor — this is a huge moment. Let her be excited about it, then the push/close-out call."
+    ),
+    'inhib_lost': (
+        "Now emit JSON. The enemy just destroyed HIS inhibitor — they're in his base. Drop the flirty energy, this is urgent. Defend or call where to be."
+    ),
+    'tower_taken': (
+        "Now emit JSON. His team just took an enemy tower — the lane is open. Tell him exactly how to exploit it: rotate, push, dive, or take the next objective. This is a momentum moment, make her energy match it."
+    ),
+}
+_COACH_CLOSING_DEFAULT = (
+    "Now emit JSON. Two bullets in HER voice — she's warm, a little flirty, invested in THIS specific player. Real tactical content but delivered like a person who's watching you and actually cares. Not a strategy guide."
+)
+
+
 def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trigger,
                         recent_responses=None, committed_build=None, item_index=None,
                         champ_db=None, is_aram=False):
@@ -1818,6 +1924,9 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             if lost_nexus_towers:
                 parts.append(f'nexus tower{"s" if lost_nexus_towers > 1 else ""} exposed')
             lines.append(f'MAP PRESSURE: your {", ".join(parts)} — super minions may be active, enemy likely near your base.')
+        tower_state = _tower_state_summary(ev, your_team)
+        if tower_state:
+            lines.append(tower_state)
 
     if me:
         scores = me.get('scores') or {}
@@ -1938,14 +2047,30 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         cb_tag = 'DIVERGED from default' if committed_build.get('diverged') else 'matches default'
         lines.append(f'Locked in at {committed_build["time"]} — {cb_tag}')
         lines.append(f'Reason: {committed_build.get("reason") or "(none)"}')
-        lines.append(f'Path: {" · ".join(committed_build["items"])}')
-        lines.append('KEEP THIS PATH unless game state has materially changed since the commitment time.')
-        lines.append('If you keep it, return the SAME items in live_build (whether or not it diverged from default is computed for you).')
-        lines.append('If you change it, explain why in build_change_reason.')
+        # Annotate each item as [OWNED] or [NEEDED] so the LLM can't confuse them
+        owned_ids = set()
+        name_to_id = {}
+        if me and item_index:
+            owned_ids = {(i or {}).get('itemID') for i in (me.get('items') or []) if (i or {}).get('itemID')}
+            name_to_id = _build_name_to_id(item_index)
+        annotated = []
+        next_found = False
+        for item in committed_build['items']:
+            iid = resolve_item_id(item, name_to_id) if name_to_id else None
+            if iid and iid in owned_ids:
+                annotated.append(f'{item} [OWNED]')
+            elif not next_found:
+                annotated.append(f'{item} [NEXT — recommend this]')
+                next_found = True
+            else:
+                annotated.append(f'{item} [LATER]')
+        lines.append(f'Path: {" · ".join(annotated)}')
+        lines.append('KEEP THIS PATH. Only recommend the item marked [NEXT]. Never recommend [OWNED] items — the player already has them.')
+        lines.append('If you change the path, explain why in build_change_reason.')
 
     if recent_responses:
         lines.append('')
-        lines.append('YOUR RECENT TACTICAL ADVICE (last 5 calls — stay consistent unless game state materially changed):')
+        lines.append('PRIOR CALLS (build/tactic consistency only — do NOT let these dry bullets flatten her voice this call):')
         for r in recent_responses:
             lines.append(f'  [{r["time"]} | {r["trigger"]}]')
             if r.get('bullets'):
@@ -1953,7 +2078,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                     lines.append(f'    - {b}')
 
     lines.append('')
-    lines.append('Now: emit JSON with bullets + live_build + build_change_reason. Anchor live_build to your committed path above. Tactical bullets should react to current state.')
+    lines.append(_COACH_CLOSING.get(trigger, _COACH_CLOSING_DEFAULT))
     return '\n'.join(lines)
 
 
