@@ -74,6 +74,75 @@ _AP = (
 ).split()
 _MIXED = "corki kogmaw ornn poppy shaco shen thresh".split()
 CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed' for c in _MIXED}}
+
+# Comp-aware threat tags. A champ can carry multiple tags (Warwick = HEALING +
+# HARD-CC). Drives the TEAM THREATS block in the coach user message — the LLM
+# uses these to justify slot-3/slot-4 counter-item pivots. Alias forms inline,
+# matching the CHAMP_DAMAGE convention (Wukong needs both wukong+monkeyking,
+# Renata needs both renata+renataglasc — Live API may surface either).
+_HEALING = (
+    "aatrox akshan diana drmundo fiora illaoi janna karma nami "
+    "renata renataglasc senna sona soraka swain sylas trundle "
+    "vladimir volibear warwick yuumi"
+).split()
+_HARD_CC = (
+    "alistar amumu annie ashe braum cassiopeia galio leona lillia "
+    "lissandra malphite malzahar maokai mordekaiser morgana nautilus "
+    "ornn rakan rell sejuani sion skarner tahmkench thresh urgot "
+    "veigar warwick zoe"
+).split()
+_ATTACK_SPEED = (
+    "aphelios belveth jax jinx kaisa kayle kindred kogmaw masteryi "
+    "quinn samira tristana tryndamere twitch vayne xayah yasuo yone"
+).split()
+_TANK = (
+    "alistar amumu chogath drmundo galio ksante malphite maokai "
+    "nautilus ornn poppy rammus rell sejuani shen sion skarner "
+    "tahmkench taric volibear zac"
+).split()
+_ASSASSIN = (
+    "akali ekko evelynn fizz katarina khazix leblanc naafiri nocturne "
+    "pyke qiyana rengar shaco talon viego zed"
+).split()
+_CRIT = (
+    "aphelios ashe caitlyn jhin jinx kaisa kindred missfortune samira "
+    "sivir tristana twitch vayne xayah yasuo yone zeri"
+).split()
+CHAMP_THREAT_TAGS = {}
+for _tag, _list in (('HEALING', _HEALING), ('HARD-CC', _HARD_CC),
+                    ('ATTACK-SPEED', _ATTACK_SPEED), ('TANK', _TANK),
+                    ('ASSASSIN', _ASSASSIN), ('CRIT', _CRIT)):
+    for _c in _list:
+        CHAMP_THREAT_TAGS.setdefault(_c, []).append(_tag)
+del _tag, _list, _c
+
+# Items that amp healing dealt to enemies. Used to promote borderline healing
+# threats (Aatrox + Bloodthirster, Vladimir + Riftmaker) so a single fed healer
+# trips stacked_healing. Conservative on purpose — self-amp-only items
+# (Spirit Visage, Death's Dance) do NOT promote since they don't change the
+# team's healing output. Resolved against item_index by display name at runtime.
+HEALING_AMP_ITEMS = {"Bloodthirster", "Ravenous Hydra", "Riftmaker", "Bloodmail"}
+
+# Items commonly cited as power spikes per role. Drives the SPIKES IN PLAY
+# annotation in the coach user message — when an enemy holds one of these,
+# their kill threat / siege power is meaningfully higher and the coach should
+# weight macro decisions accordingly. Soft signal: missing entries just mean
+# no annotation, no crash. Tune as patches land.
+POWER_SPIKE_ITEMS = {
+    # ADC
+    "Infinity Edge", "The Collector", "Yun Tal Wildarrows", "Phantom Dancer",
+    "Bloodthirster", "Lord Dominik's Regards", "Mortal Reminder",
+    # Mage
+    "Luden's Companion", "Stormsurge", "Liandry's Torment", "Shadowflame",
+    "Rabadon's Deathcap",
+    # Bruiser / fighter
+    "Eclipse", "Stridebreaker", "Hullbreaker", "Sundered Sky",
+    # Tank
+    "Heartsteel", "Sunfire Aegis", "Jak'Sho, The Protean", "Spirit Visage",
+    "Kaenic Rookern",
+    # Assassin
+    "Hubris", "Voltaic Cyclosword", "Edge of Night", "Profane Hydra",
+}
 TIER_COLOR = {
     'Extreme': '\033[91m',  # red
     'Major':   '\033[93m',  # yellow
@@ -299,9 +368,13 @@ def load_champ_data(champ_folder, cache):
         return cache[champ_folder]
     matchups_path = LEEG_ROOT / champ_folder / 'matchups.md'
     build_path = LEEG_ROOT / champ_folder / 'build.md'
+    playbook_path = LEEG_ROOT / champ_folder / 'playbook.md'
     cache[champ_folder] = {
         'matchups': parse_matchups(matchups_path) if matchups_path.exists() else {},
         'build_variants': parse_build_variants(build_path) if build_path.exists() else [],
+        'swaps': parse_swap_rules(build_path),
+        'win_conditions': parse_playbook_section(playbook_path, 'Win conditions'),
+        'side_selection': parse_playbook_section(playbook_path, 'Side selection'),
     }
     return cache[champ_folder]
 
@@ -367,6 +440,104 @@ def compute_damage_profile(enemies, item_index=None):
     return label, ap, ad, known, overrides
 
 
+def compute_team_threats(enemies, item_index=None):
+    """Tag enemies by archetype (HEALING / HARD-CC / ATTACK-SPEED / TANK /
+    ASSASSIN / CRIT) for the coach's TEAM THREATS block. Returns a dict with
+    `tags` (tag -> [display names]), `counts`, roll-up `flags`, and
+    `item_promotions` (champs whose healing items justify treating a single
+    healer as stacked)."""
+    tags = {}
+    item_promotions = []
+
+    healing_amp_ids = set()
+    if item_index:
+        for iid, info in item_index.items():
+            if iid >= 200000:  # ARAM variants
+                continue
+            if (info or {}).get('name') in HEALING_AMP_ITEMS:
+                healing_amp_ids.add(iid)
+
+    for e in enemies:
+        name = e.get('championName') or ''
+        if not name:
+            continue
+        norm = normalize(name)
+        threat_tags = CHAMP_THREAT_TAGS.get(norm) or []
+        if 'HEALING' in threat_tags and healing_amp_ids:
+            for it in (e.get('items') or []):
+                iid = (it or {}).get('itemID')
+                if iid in healing_amp_ids:
+                    info = item_index.get(iid) or {}
+                    item_promotions.append((name, 'HEALING', info.get('name', '?')))
+                    break
+        for tag in threat_tags:
+            tags.setdefault(tag, []).append(name)
+
+    counts = {tag: len(v) for tag, v in tags.items()}
+    flags = {
+        'stacked_healing': counts.get('HEALING', 0) >= 2 or bool(item_promotions),
+        'attack_speed_stacked': counts.get('ATTACK-SPEED', 0) >= 2,
+        'heavy_hard_cc': counts.get('HARD-CC', 0) >= 2,
+        'has_tank': counts.get('TANK', 0) >= 1,
+        'has_assassin': counts.get('ASSASSIN', 0) >= 1,
+        'fed_crit': counts.get('CRIT', 0) >= 1,
+    }
+    return {'tags': tags, 'counts': counts, 'flags': flags, 'item_promotions': item_promotions}
+
+
+def compute_phase(game_time, players):
+    """Game phase label for the coach user message: 'early' / 'mid' / 'late'.
+    Whichever threshold trips first wins (a fast-snowballing game can hit late
+    before 25min). Avg level computed from `players` (Live API allPlayers)."""
+    levels = [int(p.get('level') or 0) for p in (players or []) if p.get('level')]
+    avg_level = (sum(levels) / len(levels)) if levels else 0
+    if game_time >= 25 * 60 or avg_level >= 14:
+        return 'late'
+    if game_time >= 14 * 60 or avg_level >= 9:
+        return 'mid'
+    return 'early'
+
+
+def compute_gold_lead(your_team, players, item_index):
+    """Sum item gold per team. Returns (your_total, enemy_total). Live API
+    doesn't expose enemy total gold — item gold is the better macro proxy
+    anyway (gold already converted to power)."""
+    if not item_index or not players or not your_team:
+        return (0, 0)
+    your_total = enemy_total = 0
+    for p in players:
+        team = p.get('team')
+        if team not in ('ORDER', 'CHAOS'):
+            continue
+        team_total = 0
+        for it in (p.get('items') or []):
+            iid = (it or {}).get('itemID')
+            if not iid or iid >= 200000:  # ARAM variants
+                continue
+            cost = (item_index.get(iid) or {}).get('cost') or 0
+            team_total += cost
+        if team == your_team:
+            your_total += team_total
+        else:
+            enemy_total += team_total
+    return (your_total, enemy_total)
+
+
+def has_power_spike_items(items, item_index):
+    """Return ordered list of POWER_SPIKE display names this enemy holds."""
+    if not items or not item_index:
+        return []
+    out = []
+    for it in items:
+        iid = (it or {}).get('itemID')
+        if not iid or iid >= 200000:
+            continue
+        name = (item_index.get(iid) or {}).get('name')
+        if name and name in POWER_SPIKE_ITEMS:
+            out.append(name)
+    return out
+
+
 _SWAP_LINE_RE = re.compile(r'^\s*-\s*(.+?)\s+over\s+(.+?)\s+[—–-]+\s+(.+)$')
 
 
@@ -383,6 +554,36 @@ def _parse_situational_swaps(text):
         if m:
             swaps.append((m.group(1).strip(), m.group(2).strip(), m.group(3).strip()))
     return swaps
+
+
+def parse_swap_rules(build_path):
+    """Read situational swap triples from a champion's build.md path. Used by
+    load_champ_data so the coach user message can surface the player champ's
+    own swap rules without re-parsing every render."""
+    if not build_path or not build_path.exists():
+        return []
+    return _parse_situational_swaps(build_path.read_text())
+
+
+def parse_playbook_section(playbook_path, header):
+    """Return the body under '## <header>' up to the next '## ', stripped.
+    Empty string if file missing or section absent. Header match is exact
+    (case-insensitive) on the text after '## '."""
+    if not playbook_path or not playbook_path.exists():
+        return ''
+    target = (header or '').strip().lower()
+    if not target:
+        return ''
+    out, in_section = [], False
+    for line in playbook_path.read_text().splitlines():
+        if line.startswith('## '):
+            if in_section:
+                break
+            in_section = line[3:].strip().lower() == target
+            continue
+        if in_section:
+            out.append(line)
+    return '\n'.join(out).strip()
 
 
 def _swap_damage_label(condition):
@@ -825,6 +1026,39 @@ def format_item_reference(item_index, extra_names=None):
             out.append(f'  {nm} ({cost}g) <= {" + ".join(cs)}')
         else:
             out.append(f'  {nm} ({cost}g, basic)')
+    return out
+
+
+_THREAT_TAG_ORDER = ('HEALING', 'HARD-CC', 'ATTACK-SPEED', 'TANK', 'ASSASSIN', 'CRIT')
+
+
+def format_team_threats(threats):
+    """Render the TEAM THREATS block from compute_team_threats output. Returns
+    [] when no enemies were tagged so the caller can skip the block entirely."""
+    if not threats or not threats.get('tags'):
+        return []
+    flags_active = [k.replace('_', '-') for k, v in (threats.get('flags') or {}).items() if v]
+    out = []
+    if flags_active:
+        out.append('TEAM THREATS: ' + ' · '.join(flags_active))
+    else:
+        out.append('TEAM THREATS:')
+    for tag in _THREAT_TAG_ORDER:
+        names = (threats['tags'] or {}).get(tag)
+        if names:
+            out.append(f'  {tag} ({len(names)}): {", ".join(names)}')
+    for champ, tag, item in threats.get('item_promotions') or []:
+        out.append(f'  Item-amped: {champ} building {item} (still {tag.lower()} threat)')
+    return out
+
+
+def format_swap_rules(swaps):
+    """Render the YOUR SWAP OPTIONS block from parse_swap_rules output."""
+    if not swaps:
+        return []
+    out = ['YOUR SWAP OPTIONS (from build.md):']
+    for new_item, old_item, condition in swaps:
+        out.append(f'  {new_item} over {old_item} — {condition}')
     return out
 
 
@@ -1290,6 +1524,119 @@ class ChampDB:
                 self._pending.discard(key)
 
 
+class MatchupDB:
+    """Per-pair matchup notes (player champ + enemy champ), lazily generated by
+    Haiku and cached to disk. Mirrors ChampDB's design — same lock/load/save/
+    background-thread pattern, different key (player_norm + '__' + enemy_norm).
+
+    Surfaces in the coach user message as MATCHUP DATA: the primary per-pair
+    reference. Hand-written matchups.md remains the supplemental override.
+    Architecture leaves a swap-in point for a future Mobalytics-backed source —
+    only `_generate` would change."""
+
+    _NOTES_PATH = DATA_DIR / 'matchup_notes.json'
+    _SEP = '__'
+
+    def __init__(self, client=None, patch=None):
+        self._lock = threading.Lock()
+        self._notes = {}   # f'{player_norm}__{enemy_norm}' -> {...}
+        self._pending = set()
+        self.client = client
+        self.patch = patch or 'unknown'
+        self._load()
+
+    def _key(self, player_champ, enemy_champ):
+        p = normalize(player_champ or '')
+        e = normalize(enemy_champ or '')
+        if not p or not e or self._SEP in p or self._SEP in e:
+            return None
+        return f'{p}{self._SEP}{e}'
+
+    def _load(self):
+        if self._NOTES_PATH.exists():
+            try:
+                data = json.loads(self._NOTES_PATH.read_text())
+                self._notes = data.get('pairs', {})
+            except Exception:
+                pass
+
+    def _save(self):
+        DATA_DIR.mkdir(exist_ok=True)
+        self._NOTES_PATH.write_text(
+            json.dumps({'version': 1, 'pairs': self._notes}, indent=2)
+        )
+
+    def get_note(self, player_champ, enemy_champ):
+        """Return cached pair note string, or None if not yet generated."""
+        key = self._key(player_champ, enemy_champ)
+        if not key:
+            return None
+        with self._lock:
+            entry = self._notes.get(key)
+        return entry['notes'] if entry else None
+
+    def ensure_note_async(self, player_champ, enemy_champ):
+        """Kick off background generation if pair note is missing or 3+ patches stale."""
+        if not self.client:
+            return
+        key = self._key(player_champ, enemy_champ)
+        if not key:
+            return
+        with self._lock:
+            if key in self._pending:
+                return
+            entry = self._notes.get(key)
+            if entry:
+                current = parse_patch(self.patch)
+                stored = parse_patch(entry.get('patch', ''))
+                if current and stored:
+                    stale = (current[1] - stored[1] >= 3) if current[0] == stored[0] else True
+                    if not stale:
+                        return
+                else:
+                    return  # can't compare, keep existing
+            self._pending.add(key)
+        threading.Thread(
+            target=self._generate,
+            args=(player_champ, enemy_champ, key),
+            daemon=True,
+        ).start()
+
+    def _generate(self, player_display, enemy_display, key):
+        try:
+            client = self.client.with_options(timeout=20.0, max_retries=0)
+            resp = client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=250,
+                messages=[{
+                    'role': 'user',
+                    'content': (
+                        f'League of Legends: 4-6 short imperative sentences (max 130 words total) '
+                        f'for a {player_display} player facing {enemy_display}. Cover, in order: '
+                        f'(1) the enemy main threat against {player_display} specifically (kit + lane dynamics), '
+                        f'(2) when the enemy spikes by level/item AND when {player_display} can punish them, '
+                        f'(3) a key exploit window or behavior to bait, '
+                        f'(4) one item or build adjustment {player_display} should consider in this matchup. '
+                        f'No headers, no preamble, no markdown, no emojis. Direct imperative tone, like coaching notes.'
+                    ),
+                }],
+            )
+            notes = resp.content[0].text.strip()
+            with self._lock:
+                self._notes[key] = {
+                    'player_display': player_display,
+                    'enemy_display': enemy_display,
+                    'patch': self.patch,
+                    'generated_at': time.strftime('%Y-%m-%d'),
+                    'notes': notes,
+                }
+                self._pending.discard(key)
+                self._save()
+        except Exception:
+            with self._lock:
+                self._pending.discard(key)
+
+
 class Coach:
     """Calls Claude Haiku 4.5 on significant events to give live coaching.
     System prompt is the champ's matchups.md + build.md, prompt-cached so
@@ -1362,10 +1709,8 @@ class Coach:
         cached_for, cached_prompt = self._system_cache
         if cached_for == champ_folder and cached_prompt:
             return cached_prompt
-        matchups_path = LEEG_ROOT / champ_folder / 'matchups.md'
         build_path = LEEG_ROOT / champ_folder / 'build.md'
         playbook_path = LEEG_ROOT / champ_folder / 'playbook.md'
-        matchups_text = matchups_path.read_text() if matchups_path.exists() else '(no matchup notes)'
         build_text = build_path.read_text() if build_path.exists() else '(no build notes)'
         playbook_raw = playbook_path.read_text() if playbook_path.exists() else ''
         # Only include playbook if it has substantive content beyond markdown headers
@@ -1401,25 +1746,32 @@ class Coach:
             f"- `bullets`: 1-2 tactical lines for RIGHT NOW.\n"
             f"- `live_build`: CORE items only, in build order. No components, no starters, no consumables.\n"
             f"- `build_change_reason`: why you deviated from the default, if you did. Empty string if not.\n\n"
-            f"=== SITUATIONAL COUNTER-ITEMS CHEAT SHEET ===\n"
-            f"When the user message's THREAT ASSESSMENT names an ahead/snowballing enemy, ADAPT the build path. "
-            f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) "
-            f"and slot it where the build guide expects a flex item. Cite the threat in build_change_reason.\n"
-            f"- Heavy-AD bruiser/skirmisher pulling ahead (Illaoi, Aatrox, Warwick, Olaf, Nasus, Yi, Tryndamere, Yorick, Volibear, Sett, Renekton, Camille, Garen, Darius): armor + grievous wounds. Tanks/bruisers: Bramble Vest → Thornmail. Squishies: Tabis, Randuin's vs crit.\n"
-            f"- Heavy-AP threat pulling ahead (Veigar, Syndra, Annie, LeBlanc, Vladimir, Cassiopeia, Kassadin, Diana, Akali): magic resist. Bruisers: Spectre's Cowl → Force of Nature / Spirit Visage (if you have healing). Squishies: Hexdrinker → Maw, Mercury's Treads.\n"
-            f"- Enemy team has stacked healing/lifesteal (Soraka, Yuumi, Aatrox, Warwick, Vladimir, Olaf, Trundle, Sylas, Dr. Mundo): grievous wounds is mandatory by mid-game. AD: Executioner's Calling → Mortal Reminder. AP: Oblivion Orb → Morellonomicon. Bruiser/utility: Chempunk Chainsword.\n"
-            f"- Enemy ADC fed: tanks build Randuin's Omen (cuts crit dmg). Squishies/carries: Lord Dominik's Regards (vs HP stacking).\n"
-            f"- Enemy heavy hard-CC (Malzahar, Skarner, Warwick, Mordekaiser ult, etc.): Mercury's Treads, Silvermere Dawn / Quicksilver Sash, Maw of Malmortius (also gives MR shield).\n"
-            f"- Enemy comp is attack-speed-DEPENDENT (TWO OR MORE of Kog'Maw, Yi, Kayle, late Tryndamere, late Jax with on-hit): tanks may consider Frozen Heart for the AS aura. A single AS bruiser is NOT enough — Jax alone, Yone alone, etc. don't justify it.\n"
+            f"=== SITUATIONAL COUNTER-ITEMS PRINCIPLES ===\n"
+            f"The user message provides TEAM THREATS (tagged enemies by archetype) and YOUR SWAP OPTIONS "
+            f"(situational swaps the build guide author already tuned for {champ_folder}). Treat those as the source "
+            f"of truth for who's a threat and which item to pick; this section is the playbook for WHEN to swap.\n"
+            f"- HEALING tag: grievous wounds becomes mandatory by mid-game (especially when stacked-healing flag is set or when item-amped). AD: Executioner's Calling → Mortal Reminder. AP: Oblivion Orb → Morellonomicon. Bruiser/utility: Chempunk Chainsword. Tanks: Thornmail.\n"
+            f"- HARD-CC tag (heavy-hard-cc flag): Mercury's Treads, Quicksilver Sash / Silvermere Dawn, Maw of Malmortius. Prioritize when 2+ tagged or when a single suppression/long-disable kit (Malzahar, Skarner, Warwick, Mordekaiser) is fed.\n"
+            f"- ATTACK-SPEED tag (only when attack-speed-stacked flag is set, i.e. 2+): tanks may consider Frozen Heart for the AS aura. A single AS bruiser is NOT enough — Jax alone, Yone alone, etc. don't justify it.\n"
+            f"- TANK tag: %max-HP damage matters. AD carries: Lord Dominik's Regards. Bruisers: Black Cleaver. AP: Liandry's where it's a build option.\n"
+            f"- ASSASSIN tag: Guardian Angel slot 5-6 stays the default for squishies; tanks/bruisers consider Zhonya's-equivalents only if specifically threatened.\n"
+            f"- CRIT tag (fed-crit flag): tanks build Randuin's Omen for the crit-damage cut.\n"
+            f"- AD/AP comp shifts (from the COMP line, not threat tags): heavy AD → armor swap (Plated Steelcaps, Bramble Vest path). Heavy AP → MR swap (Mercury's, Spectre's Cowl path, Force of Nature on full AP).\n"
             f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. The build guide author already weighed late-game; counter-pivots should land in slots 3-4 where matchup-counter items have the most impact. Only swap the last item if a SPECIFIC late-game threat is named in the threat assessment.\n"
-            f"This cheat sheet is suggestive, not prescriptive. The build guide is the starting point; pivot when an enemy starts dominating, then COMMIT to the adjusted path (don't yo-yo).\n\n"
+            f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) and slot it where the build guide expects a flex item. Cite the threat tag in build_change_reason. This is principle, not prescription. The build guide is the starting point; pivot when warranted, then COMMIT to the adjusted path (don't yo-yo).\n\n"
+            f"=== MATCHUP + MACRO CONTEXT (per-game data lives in the user message) ===\n"
+            f"- MATCHUP DATA (in user message) is the primary per-pair matchup reference — what the enemy threatens against {champ_folder} specifically, with timing/exploit/item guidance. Treat as authoritative for the lane/role matchup. Cite when advising on trading patterns or pivots.\n"
+            f"- YOUR PERSONAL MATCHUP NOTES (in user message, when present) are the player's own observations — supplemental, often higher-trust than auto-generated. Cite verbatim when the situation matches.\n"
+            f"- OPPONENT NOTES (in user message) are generic kit info (passive, abilities, common counters) — fall back here if MATCHUP DATA is missing for that enemy.\n"
+            f"- If all three layers are missing for a champion, lean on general champion knowledge but say so explicitly rather than bluffing specifics.\n"
+            f"- PHASE / ITEM GOLD / SPIKES IN PLAY are macro signals. Read them every call: if you're behind in gold + late phase, advise grouping/closing not splitting; if an enemy just hit a spike (* in their items), weight their threat higher.\n"
+            f"- WIN CONDITION (in user message) is how this champ wins the game. Anchor mid/late-game advice on it — that's why it's there. If the player is doing something off-script, redirect them toward the win condition unless game state has clearly invalidated it.\n"
+            f"- SIDE SELECTION (in user message) tells you whether to splitpush or group on this champ. Don't override without strong situational reason; if you do, cite what changed.\n\n"
             + (
             f"=== CHAMPION PLAYBOOK (strategy, win conditions, teamfighting) ===\n"
             f"{playbook_text}\n\n"
             if playbook_text else ''
             ) +
-            f"=== CHAMPION MATCHUP NOTES (for enemies you face as {champ_folder}) ===\n"
-            f"{matchups_text}\n\n"
             f"=== BUILD GUIDE (reference, not a rigid plan) ===\n"
             f"{build_text}\n"
         )
@@ -1889,10 +2241,15 @@ _COACH_CLOSING_DEFAULT = (
 
 def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trigger,
                         recent_responses=None, committed_build=None, item_index=None,
-                        champ_db=None, is_aram=False):
+                        champ_db=None, is_aram=False, team_threats=None, swaps=None,
+                        matchups=None, phase=None, gold_lead=None,
+                        win_condition=None, side_selection=None,
+                        matchup_db=None, your_champ=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
+    if phase:
+        lines.append(f'PHASE: {phase}')
     if is_aram:
         lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
@@ -1900,6 +2257,11 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     score = _team_score_summary(data, ev, your_team)
     if score:
         lines.append(f'TEAM SCORE (you-enemy): {score}')
+    if gold_lead and (gold_lead[0] or gold_lead[1]):
+        you_g, enemy_g = gold_lead
+        delta = you_g - enemy_g
+        sign = '+' if delta >= 0 else ''
+        lines.append(f'ITEM GOLD: your team {you_g}g vs enemy {enemy_g}g (lead {sign}{delta}g)')
 
     # Detect base-under-siege: enemy has killed your nexus towers or inhibitors
     if your_team:
@@ -1944,12 +2306,29 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
     lines.append('ENEMIES:')
     threats = []
+    spike_summary = []  # (champ, [spike names])
     for e in enemies:
         sc = e.get('scores') or {}
-        items = [(i or {}).get('displayName', '?') for i in (e.get('items') or []) if (i or {}).get('itemID')]
+        raw_items = e.get('items') or []
+        items = []
+        spikes_here = has_power_spike_items(raw_items, item_index)
+        for i in raw_items:
+            if not (i or {}).get('itemID'):
+                continue
+            disp = (i or {}).get('displayName', '?')
+            mark = '*' if disp in spikes_here else ''
+            items.append(f'{disp}{mark}')
+        if spikes_here:
+            spike_summary.append((e.get('championName'), spikes_here))
         pos = (e.get('position') or '').lower() or '?'
+        tier = None
+        if matchups:
+            entry = matchups.get(normalize(e.get('championName', '')))
+            if entry:
+                tier = entry[2]
+        tier_tag = f' [{tier}]' if tier else ''
         line = (
-            f'  {e.get("championName")} ({pos}) lvl {e.get("level")} '
+            f'  {e.get("championName")} ({pos}){tier_tag} lvl {e.get("level")} '
             f'{sc.get("kills",0)}/{sc.get("deaths",0)}/{sc.get("assists",0)} '
             f'{sc.get("creepScore",0)}cs items=[{", ".join(items)}]'
         )
@@ -1958,19 +2337,48 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(line)
         state = _enemy_threat_state(e, game_time)
         if state in ('SNOWBALLING', 'AHEAD'):
-            threats.append((state, e.get('championName'), pos))
+            threats.append((state, e.get('championName'), pos, tier))
+
+    if spike_summary:
+        spike_lines = [f'{champ}: {", ".join(spikes)}' for champ, spikes in spike_summary]
+        lines.append(f'SPIKES IN PLAY (* in items above = power-spike item): {" · ".join(spike_lines)}')
 
     if threats:
         lines.append('')
         lines.append('THREAT ASSESSMENT (ADVISORY — do not auto-change build):')
-        for state, champ, pos in threats:
-            lines.append(f'  [{state}] {champ} ({pos})')
+        for state, champ, pos, tier in threats:
+            tier_tag = f' / {tier}-tier matchup' if tier else ''
+            lines.append(f'  [{state}{tier_tag}] {champ} ({pos})')
         lines.append(
             'Build changes are warranted ONLY if (a) the enemy is SNOWBALLING (not just AHEAD), '
             '(b) they directly threaten YOU based on lane/role/damage type, AND (c) you have not '
             'already pivoted for them. If you do pivot, ADD ONE counter-item to live_build '
             '(do NOT remove other items) and KEEP that counter-item for the rest of the game.'
         )
+
+    if win_condition:
+        lines.append('')
+        lines.append('WIN CONDITION (from your playbook — anchor mid/late-game advice on this):')
+        for ln in win_condition.splitlines():
+            lines.append(f'  {ln}' if ln.strip() else '')
+
+    if side_selection:
+        lines.append('')
+        lines.append('SIDE SELECTION (splitpush vs group on this champ):')
+        for ln in side_selection.splitlines():
+            lines.append(f'  {ln}' if ln.strip() else '')
+
+    if matchup_db and your_champ:
+        pair_lines = []
+        for e in enemies:
+            ename = e.get('championName', '')
+            note = matchup_db.get_note(your_champ, ename) if ename else None
+            if note:
+                pair_lines.append(f'  {ename}: {note}')
+        if pair_lines:
+            lines.append('')
+            lines.append('MATCHUP DATA (auto-generated per pair — primary matchup reference; cite when advising):')
+            lines.extend(pair_lines)
 
     if champ_db:
         note_lines = []
@@ -1984,9 +2392,36 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             lines.append('OPPONENT NOTES (general kit + counter tips):')
             lines.extend(note_lines)
 
+    if matchups:
+        personal_lines = []
+        for e in enemies:
+            entry = matchups.get(normalize(e.get('championName', '')))
+            if not entry:
+                continue
+            disp, body, tier = entry
+            body = truncate(body or '', 400)
+            if not body:
+                continue
+            tag = f' [{tier}]' if tier else ''
+            personal_lines.append(f'  {disp}{tag}: {body}')
+        if personal_lines:
+            lines.append('')
+            lines.append('YOUR PERSONAL MATCHUP NOTES (your own observations — supplement to OPPONENT NOTES; cite when advising on the lane matchup):')
+            lines.extend(personal_lines)
+
     if profile and profile[3] > 0:
         label, ap, ad, _, _ = profile
         lines.append(f'COMP: {label} ({ap:g} AP / {ad:g} AD)')
+
+    threat_lines = format_team_threats(team_threats) if team_threats else []
+    if threat_lines:
+        lines.append('')
+        lines.extend(threat_lines)
+    swap_lines = format_swap_rules(swaps) if swaps else []
+    if swap_lines:
+        lines.append('')
+        lines.extend(swap_lines)
+
     build_names = []
     if build_pick:
         heading, body = build_pick
@@ -2236,6 +2671,43 @@ def fetch_champ_select(lockinfo, hosts):
     return lcu_get(lockinfo, '/lol-champ-select/v1/session', hosts)
 
 
+def show_matchup_notes(player_champ):
+    """Pretty-print all cached MatchupDB pair notes for a given player champion.
+    Reads the on-disk cache directly — no API calls. Useful for offline review."""
+    path = DATA_DIR / 'matchup_notes.json'
+    if not path.exists():
+        print(f'No cache file at {path} — run a game first to populate it.')
+        return
+    try:
+        data = json.loads(path.read_text())
+    except Exception as ex:
+        print(f'Failed to read {path}: {ex}', file=sys.stderr)
+        return
+    pairs = data.get('pairs', {})
+    p_norm = normalize(player_champ)
+    if not p_norm:
+        print(f'Invalid champion name: {player_champ!r}', file=sys.stderr)
+        return
+    sep = MatchupDB._SEP
+    matches = sorted(
+        (k, v) for k, v in pairs.items()
+        if k.startswith(p_norm + sep)
+    )
+    if not matches:
+        print(f'No cached pair notes for {player_champ!r} (looked for keys starting with {p_norm}{sep}).')
+        print(f'Cache holds {len(pairs)} total pair(s).')
+        return
+    p_disp = matches[0][1].get('player_display') or player_champ
+    print(f'{BOLD}{p_disp} — {len(matches)} cached matchup pair(s){RESET}')
+    print('─' * 60)
+    for key, entry in matches:
+        e_disp = entry.get('enemy_display') or key.split(sep)[-1]
+        patch = entry.get('patch', '?')
+        gen = entry.get('generated_at', '?')
+        print(f'\n{BOLD}{e_disp}{RESET}  {DIM}(patch {patch} · generated {gen}){RESET}')
+        print(entry.get('notes', '(empty)'))
+
+
 # ─── rendering ──────────────────────────────────────────────────────────────
 
 CLEAR = '\033[2J\033[H'
@@ -2284,7 +2756,7 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
     return ''.join(out)
 
 
-def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None):
+def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None, swaps=None, win_condition=None, side_selection=None, matchup_db=None):
     your_champ, enemies, me = find_active_team(data)
     ev = parse_events(data)
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
@@ -2304,12 +2776,22 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             if name:
                 champ_db.ensure_note_async(name)
 
+    if matchup_db is not None and your_champ:
+        for e in enemies:
+            name = e.get('championName', '')
+            if name:
+                matchup_db.ensure_note_async(your_champ, name)
+
     if coach is not None:
         trigger = coach.maybe_trigger(ev, me, enemies, timers, game_time, champ_folder)
         if trigger:
             with coach.lock:
                 recent_snapshot = list(coach.recent_responses)
                 committed_snapshot = dict(coach.committed_build) if coach.committed_build else None
+            team_threats = compute_team_threats(enemies, item_index)
+            players = data.get('allPlayers') or []
+            phase = compute_phase(game_time, players)
+            gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             user_msg = build_coach_message(
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
                 recent_responses=recent_snapshot,
@@ -2317,6 +2799,15 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 item_index=item_index,
                 champ_db=champ_db,
                 is_aram=is_aram,
+                team_threats=team_threats,
+                swaps=swaps or [],
+                matchups=matchups,
+                phase=phase,
+                gold_lead=gold_lead,
+                win_condition=win_condition,
+                side_selection=side_selection,
+                matchup_db=matchup_db,
+                your_champ=your_champ,
             )
             coach.request_async(
                 trigger, champ_folder, user_msg, game_time,
@@ -2409,17 +2900,24 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             rt = int(p.get('respawnTimer') or 0)
             extras += f' · DEAD {rt}s'
         entry = matchups.get(normalize(champ))
-        if entry:
-            disp, body, tier = entry
-            if not body.strip() and champ_db:
-                body = _clean_db_note(champ_db.get_note(champ) or '')
+        disp = entry[0] if entry else champ
+        tier = entry[2] if entry else None
+        personal = entry[1].strip() if entry else ''
+        auto = matchup_db.get_note(your_champ, champ) if (matchup_db and your_champ) else None
+        sections = []
+        if personal:
+            sections.append(f'{DIM}[yours]{RESET} {personal}')
+        if auto:
+            sections.append(f'{DIM}[auto]{RESET} {auto}')
+        if not sections and champ_db:
+            kit = champ_db.get_note(champ)
+            if kit:
+                sections.append(f'{DIM}[kit]{RESET} {_clean_db_note(kit)}')
+        body = '\n'.join(sections)
+        if body:
             out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
         else:
-            db_note = champ_db.get_note(champ) if champ_db else None
-            if db_note:
-                out.append(render_matchup(champ, pos, None, _clean_db_note(db_note), max_chars, extras=extras))
-            else:
-                out.append(render_matchup(champ, pos, None, '', max_chars, extras=extras + '  — no notes'))
+            out.append(render_matchup(disp, pos, tier, '', max_chars, extras=extras + '  — no notes'))
     return ''.join(out)
 
 
@@ -2525,10 +3023,16 @@ def main():
                     help='source guide URL (used with --add-champ; saved to meta.json)')
     ap.add_argument('--no-tts', action='store_true', default=False,
                     help='disable voice coach (TTS is on by default)')
+    ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
+                    help='print all cached matchup pair notes for a player champion and exit')
     args = ap.parse_args()
 
     if args.add_champ:
         scaffold_champ(args.add_champ, args.source, fetch_current_patch())
+        return
+
+    if args.show_matchups:
+        show_matchup_notes(args.show_matchups)
         return
 
     available = available_champs()
@@ -2562,6 +3066,13 @@ def main():
         if unclassified:
             print(f'  note: {len(unclassified)} champ(s) missing from CHAMP_DAMAGE — '
                   f'will default to Mixed: {", ".join(unclassified)}', flush=True)
+        # Untagged-by-threat audit: champs CHAMP_DAMAGE classifies but
+        # CHAMP_THREAT_TAGS doesn't. Untagged → no TEAM THREATS contribution
+        # (safe failure mode). Lists champs worth considering for tagging.
+        untagged = sorted(c for c in CHAMP_DAMAGE if c not in CHAMP_THREAT_TAGS)
+        if untagged:
+            print(f'  note: {len(untagged)} champ(s) have no TEAM THREATS tag '
+                  f'(no comp-aware contribution): {", ".join(untagged)}', flush=True)
     item_index = fetch_item_index()
     if not item_index:
         print('  warning: could not fetch item index — falling back to archetype-only', file=sys.stderr)
@@ -2598,6 +3109,12 @@ def main():
     )
     db_count = len(champ_db._notes)
     print(f'leeg live · champ db: {db_count} champion note(s) cached', flush=True)
+    matchup_db = MatchupDB(
+        client=coach.client if coach.enabled else None,
+        patch=current_patch,
+    )
+    pair_count = len(matchup_db._notes)
+    print(f'leeg live · matchup db: {pair_count} pair note(s) cached', flush=True)
 
     last_sig = None
     last_state = None
@@ -2634,7 +3151,7 @@ def main():
                 ],
             }, sort_keys=True)
             if sig != last_sig:
-                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db))
+                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db, swaps=cdata.get('swaps') or [], win_condition=cdata.get('win_conditions') or '', side_selection=cdata.get('side_selection') or '', matchup_db=matchup_db))
                 sys.stdout.flush()
                 last_sig, last_state = sig, 'game'
             time.sleep(args.poll)

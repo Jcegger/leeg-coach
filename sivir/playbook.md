@@ -94,6 +94,12 @@
 - **Hit objectives on cooldown.** Your waveclear lets you be the lane that pressures sides while your team takes drag/baron.
 - **Don't fight 1v1.** Always force 2v2+, ideally 5v5 with R engage.
 
+## Side selection
+
+- **Default is GROUP.** Sivir is a teamfight ADC; she's at her best as the centerpiece of a coordinated mid-game push (per win conditions).
+- Sivir CAN sidelane safely with R disengage — push with W, threaten Q from range, R out if collapsed on. But that's a tool, not the gameplan.
+- Side only when (a) your team is poking another objective elsewhere AND (b) you have R available for the rotation back. Otherwise mid lane to group is correct.
+
 ## Pairing notes (supports)
 
 **Best with you:**

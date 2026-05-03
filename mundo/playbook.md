@@ -98,6 +98,20 @@
 - **The flaw:** without R, you can't teamfight. R stays at 120s CD at every rank, and Mundo barely builds AH.
 - **Make ult worth it.** If you're going to die anyway, *don't* copium-ult — save it so post-respawn you have impact. Exception: stalling for Baron/objective is worth ulting away.
 
+## Win conditions
+
+- **Survive lane.** 0/2/even is fine — no death snowballs Mundo more than the enemy. Hit level 11 + Heartsteel before fights start.
+- **Mid-game:** cleaver-poke before any engage. Only frontline real fights with R available.
+- **Late-game (level 16, 3+ items):** Rank 3 R + Spirit Visage = stat-check window. Target 9–10 CS/min and a level lead on the rest of your team.
+- **Force focus:** if behind, run at the ADC. Either they focus you (4–5s of free damage for your team) or they ignore you and you actually kill the carry.
+
+## Side selection
+
+- Mundo is an Illaoi/Sion-type splitter — kill the responder, not Garen/Trynd run-away.
+- **If you can't 1v1 the responder, don't split. Group.** Splitting is often a flat-out bad choice for Mundo.
+- Default to grouping unless you have a clear 1v1 advantage on the side responder. "If you don't know what to do, group. It isn't always the best option but it's very rarely a bad choice."
+- Hyper-late (full builds): split is viable but more carefully — the ADC will shred you, and without R up you can't 1v1 anyone meaningful.
+
 ## Teamfighting
 
 ### Position

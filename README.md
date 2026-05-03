@@ -6,11 +6,12 @@ The champion notes in this repo (`mundo/`, `sivir/`) are my own, but the tool wo
 
 ## Features
 
-- **Live enemy panel** — all 5 enemies sorted by threat tier with KDA, CS, gold, items, level
+- **Live enemy panel** — all 5 enemies sorted by threat tier with KDA, CS, gold, items, level. Per enemy: stacked matchup notes (your hand-written + auto-generated + kit fallback) so you can scan during dead time, fountain trips, or slow phases.
 - **Objective timers** — drake and baron spawn countdowns, with lane-open callouts when towers fall
 - **Rule-based DO panel** — deterministic advice: push windows, objective windows, fed-enemy alerts, next buy hint, dead-laner callouts
 - **Event feed** — last 8 events (kills, towers, objectives) with timestamps
-- **AI coach** (optional) — fires on significant events with 1–2 tactical bullets tuned to your champion's matchup notes and current game state
+- **AI coach** (optional) — fires on significant events with 1–2 tactical bullets grounded in structured comp signals (threat tags, item-gold lead, phase, power spikes), per-pair matchup data, and your champion's playbook win-conditions / side-selection framing
+- **Auto-generated matchup notes** — Haiku-generated 4-6 sentence notes per (your champ, enemy champ) pair, cached to disk, refreshed when a patch is 3+ versions stale. Browse with `--show-matchups <champ>`.
 - **Voice output** (optional) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
 
 ## Quickstart
@@ -48,8 +49,12 @@ export ELEVENLABS_API_KEY=...
 
 On game-shifting events (first blood, ace, baron, inhibitor, your kills and deaths, multikills, tower takes), the coach fires a short 1–2 bullet response using:
 
-- Your champion's `matchups.md` + `build.md` as the system prompt (prompt-cached, 1h TTL — full cost paid once, cheap reads after)
-- Current game state: enemy items/scores, gold, threat tier, last 8 events, objective timers, tower state
+- Your champion's `build.md` + `playbook.md` as the cached system prompt (1h TTL — full cost paid once, cheap reads after) plus counter-items principles and a directive on where to find per-pair matchup data
+- Per-game user message: enemy items/scores, gold, threat tier, last 8 events, objective timers, tower state
+- **Comp-aware threat tags** — enemies tagged HEALING / HARD-CC / ATTACK-SPEED / TANK / ASSASSIN / CRIT, with stacking flags (e.g. `stacked_healing` when 2+ healers or healing-amped item present). Drives slot-3/slot-4 counter pivots
+- **Macro signals** — game phase (early/mid/late), team item-gold lead, power-spike items in play (`*` markers in enemy items)
+- **Win condition + side selection** anchors lifted verbatim from the champion's playbook for mid/late-game framing
+- **Three-layer matchup data**: auto-generated MatchupDB pair notes (primary), your hand-written matchups.md (supplemental override), generic kit info (fallback)
 - A persistent build commitment — the coach picks a 6-item path at game start and stays on it unless the enemy comp demands a pivot
 - Rolling 5-call history for tactical consistency
 
@@ -59,6 +64,16 @@ Server-side validators run after every LLM response:
 - Rewrite unaffordable BACK bullets to FARM with the gold deficit shown
 
 A 90-second periodic fallback fires if the game has been quiet. A 25-second cooldown between calls prevents spam.
+
+## Matchup notes (auto-generated)
+
+The first time you see a new (your champ, enemy champ) pair, a Haiku call generates a 4-6 sentence matchup note in the background and caches it to `data/matchup_notes.json`. By your second game against that enemy, the note is preloaded and surfaced both in the in-game enemy panel (under each enemy as `[auto]`) and in the coach's user message as the primary matchup reference.
+
+Hand-written notes in `<champ>/matchups.md` always take precedence — they show as `[yours]` in the panel and are framed to the coach as supplemental override. Generation cost is ~$0.005 per new game (5 enemies × Haiku); caches are reused indefinitely until the patch is 3+ versions stale.
+
+```bash
+python tools/live.py --show-matchups Mundo   # browse all cached pairs for one champ
+```
 
 ## Setup — WSL2 / Windows
 
@@ -148,7 +163,7 @@ leeg-coach/
 ├── sivir/              ← Sivir bot (heeiseenbeerg's guide + general ADC knowledge)
 │   └── ...
 └── tools/
-    ├── live.py         ← entire CLI, ~2700 lines, stdlib + anthropic
+    ├── live.py         ← entire CLI, ~3200 lines, stdlib + anthropic
     └── README.md       ← detailed technical docs (coach internals, cost model, triggers)
 ```
 
@@ -160,9 +175,13 @@ leeg-coach/
 ## Status
 
 ### Working
-- Live enemy panel: threat sort, KDA, CS, gold, items, level
+- Live enemy panel with stacked matchup notes per enemy (`[yours]` / `[auto]` / `[kit]`)
 - Rule-based DO panel: push windows, drake/baron timers, buy hint, fed-enemy alerts, dead-laner callouts
-- AI coach: Claude Sonnet 4.6, prompt caching, build commitment, 5-call history, 10+ event triggers
+- AI coach: Claude Sonnet 4.6, prompt caching, build commitment, 5-call history, 11+ event triggers
+- Comp-aware threat tags (HEALING / HARD-CC / ATTACK-SPEED / TANK / ASSASSIN / CRIT) with stacking flags
+- Macro signals: game phase, team item-gold lead, power-spike item annotation
+- Per-champion playbook framing: WIN CONDITION + SIDE SELECTION anchors in coach user message
+- MatchupDB: auto-generated per-pair matchup notes via Haiku, on-disk cache, patch-staleness refresh, `--show-matchups` CLI for offline review
 - Voice output: ElevenLabs neural voice, edge-tts free fallback
 - Tower state tracking with lane-open callouts
 - Game-transition detection (resets coach state on new game), API watchdog
@@ -175,6 +194,7 @@ leeg-coach/
 - More champion folders
 - ARAM-aware coach (skip drake/baron timers, use ARAM-specific prompt)
 - Mute hotkey
+- Mobalytics or other real-data layer to replace MatchupDB's Haiku-generation as the authoritative matchup source
 
 ## Troubleshooting
 
