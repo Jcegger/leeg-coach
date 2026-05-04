@@ -1218,8 +1218,19 @@ def find_active_team(data):
 
     your_team = me.get('team') if me else None
     your_champ = me.get('championName') if me else None
+    # Deduplicate allPlayers by player identity first; the Live API occasionally
+    # returns duplicate entries for the same player (same summonerName/riotId).
+    seen_ids: set = set()
+    unique_players = []
+    for p in players:
+        pid = p.get('summonerName') or p.get('riotId') or p.get('riotIdGameName') or p.get('championName')
+        if pid and pid in seen_ids:
+            continue
+        if pid:
+            seen_ids.add(pid)
+        unique_players.append(p)
     enemies = (
-        [p for p in players if p.get('team') and p.get('team') != your_team]
+        [p for p in unique_players if p.get('team') and p.get('team') != your_team]
         if your_team else []
     )
     # Stamp the authoritative game name (from activePlayer) onto me so event
