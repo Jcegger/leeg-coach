@@ -241,6 +241,17 @@ ELEVENLABS_VOICE = os.environ.get('LEEG_ELEVENLABS_VOICE', 'gllMMawbYGTja23oQ3Vu
 _tts_proc = None
 _tts_lock = threading.Lock()
 _tts_last_error = None
+# Rotate between two MP3 slots so a new write never races with the file
+# that WinMCI currently has open for playback.
+_MP3_SLOTS = (
+    '/mnt/c/Windows/Temp/leeg_tts_0.mp3',
+    '/mnt/c/Windows/Temp/leeg_tts_1.mp3',
+)
+_WIN_MP3_SLOTS = (
+    r'C:\Windows\Temp\leeg_tts_0.mp3',
+    r'C:\Windows\Temp\leeg_tts_1.mp3',
+)
+_mp3_slot = 0
 
 
 def _tts_mode():
@@ -259,10 +270,13 @@ def _tts_mode():
     return 'sapi'
 
 _PS1 = r'C:\Windows\Temp\leeg_tts.ps1'
-_MP3 = '/mnt/c/Windows/Temp/leeg_tts.mp3'
+# PS1 takes -f <path>; closes any stale MCI device before opening the new file
+# so the alias is always fresh and there's no leftover lock from a previous call.
 _PS1_CONTENT = """\
+param([string]$f)
 Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class WinMCI { [DllImport("winmm.dll", CharSet=CharSet.Auto)] public static extern int mciSendString(string cmd, System.Text.StringBuilder ret, int retLen, IntPtr cb); }'
-[WinMCI]::mciSendString('open "C:\\Windows\\Temp\\leeg_tts.mp3" type mpegvideo alias leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null
+[WinMCI]::mciSendString("open `"$f`" type mpegvideo alias leeg", $null, 0, [IntPtr]::Zero) | Out-Null
 [WinMCI]::mciSendString('play leeg wait', $null, 0, [IntPtr]::Zero) | Out-Null
 [WinMCI]::mciSendString('close leeg', $null, 0, [IntPtr]::Zero) | Out-Null
 """
@@ -278,7 +292,7 @@ def warmup_tts():
 
 
 def _speak_worker(text):
-    global _tts_proc, _tts_last_error
+    global _tts_proc, _tts_last_error, _mp3_slot
     with _tts_lock:
         if _tts_proc is not None:
             try:
@@ -286,7 +300,12 @@ def _speak_worker(text):
             except Exception:
                 pass
             _tts_proc = None
+        # Pick the slot that isn't currently playing, then advance for next call.
+        slot = _mp3_slot
+        _mp3_slot = 1 - _mp3_slot
 
+    mp3_wsl = _MP3_SLOTS[slot]
+    mp3_win = _WIN_MP3_SLOTS[slot]
     mp3_written = False
 
     # 1. ElevenLabs
@@ -300,7 +319,7 @@ def _speak_worker(text):
                 text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
                 voice_settings=VoiceSettings(stability=0.40, similarity_boost=0.75, style=0.60, use_speaker_boost=True, speed=1.0),
             )
-            with open(_MP3, 'wb') as f:
+            with open(mp3_wsl, 'wb') as f:
                 for chunk in audio:
                     f.write(chunk)
             mp3_written = True
@@ -313,7 +332,7 @@ def _speak_worker(text):
         try:
             import asyncio
             import edge_tts
-            asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(_MP3))
+            asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(mp3_wsl))
             mp3_written = True
             _tts_last_error = None
         except ImportError:
@@ -326,7 +345,7 @@ def _speak_worker(text):
         try:
             proc = subprocess.Popen(
                 ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
-                 '-WindowStyle', 'Hidden', '-File', _PS1],
+                 '-WindowStyle', 'Hidden', '-File', _PS1, '-f', mp3_win],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
             with _tts_lock:
