@@ -240,6 +240,23 @@ TTS_VOICE = os.environ.get('LEEG_TTS_VOICE', 'en-US-AvaMultilingualNeural')  # e
 ELEVENLABS_VOICE = os.environ.get('LEEG_ELEVENLABS_VOICE', 'gllMMawbYGTja23oQ3Vu')  # Crystal
 _tts_proc = None
 _tts_lock = threading.Lock()
+_tts_last_error = None
+
+
+def _tts_mode():
+    """Return which TTS backend will be used: 'elevenlabs', 'edge-tts', or 'sapi'."""
+    if os.environ.get('ELEVENLABS_API_KEY'):
+        try:
+            import elevenlabs  # noqa: F401
+            return 'elevenlabs'
+        except ImportError:
+            pass
+    try:
+        import edge_tts  # noqa: F401
+        return 'edge-tts'
+    except ImportError:
+        pass
+    return 'sapi'
 
 _PS1 = r'C:\Windows\Temp\leeg_tts.ps1'
 _MP3 = '/mnt/c/Windows/Temp/leeg_tts.mp3'
@@ -261,7 +278,7 @@ def warmup_tts():
 
 
 def _speak_worker(text):
-    global _tts_proc
+    global _tts_proc, _tts_last_error
     with _tts_lock:
         if _tts_proc is not None:
             try:
@@ -269,12 +286,16 @@ def _speak_worker(text):
             except Exception:
                 pass
             _tts_proc = None
-    try:
-        el_key = os.environ.get('ELEVENLABS_API_KEY')
-        if el_key:
+
+    mp3_written = False
+
+    # 1. ElevenLabs
+    el_key = os.environ.get('ELEVENLABS_API_KEY')
+    if el_key:
+        try:
             from elevenlabs.client import ElevenLabs
-            el = ElevenLabs(api_key=el_key)
             from elevenlabs import VoiceSettings
+            el = ElevenLabs(api_key=el_key)
             audio = el.text_to_speech.convert(
                 text=text, voice_id=ELEVENLABS_VOICE, model_id='eleven_flash_v2_5',
                 voice_settings=VoiceSettings(stability=0.40, similarity_boost=0.75, style=0.60, use_speaker_boost=True, speed=1.0),
@@ -282,30 +303,53 @@ def _speak_worker(text):
             with open(_MP3, 'wb') as f:
                 for chunk in audio:
                     f.write(chunk)
-        else:
+            mp3_written = True
+            _tts_last_error = None
+        except Exception as exc:
+            _tts_last_error = f'elevenlabs: {type(exc).__name__}: {str(exc)[:80]}'
+
+    # 2. edge-tts fallback
+    if not mp3_written:
+        try:
             import asyncio
             import edge_tts
             asyncio.run(edge_tts.Communicate(text, TTS_VOICE).save(_MP3))
-        proc = subprocess.Popen(
-            ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
-             '-WindowStyle', 'Hidden', '-File', _PS1],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
-        with _tts_lock:
-            _tts_proc = proc
-        proc.wait(timeout=30)
-        with _tts_lock:
-            if _tts_proc is proc:
-                _tts_proc = None
-    except ImportError:
-        safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
+            mp3_written = True
+            _tts_last_error = None
+        except ImportError:
+            pass
+        except Exception as exc:
+            _tts_last_error = f'edge-tts: {type(exc).__name__}: {str(exc)[:80]}'
+
+    # 3. Play MP3 via PS1 script
+    if mp3_written:
+        try:
+            proc = subprocess.Popen(
+                ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+                 '-WindowStyle', 'Hidden', '-File', _PS1],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
+            with _tts_lock:
+                _tts_proc = proc
+            proc.wait(timeout=30)
+            with _tts_lock:
+                if _tts_proc is proc:
+                    _tts_proc = None
+            return
+        except Exception as exc:
+            _tts_last_error = f'playback: {type(exc).__name__}: {str(exc)[:80]}'
+
+    # 4. SAPI inline fallback (no MP3 needed)
+    safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
+    try:
         subprocess.Popen(
             ['powershell.exe', '-NoProfile', '-WindowStyle', 'Hidden', '-Command',
              f'Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("{safe}")'],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
-    except Exception:
-        pass
+        _tts_last_error = None
+    except Exception as exc:
+        _tts_last_error = f'sapi: {type(exc).__name__}: {str(exc)[:80]}'
 
 
 def _normalize_for_tts(text):
@@ -1992,6 +2036,8 @@ class Coach:
             elif self.last_response and not self.last_bullets:
                 # JSON parse failed — surface the raw response as a fallback
                 out.append(f'{DIM}{self.last_response}{RESET}\n')
+            if self.tts and _tts_last_error:
+                out.append(f'{DIM}tts error: {_tts_last_error}{RESET}\n')
             out.append('\n')
             return ''.join(out)
 
@@ -3098,7 +3144,7 @@ def main():
     if coach.tts:
         warmup_tts()
     if coach.enabled:
-        tts_label = '' if coach.tts else ' · tts=off'
+        tts_label = f' · tts={_tts_mode()}' if coach.tts else ' · tts=off'
         print(f'leeg live · coach: enabled (model={coach.model}, cooldown={coach.cooldown_seconds}s{tts_label})', flush=True)
     else:
         print(f'leeg live · coach: disabled — {coach.error_msg}', flush=True)
