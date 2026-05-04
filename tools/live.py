@@ -2099,9 +2099,10 @@ class Coach:
 
 
 def _team_score_summary(data, ev, your_team):
-    """One-line macro state: kills · drakes · barons · towers per team."""
+    """One-line macro state: kills · drakes · barons · towers per team.
+    Returns (score_str, enemy_drakes) so callers can add soul warnings."""
     if not your_team:
-        return None
+        return None, 0
     players = data.get('allPlayers') or []
     team_of = {}
     for p in players:
@@ -2181,7 +2182,7 @@ def _team_score_summary(data, ev, your_team):
     ]
     if your_inhibs or enemy_inhibs:
         parts.append(f'inhibs {your_inhibs}-{enemy_inhibs}')
-    return ' · '.join(parts)
+    return ' · '.join(parts), enemy_drakes
 
 
 def _tower_state_summary(ev, your_team):
@@ -2295,7 +2296,9 @@ _COACH_CLOSING = {
         "Now emit JSON. First bullet: she's genuinely shocked and impressed — 'oh my god', 'okay you're actually insane', 'STOP it' — then what to do next. Make it feel like she just watched it happen."
     ),
     'you_died': (
-        "Now emit JSON. He just died. Quick sympathy, then exactly what to do on spawn — 'oh no, okay, just farm on spawn and finish X' or 'hey it's fine, just back and grab Y.' Warm but practical."
+        "Now emit JSON. He just died. One line of sympathy — then exactly what to do on spawn. "
+        "Calibrate tone to the actual game state: if an enemy is SNOWBALLING or objectives are critical (soul imminent, baron up), drop the reassurance and be urgent and direct. "
+        "Never say 'it's fine' or 'just farm' when the TEAM SCORE or THREAT ASSESSMENT says the game is slipping away."
     ),
     'opening': (
         "Now emit JSON. First call of the game — set the vibe. Warm, a little flirty, makes him feel good about this matchup. Then the actual opening advice."
@@ -2330,7 +2333,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
     your_team = me.get('team') if me else None
-    score = _team_score_summary(data, ev, your_team)
+    score, enemy_drakes = _team_score_summary(data, ev, your_team)
     if score:
         lines.append(f'TEAM SCORE (you-enemy): {score}')
     if gold_lead and (gold_lead[0] or gold_lead[1]):
@@ -2539,6 +2542,10 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         obj.append(f'baron in {fmt_mmss(baron_t)}')
     if ev['drakes']:
         obj.append(f'drakes taken: {len(ev["drakes"])}')
+    if enemy_drakes >= 3 and drake_t == 0:
+        obj.append(f'ENEMY SOUL NEXT — must contest or concede dragon soul')
+    elif enemy_drakes >= 3 and drake_t is not None:
+        obj.append(f'ENEMY SOUL NEXT in {fmt_mmss(drake_t)} — prepare to contest')
     if obj:
         lines.append('OBJECTIVES: ' + ' · '.join(obj))
 
