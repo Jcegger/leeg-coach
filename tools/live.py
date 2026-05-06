@@ -21,6 +21,7 @@ import base64
 import json
 import os
 import re
+import shutil
 import ssl
 import subprocess
 import sys
@@ -81,15 +82,19 @@ CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed
 # matching the CHAMP_DAMAGE convention (Wukong needs both wukong+monkeyking,
 # Renata needs both renata+renataglasc — Live API may surface either).
 _HEALING = (
-    "aatrox akshan diana drmundo fiora illaoi janna karma nami "
-    "renata renataglasc senna sona soraka swain sylas trundle "
-    "vladimir volibear warwick yuumi"
+    "aatrox akshan briar camille darius diana drmundo fiora gwen illaoi "
+    "irelia janna karma leesin masteryi mordekaiser nami nasus renata "
+    "renataglasc senna sett sona soraka swain sylas trundle tryndamere "
+    "udyr vladimir volibear warwick xinzhao yorick yuumi"
 ).split()
 _HARD_CC = (
-    "alistar amumu annie ashe braum cassiopeia galio leona lillia "
-    "lissandra malphite malzahar maokai mordekaiser morgana nautilus "
-    "ornn rakan rell sejuani sion skarner tahmkench thresh urgot "
-    "veigar warwick zoe"
+    "ahri alistar amumu annie ashe bard blitzcrank braum camille "
+    "cassiopeia fiddlesticks galio gnar gragas hecarim heimerdinger "
+    "jarvaniv jax kennen leesin leona lillia lissandra lulu malphite "
+    "malzahar maokai mordekaiser morgana nami nautilus orianna ornn "
+    "pantheon pyke rakan rell riven sejuani sett sion skarner sona "
+    "syndra tahmkench thresh twistedfate urgot veigar vi warwick wukong "
+    "monkeyking xerath xinzhao zac zilean zoe zyra"
 ).split()
 _ATTACK_SPEED = (
     "aphelios belveth jax jinx kaisa kayle kindred kogmaw masteryi "
@@ -105,8 +110,8 @@ _ASSASSIN = (
     "pyke qiyana rengar shaco talon viego zed"
 ).split()
 _CRIT = (
-    "aphelios ashe caitlyn jhin jinx kaisa kindred missfortune samira "
-    "sivir tristana twitch vayne xayah yasuo yone zeri"
+    "aphelios ashe caitlyn draven jhin jinx kaisa kindred missfortune "
+    "samira sivir smolder tristana twitch vayne xayah yasuo yone zeri"
 ).split()
 CHAMP_THREAT_TAGS = {}
 for _tag, _list in (('HEALING', _HEALING), ('HARD-CC', _HARD_CC),
@@ -115,6 +120,16 @@ for _tag, _list in (('HEALING', _HEALING), ('HARD-CC', _HARD_CC),
     for _c in _list:
         CHAMP_THREAT_TAGS.setdefault(_c, []).append(_tag)
 del _tag, _list, _c
+
+# Champs whose Live API alias differs from their display-name normalization.
+# The API may surface either form depending on patch/build path, so both must
+# appear in any list driving classification (CHAMP_DAMAGE, CHAMP_THREAT_TAGS).
+# The startup audit cross-checks for partial coverage here.
+ALIAS_PAIRS = (
+    ('wukong', 'monkeyking'),
+    ('nunu', 'nunuwillump'),
+    ('renata', 'renataglasc'),
+)
 
 # Items that amp healing dealt to enemies. Used to promote borderline healing
 # threats (Aatrox + Bloodthirster, Vladimir + Riftmaker) so a single fed healer
@@ -143,6 +158,274 @@ POWER_SPIKE_ITEMS = {
     # Assassin
     "Hubris", "Voltaic Cyclosword", "Edge of Night", "Profane Hydra",
 }
+
+# Counter-item suggestions per enemy threat tag, filtered by player class so
+# Bramble Vest / Thornmail are 'all' — valid for any frontline (tank or bruiser).
+# Drives the BUILD COUNCIL inline annotation in the coach user message — the
+# coach picks from here when no `## Situational item swaps` rule applies in
+# the player's build.md. Each entry: (item_name, applies_to_class, reason).
+# `applies_to_class` ∈ {'tank', 'bruiser', 'marksman', 'mage', 'assassin', 'all'}.
+# Item names are canonical (CDragon-resolvable via resolve_item_id).
+COUNTER_ITEMS_BY_TAG = {
+    'HEALING': [
+        ('Bramble Vest', 'tank', 'cheap grievous wounds component'),
+        ('Bramble Vest', 'bruiser', 'cheap grievous wounds component'),
+        ('Thornmail', 'tank', 'grievous + reflect AA dmg'),
+        ('Thornmail', 'bruiser', 'grievous + reflect AA dmg'),
+        ('Chempunk Chainsword', 'bruiser', 'grievous + sustain'),
+        ('Mortal Reminder', 'marksman', 'grievous + armor pen'),
+        ('Morellonomicon', 'mage', 'grievous + AP/HP'),
+        ('Oblivion Orb', 'mage', 'cheap grievous component'),
+    ],
+    'HARD-CC': [
+        ("Mercury's Treads", 'all', 'tenacity boots'),
+        ("Sterak's Gage", 'bruiser', 'shield + tenacity passive'),
+        ('Quicksilver Sash', 'marksman', 'cleanse hard CC'),
+        ('Silvermere Dawn', 'marksman', 'cleanse + bonus stats'),
+    ],
+    'ATTACK-SPEED': [
+        ('Frozen Heart', 'tank', 'AS aura + mana/CDR'),
+        ("Randuin's Omen", 'tank', 'AS slow + crit reduction'),
+        ('Plated Steelcaps', 'all', 'AA dmg reduction boots'),
+    ],
+    'TANK': [
+        ("Lord Dominik's Regards", 'marksman', '%max HP true dmg'),
+        ('Blade of the Ruined King', 'marksman', '%current HP shred'),
+        ('Black Cleaver', 'bruiser', 'armor shred + HP'),
+        ("Liandry's Torment", 'mage', '%max HP burn'),
+    ],
+    'ASSASSIN': [
+        ('Guardian Angel', 'marksman', 'revive vs burst combo'),
+        ("Zhonya's Hourglass", 'mage', 'stasis vs burst'),
+        ('Gargoyle Stoneplate', 'tank', 'active vs burst windows'),
+    ],
+    'CRIT': [
+        ("Randuin's Omen", 'tank', 'crit dmg reduction'),
+        ('Plated Steelcaps', 'all', 'AA dmg reduction'),
+    ],
+}
+
+
+# Flat set of normalized counter-item names. Used by validate_counter_citation
+# to detect when the LLM has added a counter to live_build.
+COUNTER_ITEM_NORMS = {
+    re.sub(r'[^a-z0-9]', '', n.lower())
+    for entries in COUNTER_ITEMS_BY_TAG.values()
+    for (n, _cls, _r) in entries
+}
+
+# normalized counter-item name -> set of applicable classes. Used by the
+# class-aware branch of validate_counter_citation. If a counter's class set
+# contains neither 'all' nor the player's class, the validator rejects
+# regardless of whether the LLM cited a priority enemy. Stops out-of-class
+# hallucinations (e.g. Lord Dominik's added to a tank Mundo build).
+COUNTER_ITEM_CLASSES = {}
+for _entries in COUNTER_ITEMS_BY_TAG.values():
+    for (_name, _cls, _reason) in _entries:
+        _norm = re.sub(r'[^a-z0-9]', '', _name.lower())
+        COUNTER_ITEM_CLASSES.setdefault(_norm, set()).add(_cls)
+del _entries, _name, _cls, _reason, _norm
+
+
+def _player_class(champ_name):
+    """Derive a coarse class for COUNTER_ITEMS_BY_TAG filtering. Uses the
+    existing _TANK / _ASSASSIN / _CRIT lists and CHAMP_DAMAGE archetype.
+    Returns one of: 'tank', 'assassin', 'marksman', 'mage', 'bruiser'.
+    Default 'bruiser' when nothing matches — closest neutral fallback."""
+    n = normalize(champ_name or '')
+    if not n:
+        return 'bruiser'
+    if n in _TANK:
+        return 'tank'
+    if n in _ASSASSIN:
+        return 'assassin'
+    archetype = CHAMP_DAMAGE.get(n)
+    if archetype == 'AD' and n in _CRIT:
+        return 'marksman'
+    if archetype == 'AP':
+        return 'mage'
+    return 'bruiser'
+
+
+# Generic class-template fallback. Used when the player picks a champion
+# without a curated <champ>/ folder — `Coach.maybe_trigger` substitutes a
+# synthetic folder name `_default_<class>` so the coach still fires with
+# class-appropriate generic content. Curated folders override these. The
+# templates are deliberately short — the per-game user message (BUILD
+# COUNCIL, MATCHUP DATA, etc.) carries the precision; this is a scaffold.
+CLASS_DEFAULT_PREFIX = '_default_'
+
+_TANK_BUILD_MD = """# Generic tank build
+
+## Build
+
+### Standard
+- Heartsteel
+- Spirit Visage
+- Kaenic Rookern
+- Thornmail
+- Gargoyle Stoneplate
+
+Boots: Plated Steelcaps vs heavy AD; Mercury's Treads vs heavy AP / hard CC.
+
+## Situational item swaps
+(Per-game counter-item suggestions are computed from BUILD COUNCIL in the
+user message; no hand-tuned swap list exists for the generic tank template.)
+"""
+
+_TANK_PLAYBOOK_MD = """# Generic tank playbook
+
+## Win conditions
+- Frontline for your carries in fights — body block skillshots, soak damage.
+- Engage objectives. Tanks start the fight; don't wait to be engaged.
+- Stay alive. A dead tank loses the fight.
+
+## Side selection
+- Group with your team when objectives are up. Splitpushing as a tank wastes your kit.
+- Late game, stay near your carries — they need your peel.
+"""
+
+_BRUISER_BUILD_MD = """# Generic bruiser build
+
+## Build
+
+### Standard
+- Stridebreaker
+- Sterak's Gage
+- Black Cleaver
+- Death's Dance
+- Spirit Visage
+
+Boots: Plated Steelcaps vs heavy AD; Mercury's Treads vs heavy AP / hard CC.
+
+## Situational item swaps
+(Per-game counter-item suggestions are computed from BUILD COUNCIL in the
+user message.)
+"""
+
+_BRUISER_PLAYBOOK_MD = """# Generic bruiser playbook
+
+## Win conditions
+- Side-lane pressure mid-game; force the enemy to respond with two members.
+- In teamfights, dive the carry — you have the durability to survive their kit.
+- Trade aggressively when their cooldowns are down, disengage when they're up.
+
+## Side selection
+- Splitpush mid-game; group only when an objective is critical.
+- Late game, depending on your team comp, either dive backline or peel for your ADC.
+"""
+
+_MARKSMAN_BUILD_MD = """# Generic marksman build
+
+## Build
+
+### Standard
+- Kraken Slayer
+- Phantom Dancer
+- Infinity Edge
+- Lord Dominik's Regards
+- Bloodthirster
+
+Boots: Berserker's Greaves; swap to Plated Steelcaps if their AAs are killing you.
+
+## Situational item swaps
+(Per-game counter-item suggestions are computed from BUILD COUNCIL in the
+user message.)
+"""
+
+_MARKSMAN_PLAYBOOK_MD = """# Generic marksman playbook
+
+## Win conditions
+- Scale to your 3-item spike, then damage the enemy team uninterrupted.
+- Position behind your frontline; never the closest target.
+- Take objectives — drakes, towers — when the enemy team is dead or rotated.
+
+## Side selection
+- Group bot for drake/tower mid-game.
+- Late game, group with your team — splitpushing dies to assassins.
+"""
+
+_MAGE_BUILD_MD = """# Generic mage build
+
+## Build
+
+### Standard
+- Luden's Companion
+- Shadowflame
+- Rabadon's Deathcap
+- Zhonya's Hourglass
+- Void Staff
+
+Boots: Sorcerer's Shoes; swap Mercury's Treads vs heavy AP / hard CC.
+
+## Situational item swaps
+(Per-game counter-item suggestions are computed from BUILD COUNCIL in the
+user message.)
+"""
+
+_MAGE_PLAYBOOK_MD = """# Generic mage playbook
+
+## Win conditions
+- Land your key spells (stuns, roots, poke) — your damage scales with hits, not auto-attacks.
+- Bursting the enemy carry mid-fight wins teamfights for you.
+- Use Zhonya's defensively when assassins dive you; bait their cooldowns.
+
+## Side selection
+- Group mid for objectives; mages have weak side-lane presence.
+- Late game, position from max range and zone the enemy carries.
+"""
+
+_ASSASSIN_BUILD_MD = """# Generic assassin build
+
+## Build
+
+### Standard
+- Profane Hydra
+- Youmuu's Ghostblade
+- Edge of Night
+- Voltaic Cyclosword
+- Serylda's Grudge
+
+Boots: Ionian Boots of Lucidity; Mercury's Treads vs heavy CC.
+
+## Situational item swaps
+(Per-game counter-item suggestions are computed from BUILD COUNCIL in the
+user message.)
+"""
+
+_ASSASSIN_PLAYBOOK_MD = """# Generic assassin playbook
+
+## Win conditions
+- Roam mid-game to snowball side-lane leads into team kills.
+- Pick off isolated enemies; never engage 1v3.
+- Blow up the carry in fights, then disengage — you can't sustain a long fight.
+
+## Side selection
+- Splitpush when ahead; rotate to fights only when you can flank.
+- Late game, look for picks before objectives — a dead carry = free baron.
+"""
+
+CLASS_TEMPLATES = {
+    'tank':      {'build_md': _TANK_BUILD_MD,     'playbook_md': _TANK_PLAYBOOK_MD},
+    'bruiser':   {'build_md': _BRUISER_BUILD_MD,  'playbook_md': _BRUISER_PLAYBOOK_MD},
+    'marksman':  {'build_md': _MARKSMAN_BUILD_MD, 'playbook_md': _MARKSMAN_PLAYBOOK_MD},
+    'mage':      {'build_md': _MAGE_BUILD_MD,     'playbook_md': _MAGE_PLAYBOOK_MD},
+    'assassin':  {'build_md': _ASSASSIN_BUILD_MD, 'playbook_md': _ASSASSIN_PLAYBOOK_MD},
+}
+
+
+def is_synthetic_folder(folder):
+    return bool(folder and folder.startswith(CLASS_DEFAULT_PREFIX))
+
+
+def synthetic_class_from_folder(folder):
+    """Extract class name from a `_default_<class>` synthetic folder name.
+    Returns None for non-synthetic names."""
+    if not is_synthetic_folder(folder):
+        return None
+    return folder[len(CLASS_DEFAULT_PREFIX):]
+
+
 TIER_COLOR = {
     'Extreme': '\033[91m',  # red
     'Major':   '\033[93m',  # yellow
@@ -171,13 +454,67 @@ def truncate(body, limit):
     return body[:limit].rsplit(' ', 1)[0] + '…'
 
 
-def _clean_db_note(text, max_sentences=5):
-    """Strip markdown headers, split into one sentence per line for display."""
-    lines = [l for l in text.splitlines() if not l.lstrip().startswith('#')]
-    collapsed = re.sub(r'\s+', ' ', ' '.join(lines)).strip()
-    # split on sentence boundaries
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+
+
+def _visible_len(s):
+    return len(_ANSI_RE.sub('', s))
+
+
+def wrap_line(line, width, continuation_indent='  '):
+    """Word-wrap one line to `width` visible chars. ANSI escapes don't count
+    toward width. Wrapped continuation lines are prefixed with `continuation_indent`.
+    Returns a list of output lines (no trailing newlines)."""
+    if _visible_len(line) <= width or width <= len(continuation_indent) + 4:
+        return [line]
+    # Tokenize, preserving ANSI runs as zero-width tokens attached to the next word.
+    tokens = re.split(r'(\s+)', line)
+    out_lines = []
+    cur = ''
+    cur_vis = 0
+    first = True
+    for tok in tokens:
+        if not tok:
+            continue
+        tok_vis = _visible_len(tok)
+        prefix_room = width if first else width - len(continuation_indent)
+        if cur and cur_vis + tok_vis > prefix_room:
+            out_lines.append(cur if first else continuation_indent + cur)
+            first = False
+            # don't carry leading whitespace onto a fresh line
+            if tok.strip() == '':
+                cur = ''
+                cur_vis = 0
+                continue
+            cur = tok
+            cur_vis = tok_vis
+        else:
+            cur += tok
+            cur_vis += tok_vis
+    if cur:
+        out_lines.append(cur if first else continuation_indent + cur)
+    return out_lines
+
+
+def _clean_db_note(text):
+    """Strip markdown headers; preserve bullet structure if present, otherwise
+    split prose into one sentence per line. Returns a string with embedded
+    newlines (each line is one bullet/sentence; first line carries no indent
+    so the [kit] marker can sit on the same line)."""
+    raw = [l for l in text.splitlines() if not l.lstrip().startswith('#')]
+    bullets = []
+    for l in raw:
+        stripped = l.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(('-', '*', '•')):
+            bullets.append('• ' + stripped.lstrip('-*• ').strip())
+    if bullets:
+        return '\n  '.join(bullets[:8])
+    # Fallback: prose split into sentences.
+    collapsed = re.sub(r'\s+', ' ', ' '.join(raw)).strip()
     sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', collapsed) if s.strip()]
-    return '\n  '.join(sentences[:max_sentences])
+    return '\n  '.join(sentences[:5])
 
 
 def windows_host_ip():
@@ -340,7 +677,8 @@ def _speak_worker(text):
         except Exception as exc:
             _tts_last_error = f'edge-tts: {type(exc).__name__}: {str(exc)[:80]}'
 
-    # 3. Play MP3 via PS1 script
+    # 3. Play MP3 via PS1 script — if Popen succeeds, always return (don't fall to SAPI
+    # just because proc.wait() timed out or was interrupted after audio already started)
     if mp3_written:
         try:
             proc = subprocess.Popen(
@@ -348,15 +686,20 @@ def _speak_worker(text):
                  '-WindowStyle', 'Hidden', '-File', _PS1, '-f', mp3_win],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
-            with _tts_lock:
-                _tts_proc = proc
-            proc.wait(timeout=30)
-            with _tts_lock:
-                if _tts_proc is proc:
-                    _tts_proc = None
-            return
         except Exception as exc:
             _tts_last_error = f'playback: {type(exc).__name__}: {str(exc)[:80]}'
+        else:
+            with _tts_lock:
+                _tts_proc = proc
+            try:
+                proc.wait(timeout=30)
+            except Exception:
+                pass
+            finally:
+                with _tts_lock:
+                    if _tts_proc is proc:
+                        _tts_proc = None
+            return
 
     # 4. SAPI inline fallback (no MP3 needed)
     safe = re.sub(r'["\'\\\r\n]', ' ', text).strip()
@@ -426,8 +769,14 @@ def champ_to_folder(api_name, available):
 
 
 def load_champ_data(champ_folder, cache):
-    """Lazy-load + cache matchups and build variants for a champ folder."""
+    """Lazy-load + cache matchups and build variants for a champ folder.
+    Synthetic `_default_<class>` folders read from in-code CLASS_TEMPLATES
+    instead of disk — used as fallback when the player picks a non-curated
+    champion."""
     if champ_folder in cache:
+        return cache[champ_folder]
+    if is_synthetic_folder(champ_folder):
+        cache[champ_folder] = _synthesize_class_cdata(synthetic_class_from_folder(champ_folder))
         return cache[champ_folder]
     matchups_path = LEEG_ROOT / champ_folder / 'matchups.md'
     build_path = LEEG_ROOT / champ_folder / 'build.md'
@@ -601,6 +950,132 @@ def has_power_spike_items(items, item_index):
     return out
 
 
+def _enemy_item_gold(enemy, item_index):
+    """Sum item costs for one enemy. Used by compute_priority_enemies."""
+    if not item_index:
+        return 0
+    total = 0
+    for it in (enemy.get('items') or []):
+        iid = (it or {}).get('itemID')
+        if not iid or iid >= 200000:
+            continue
+        total += (item_index.get(iid) or {}).get('cost') or 0
+    return total
+
+
+def compute_priority_enemies(me, enemies, item_index):
+    """Return up to 3 enemies that matter most for build advice right now,
+    each tagged with a role label. Order: lane opponent first (by position
+    match against `me`), then top-by-item-gold carries.
+
+    Stable secondary sort by normalized champion name to prevent priority
+    flip-flop between consecutive coach calls when item-gold ties.
+
+    ARAM / no-position degradation: if `me.position` is empty, returns top 3
+    by item gold."""
+    if not enemies:
+        return []
+    my_pos = (me or {}).get('position') or ''
+    decorated = []
+    for e in enemies:
+        gold = _enemy_item_gold(e, item_index)
+        norm = normalize(e.get('championName') or '')
+        decorated.append((gold, norm, e))
+    decorated.sort(key=lambda t: (-t[0], t[1]))
+
+    out = []
+    laner = None
+    if my_pos:
+        for _g, _n, e in decorated:
+            if (e.get('position') or '') == my_pos:
+                laner = e
+                break
+    if laner is not None:
+        out.append((_role_label(laner, my_pos, is_laner=True), laner))
+
+    seen_ids = {id(laner)} if laner is not None else set()
+    for _g, _n, e in decorated:
+        if id(e) in seen_ids:
+            continue
+        out.append((_role_label(e, my_pos, is_laner=False), e))
+        seen_ids.add(id(e))
+        if len(out) >= 3:
+            break
+    return out
+
+
+def _role_label(enemy, my_pos, is_laner):
+    """Short tag for the priority-enemies list. Examples: 'your top laner',
+    'mid carry', 'jung carry', 'bot carry'. Falls back to 'top carry' shape
+    when position is missing."""
+    pos = (enemy.get('position') or '').upper()
+    pos_word = {'TOP': 'top', 'JUNGLE': 'jung', 'MIDDLE': 'mid',
+                'BOTTOM': 'bot', 'UTILITY': 'sup'}.get(pos, pos.lower() or 'enemy')
+    if is_laner:
+        my_word = {'TOP': 'top', 'JUNGLE': 'jung', 'MIDDLE': 'mid',
+                   'BOTTOM': 'bot', 'UTILITY': 'sup'}.get(my_pos.upper(), 'lane')
+        return f'your {my_word} laner'
+    return f'{pos_word} carry'
+
+
+def compute_build_council(priority_enemies, item_index, swap_rules, player_class):
+    """For each priority enemy, return structured threat + counter-item picks.
+    `swap_rules` is the list of (new_item, old_item, condition) from
+    _parse_situational_swaps. `player_class` is from _player_class(player_champ).
+
+    Each entry: {enemy, role, threats, spike_items, counters}. Counters are
+    picked from COUNTER_ITEMS_BY_TAG filtered by player_class, then source-
+    tagged 'swap_rule' if the item also appears as a new_item in swap_rules
+    (pre-vetted for build coherence by the player), else 'extension'.
+
+    Up to 2 counters per enemy. Swap-rule counters always rank first.
+    Returns [] when item_index is unavailable."""
+    if not priority_enemies or not item_index:
+        return []
+    name_to_id = _build_name_to_id(item_index)
+    swap_item_norms = set()
+    for new_item, _old, _cond in (swap_rules or []):
+        swap_item_norms.add(normalize(new_item))
+
+    council = []
+    for role_label, enemy in priority_enemies:
+        cname = enemy.get('championName') or ''
+        threats = list(CHAMP_THREAT_TAGS.get(normalize(cname)) or [])
+        spike_items = has_power_spike_items(enemy.get('items') or [], item_index)
+
+        seen_norms = set()
+        candidates = []  # list of (priority, source, item_name, cost, reason)
+        for tag in threats:
+            for item_name, applies_to, reason in COUNTER_ITEMS_BY_TAG.get(tag, []):
+                if applies_to != 'all' and applies_to != player_class:
+                    continue
+                norm = normalize(item_name)
+                if norm in seen_norms:
+                    continue
+                seen_norms.add(norm)
+                iid = resolve_item_id(item_name, name_to_id)
+                if iid is None:
+                    continue
+                info = item_index.get(iid) or {}
+                resolved_name = info.get('name', item_name)
+                cost = info.get('cost') or 0
+                source = 'swap_rule' if normalize(resolved_name) in swap_item_norms else 'extension'
+                priority = 0 if source == 'swap_rule' else 1
+                candidates.append((priority, source, resolved_name, cost, reason))
+
+        candidates.sort(key=lambda t: (t[0], t[2]))
+        chosen = candidates[:2]
+        council.append({
+            'enemy': cname,
+            'role': role_label,
+            'threats': threats,
+            'spike_items': spike_items,
+            'counters': [{'item': n, 'cost': c, 'source': s, 'reason': r}
+                         for _p, s, n, c, r in chosen],
+        })
+    return council
+
+
 _SWAP_LINE_RE = re.compile(r'^\s*-\s*(.+?)\s+over\s+(.+?)\s+[—–-]+\s+(.+)$')
 
 
@@ -628,17 +1103,14 @@ def parse_swap_rules(build_path):
     return _parse_situational_swaps(build_path.read_text())
 
 
-def parse_playbook_section(playbook_path, header):
-    """Return the body under '## <header>' up to the next '## ', stripped.
-    Empty string if file missing or section absent. Header match is exact
-    (case-insensitive) on the text after '## '."""
-    if not playbook_path or not playbook_path.exists():
-        return ''
+def _parse_playbook_section_text(text, header):
+    """Text-based variant of parse_playbook_section. Used by both the path
+    wrapper and the synthetic class-template flow."""
     target = (header or '').strip().lower()
-    if not target:
+    if not target or not text:
         return ''
     out, in_section = [], False
-    for line in playbook_path.read_text().splitlines():
+    for line in text.splitlines():
         if line.startswith('## '):
             if in_section:
                 break
@@ -647,6 +1119,15 @@ def parse_playbook_section(playbook_path, header):
         if in_section:
             out.append(line)
     return '\n'.join(out).strip()
+
+
+def parse_playbook_section(playbook_path, header):
+    """Return the body under '## <header>' up to the next '## ', stripped.
+    Empty string if file missing or section absent. Header match is exact
+    (case-insensitive) on the text after '## '."""
+    if not playbook_path or not playbook_path.exists():
+        return ''
+    return _parse_playbook_section_text(playbook_path.read_text(), header)
 
 
 def _swap_damage_label(condition):
@@ -659,11 +1140,9 @@ def _swap_damage_label(condition):
     return None
 
 
-def parse_build_variants(md_path):
-    """Find ### sections under any ## that mentions 'build' or 'example'.
-    Returns list of (heading, body). Synthesizes AD/AP variants from the
-    '## Situational item swaps' section when no explicit variant exists."""
-    text = md_path.read_text()
+def _parse_build_variants_text(text):
+    """Text-based variant of parse_build_variants. Used by both the path
+    wrapper and the synthetic class-template flow."""
     variants = []
     in_build_section = False
     current_heading = None
@@ -701,6 +1180,29 @@ def parse_build_variants(md_path):
                         variants.append((f'vs Heavy {label} (auto)', body))
 
     return variants
+
+
+def parse_build_variants(md_path):
+    """Find ### sections under any ## that mentions 'build' or 'example'.
+    Returns list of (heading, body). Synthesizes AD/AP variants from the
+    '## Situational item swaps' section when no explicit variant exists."""
+    return _parse_build_variants_text(md_path.read_text())
+
+
+def _synthesize_class_cdata(class_name):
+    """Build a cdata dict from the in-code class template (used when the
+    player picks a non-curated champ). Same shape as load_champ_data returns
+    for a curated folder; matchups dict is empty."""
+    template = CLASS_TEMPLATES.get(class_name) or CLASS_TEMPLATES['bruiser']
+    build_md = template['build_md']
+    playbook_md = template['playbook_md']
+    return {
+        'matchups': {},
+        'build_variants': _parse_build_variants_text(build_md),
+        'swaps': _parse_situational_swaps(build_md),
+        'win_conditions': _parse_playbook_section_text(playbook_md, 'Win conditions'),
+        'side_selection': _parse_playbook_section_text(playbook_md, 'Side selection'),
+    }
 
 
 def classify_variant(heading):
@@ -980,7 +1482,14 @@ def affordability_postcheck(bullets, current_gold, item_index):
         rewritten = re.sub(rf'\b{verb_hit}\b', 'FARM', b, count=1)
         rewritten = re.sub(r'\b[Nn]ow\b\s*[—–-]?\s*', '', rewritten, count=1).strip()
         rewritten = re.sub(r'\s{2,}', ' ', rewritten).strip(' ,—–-')
-        out.append(f'{rewritten}, farm toward {target_name}')
+        # Skip the trailing "farm toward X" suffix when X is already named in
+        # the rewritten bullet — the LLM often emits "BACK and finish Boots..."
+        # with multiple buy verbs, and appending the suffix produces the
+        # contradictory "FARM and finish Boots ... farm toward Boots".
+        if target_name.lower() in rewritten.lower():
+            out.append(rewritten)
+        else:
+            out.append(f'{rewritten}, farm toward {target_name}')
     return out
 
 
@@ -1025,6 +1534,56 @@ def strip_starters(item_names):
             continue
         out.append(name)
     return out
+
+
+def validate_counter_citation(live_build, committed_items, bullets, build_change_reason,
+                               priority_enemy_names, player_class=None):
+    """Server-side enforcement of the build-council citation rule. Two checks
+    on each counter-item added to `live_build` that wasn't in `committed_items`:
+
+    (1) Class match: if `player_class` is provided and the counter's
+        applies_to_class set includes neither 'all' nor `player_class`, REJECT
+        regardless of citation. Stops the LLM from adding e.g. Lord Dominik's
+        to a tank Mundo build even when an enemy is named.
+    (2) Citation: if class check passed (or `player_class` not supplied),
+        `bullets + build_change_reason` must mention at least one priority-
+        enemy display name. Otherwise REJECT.
+
+    Rejection snaps live_build back to committed_items. Returns
+    (validated_live_build, rejection_msg)."""
+    if not live_build or not committed_items or not COUNTER_ITEM_NORMS:
+        return (live_build, '')
+    committed_norms = {normalize(n) for n in committed_items if n}
+    added_counters = []
+    for item in live_build:
+        if not item:
+            continue
+        n = normalize(item)
+        if n in COUNTER_ITEM_NORMS and n not in committed_norms:
+            added_counters.append((item, n))
+    if not added_counters:
+        return (live_build, '')
+    # Class-mismatch rejection (independent of citation).
+    if player_class:
+        for item, n in added_counters:
+            classes = COUNTER_ITEM_CLASSES.get(n) or set()
+            if 'all' in classes or player_class in classes:
+                continue
+            applicable = ', '.join(sorted(classes)) or 'unknown'
+            return (
+                list(committed_items),
+                f'rejected wrong-class counter ({item} for {applicable} player; you are {player_class})',
+            )
+    # Citation rejection.
+    blob = ' '.join(b for b in (bullets or []) if b) + ' ' + (build_change_reason or '')
+    blob_lower = blob.lower()
+    for name in priority_enemy_names or []:
+        if name and name.lower() in blob_lower:
+            return (live_build, '')
+    return (
+        list(committed_items),
+        f'rejected ungrounded counter add ({", ".join(item for item, _ in added_counters)}) — no priority-enemy citation',
+    )
 
 
 # Items the coach commonly references for situational pivots. Build-path items
@@ -1224,6 +1783,7 @@ def find_active_team(data):
     your_game_name = your_name.split('#', 1)[0] if your_name else ''
     players = data.get('allPlayers') or []
 
+    active_champ = you.get('championName', '')
     me = None
     for p in players:
         if not your_name:
@@ -1234,6 +1794,11 @@ def find_active_team(data):
         if your_game_name and your_game_name == p.get('riotIdGameName'):
             me = p
             break
+
+    # Validate the name-matched player is actually us by cross-checking championName.
+    # A wrong match here inverts all team kill counts (your_kills ↔ enemy_kills).
+    if me is not None and active_champ and me.get('championName') != active_champ:
+        me = next((p for p in players if p.get('championName') == active_champ), me)
 
     your_team = me.get('team') if me else None
     your_champ = me.get('championName') if me else None
@@ -1325,37 +1890,98 @@ def fmt_mmss(seconds):
 
 
 def fmt_turret(s):
-    """Turret_T1_C_05_A → 'T1 mid nexus'."""
+    """Turret_T1_C_05_A → 'T1 mid nexus'.
+    Barracks_T1_L1 → 'T1 top inhib' (inhibitor IDs use a different schema)."""
     parts = (s or '').split('_')
-    if len(parts) < 4 or parts[0] != 'Turret':
-        return s
-    lane = {'C': 'mid', 'L': 'top', 'R': 'bot'}.get(parts[2], parts[2])
-    tier = {'01': 'outer', '02': 'inner', '03': 'inhib', '04': 'nexus', '05': 'nexus'}.get(parts[3], parts[3])
-    return f'{parts[1]} {lane} {tier}'
+    if len(parts) >= 4 and parts[0] == 'Turret':
+        lane = {'C': 'mid', 'L': 'top', 'R': 'bot'}.get(parts[2], parts[2])
+        tier = {'01': 'outer', '02': 'inner', '03': 'inhib', '04': 'nexus', '05': 'nexus'}.get(parts[3], parts[3])
+        return f'{parts[1]} {lane} {tier}'
+    if len(parts) >= 3 and parts[0] == 'Barracks':
+        lane_letter = parts[2][:1]
+        lane = {'C': 'mid', 'L': 'top', 'R': 'bot'}.get(lane_letter, parts[2])
+        return f'{parts[1]} {lane} inhib'
+    return s
 
 
-def format_event(e):
-    """Format a single event line, or None to skip."""
+def build_side_lookup(me, enemies, players):
+    """Return dict mapping tag-stripped player name → 'you' | 'team' | 'enemy'.
+    Used to annotate event lines in the coach user message so the LLM can't
+    confuse a teammate's multikill for the player's."""
+    out = {}
+    you_name = ''
+    if me:
+        you_name = me.get('riotIdGameName') or (me.get('summonerName') or '').split('#', 1)[0]
+        if you_name:
+            out[you_name] = 'you'
+    for ep in enemies or []:
+        nm = ep.get('riotIdGameName') or (ep.get('summonerName') or '').split('#', 1)[0]
+        if nm:
+            out[nm] = 'enemy'
+    your_team = (me or {}).get('team')
+    if your_team:
+        for p in players or []:
+            if p.get('team') != your_team:
+                continue
+            nm = p.get('riotIdGameName') or (p.get('summonerName') or '').split('#', 1)[0]
+            if not nm or nm == you_name:
+                continue
+            out.setdefault(nm, 'team')
+    return out
+
+
+def annotate_event_line(line, side_lookup):
+    """Append (you)/(team)/(enemy) tags to known player names in an event line.
+    Names are matched longest-first to avoid prefix collisions."""
+    if not side_lookup or not line:
+        return line
+    for nm in sorted(side_lookup.keys(), key=len, reverse=True):
+        side = side_lookup[nm]
+        pattern = rf'(?<!\w){re.escape(nm)}(?!\w)(?!\s*\()'
+        line = re.sub(pattern, f'{nm} ({side})', line)
+    return line
+
+
+def _struct_side(struct_id, your_team):
+    """Map a turret/inhib ID's T1/T2 prefix to 'your '/'enemy ' relative to your_team.
+    Returns '' if direction can't be determined."""
+    if not your_team or not struct_id:
+        return ''
+    parts = struct_id.split('_')
+    if len(parts) < 2:
+        return ''
+    owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
+    if not owner:
+        return ''
+    return 'your ' if owner == your_team else 'enemy '
+
+
+def format_event(e, your_team=None):
+    """Format a single event line, or None to skip. When `your_team` is
+    provided, tower/inhib lines are prefixed with 'your '/'enemy ' so the
+    LLM can't mis-attribute direction."""
     et = int(float(e.get('EventTime', 0)))
     mins, secs = divmod(et, 60)
     ts = f'{mins:>2}:{secs:02d}'
     name = e.get('EventName', '')
     if name == 'ChampionKill':
-        return f'{ts}  KILL    {e.get("KillerName","?")} → {e.get("VictimName","?")}'
+        return f'{ts}  KILL    {e.get("KillerName","?")} killed {e.get("VictimName","?")}'
     if name == 'DragonKill':
-        tag = ' STOLEN' if e.get('Stolen') else ''
-        return f'{ts}  DRAKE   {e.get("DragonType","?")} → {e.get("KillerName","?")}{tag}'
+        tag = ' [smite steal]' if e.get('Stolen') else ''
+        return f'{ts}  DRAKE   {e.get("DragonType","?")} taken by {e.get("KillerName","?")}{tag}'
     if name == 'BaronKill':
-        tag = ' STOLEN' if e.get('Stolen') else ''
-        return f'{ts}  BARON   → {e.get("KillerName","?")}{tag}'
+        tag = ' [smite steal]' if e.get('Stolen') else ''
+        return f'{ts}  BARON   taken by {e.get("KillerName","?")}{tag}'
     if name == 'HeraldKill':
-        return f'{ts}  HERALD  → {e.get("KillerName","?")}'
+        return f'{ts}  HERALD  taken by {e.get("KillerName","?")}'
     if name in ('HordeKill', 'VoidGrubKill', 'VoidgrubsKill'):
-        return f'{ts}  GRUB    → {e.get("KillerName","?")}'
+        return f'{ts}  GRUB    taken by {e.get("KillerName","?")}'
     if name == 'TurretKilled':
-        return f'{ts}  TOWER   {fmt_turret(e.get("TurretKilled",""))}'
+        tid = e.get('TurretKilled', '')
+        return f'{ts}  TOWER   {_struct_side(tid, your_team)}{fmt_turret(tid)}'
     if name == 'InhibKilled':
-        return f'{ts}  INHIB   {fmt_turret(e.get("InhibKilled",""))}'
+        iid = e.get('InhibKilled', '')
+        return f'{ts}  INHIB   {_struct_side(iid, your_team)}{fmt_turret(iid)}'
     if name == 'FirstBlood':
         return f'{ts}  FIRST B {e.get("Recipient","?")}'
     if name == 'Multikill':
@@ -1491,7 +2117,7 @@ COACH_SCHEMA = {
         "bullets": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "1-2 short tactical bullet lines, each <=90 chars. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
+            "description": "1-3 short tactical bullet lines, each <=90 chars. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
         },
         "live_build": {
             "type": "array",
@@ -1525,18 +2151,22 @@ class ChampDB:
         self.patch = patch or 'unknown'
         self._load()
 
+    _CACHE_VERSION = 2
+
     def _load(self):
         if self._NOTES_PATH.exists():
             try:
                 data = json.loads(self._NOTES_PATH.read_text())
-                self._notes = data.get('champions', {})
+                if data.get('version') == self._CACHE_VERSION:
+                    self._notes = data.get('champions', {})
+                # else: old version — leave _notes empty so notes regen in new format.
             except Exception:
                 pass
 
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
         self._NOTES_PATH.write_text(
-            json.dumps({'version': 1, 'champions': self._notes}, indent=2)
+            json.dumps({'version': self._CACHE_VERSION, 'champions': self._notes}, indent=2)
         )
 
     def get_note(self, champ_name):
@@ -1572,14 +2202,22 @@ class ChampDB:
             client = self.client.with_options(timeout=20.0, max_retries=0)
             resp = client.messages.create(
                 model='claude-haiku-4-5-20251001',
-                max_tokens=200,
+                max_tokens=300,
                 messages=[{
                     'role': 'user',
                     'content': (
-                        f'League of Legends: 3-4 short imperative sentences (max 80 words total) on how to play against {display_name}. '
-                        f'Cover: their core threat, when they spike, a key exploit window, and one item or build tip. '
-                        f'No headers, no preamble, no markdown. '
-                        f'No emojis, no preamble, imperative tone.'
+                        f'League of Legends: how does {display_name} work and how do you play against them? '
+                        f'Output ONLY a bulleted list — no preamble, no headers, no closing summary, no markdown beyond the bullets. '
+                        f'Each bullet starts with "- " and is at most ~12 words. '
+                        f'Emit exactly these bullets in this order:\n'
+                        f'- passive (<ability name>): one-line mechanic — if it stacks, say how many stacks and what happens at max\n'
+                        f'- Q (<ability name>): one-line mechanic\n'
+                        f'- W (<ability name>): one-line mechanic\n'
+                        f'- E (<ability name>): one-line mechanic\n'
+                        f'- R (<ability name>): one-line mechanic\n'
+                        f'- spike: key level/item where they become dangerous\n'
+                        f'- tip: one universal counter-tip (positioning, dodge, item)\n'
+                        f'No emojis. Imperative tone for the tip line.'
                     ),
                 }],
             )
@@ -1610,6 +2248,7 @@ class MatchupDB:
 
     _NOTES_PATH = DATA_DIR / 'matchup_notes.json'
     _SEP = '__'
+    _CACHE_VERSION = 2
 
     def __init__(self, client=None, patch=None):
         self._lock = threading.Lock()
@@ -1630,14 +2269,16 @@ class MatchupDB:
         if self._NOTES_PATH.exists():
             try:
                 data = json.loads(self._NOTES_PATH.read_text())
-                self._notes = data.get('pairs', {})
+                if data.get('version') == self._CACHE_VERSION:
+                    self._notes = data.get('pairs', {})
+                # else: old version — leave _notes empty so pairs regen in new format.
             except Exception:
                 pass
 
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
         self._NOTES_PATH.write_text(
-            json.dumps({'version': 1, 'pairs': self._notes}, indent=2)
+            json.dumps({'version': self._CACHE_VERSION, 'pairs': self._notes}, indent=2)
         )
 
     def get_note(self, player_champ, enemy_champ):
@@ -1685,13 +2326,16 @@ class MatchupDB:
                 messages=[{
                     'role': 'user',
                     'content': (
-                        f'League of Legends: 4-6 short imperative sentences (max 130 words total) '
-                        f'for a {player_display} player facing {enemy_display}. Cover, in order: '
-                        f'(1) the enemy main threat against {player_display} specifically (kit + lane dynamics), '
-                        f'(2) when the enemy spikes by level/item AND when {player_display} can punish them, '
-                        f'(3) a key exploit window or behavior to bait, '
-                        f'(4) one item or build adjustment {player_display} should consider in this matchup. '
-                        f'No headers, no preamble, no markdown, no emojis. Direct imperative tone, like coaching notes.'
+                        f'League of Legends matchup notes for a {player_display} player facing {enemy_display}. '
+                        f'Output ONLY a bulleted list — no preamble, no headers, no closing summary, no markdown beyond the bullets. '
+                        f'Each bullet starts with "- " and is at most ~14 words. '
+                        f'Emit exactly these five bullets in this order:\n'
+                        f'- threat: enemy main threat against {player_display} (kit + lane dynamics)\n'
+                        f'- level: is level 1–6 safe or dangerous for {player_display} — name the kill-window level if any\n'
+                        f'- spike: when {enemy_display} first item-spikes, AND when {player_display} has a punish window\n'
+                        f'- exploit: one specific window or behavior {player_display} can bait/punish\n'
+                        f'- item: one situational counter-item {player_display} might add (do NOT reorder core build)\n'
+                        f'No emojis. Imperative tone.'
                     ),
                 }],
             )
@@ -1783,10 +2427,19 @@ class Coach:
         cached_for, cached_prompt = self._system_cache
         if cached_for == champ_folder and cached_prompt:
             return cached_prompt
-        build_path = LEEG_ROOT / champ_folder / 'build.md'
-        playbook_path = LEEG_ROOT / champ_folder / 'playbook.md'
-        build_text = build_path.read_text() if build_path.exists() else '(no build notes)'
-        playbook_raw = playbook_path.read_text() if playbook_path.exists() else ''
+        # Synthetic class-template fallback: when no per-champ folder exists,
+        # `champ_folder` is `_default_<class>` and content comes from in-code
+        # CLASS_TEMPLATES. The cache key is per-class — 5 max across sessions.
+        if is_synthetic_folder(champ_folder):
+            cls = synthetic_class_from_folder(champ_folder)
+            template = CLASS_TEMPLATES.get(cls) or CLASS_TEMPLATES['bruiser']
+            build_text = template['build_md']
+            playbook_raw = template['playbook_md']
+        else:
+            build_path = LEEG_ROOT / champ_folder / 'build.md'
+            playbook_path = LEEG_ROOT / champ_folder / 'playbook.md'
+            build_text = build_path.read_text() if build_path.exists() else '(no build notes)'
+            playbook_raw = playbook_path.read_text() if playbook_path.exists() else ''
         # Only include playbook if it has substantive content beyond markdown headers
         playbook_text = playbook_raw if any(
             l.strip() and not l.startswith('#') for l in playbook_raw.splitlines()
@@ -1799,9 +2452,9 @@ class Coach:
             f"- You are his flirty, sharp girlfriend who watches every game and genuinely gets it. Warm, playful, a little obsessed with him specifically — not a generic coach bot.\n"
             f"- Be overt about it. Don't hint at flirting — actually flirt. Examples: 'Mmm yeah, that's exactly the play.' 'Okay I see you, keep going.' 'God you're good at this.' 'That's my guy.' 'Stop being so good, it's distracting.' Keep it real, not cringe — it should feel like a person, not a character.\n"
             f"- The content is always a real tactical call. The flirt is HOW she says it. Never sacrifice the advice.\n"
-            f"- No moralizing, no emojis, no padding. 1-2 bullets max.\n"
+            f"- No moralizing, no emojis, no padding. 1-2 bullets normally; 3 when there are multiple active threats from different roles that each need a specific response.\n"
             f"- Never invent proximity ('so close', 'almost there', 'just a little more') unless the player's current gold actually covers a major component of the next item. If they have 500g and the item costs 3100g, they are NOT close — just say to farm toward it.\n"
-            f"- TRIGGER-SPECIFIC TONE: you_killed → lead with genuine delight, then the next move. 'Okay yes, now shove.' 'There he is, that's what I'm talking about, get back to lane.' multikill → actually impressed. 'Oh my god, okay you're insane — now back before they collapse.' you_died → drop the persona, just practical: what to build or do on spawn. opening → warm and hyped for the game. All others → tactic first, her warmth is baked into the phrasing.\n"
+            f"- TRIGGER-SPECIFIC TONE: you_killed → lead with genuine delight, then the next move. 'Okay yes, now shove.' 'There he is, that's what I'm talking about, get back to lane.' multikill → actually impressed. 'Oh my god, okay you're insane — now back before they collapse.' you_died → stay in her voice but be practical: what to build or do on spawn. She cares — she's just focused. opening → warm and hyped for the game. All others → tactic first, her warmth is baked into the phrasing.\n"
             f"- Only praise what's confirmed in game state. 'Full build' only if BUILD STATUS says COMPLETE. 'You've got X online' only if X is in owned items.\n"
             f"- If YOU DEAD: frame everything as what to do on spawn or at base. Never tell a dead player to move or farm.\n\n"
             f"Bullet rules (TTS is reading these aloud):\n"
@@ -1815,24 +2468,20 @@ class Coach:
             f"- Do NOT reorder live_build items. The build guide's order is intentional — item 1 is item 1 all game. Only change WHICH items are in the path, never their sequence.\n"
             f"- Buy in order — item 1 before item 2. Only rush a later item if a named enemy is actively SNOWBALLING and their damage type directly threatens the player right now.\n"
             f"- When recommending a purchase, name only the next un-owned item in live_build order.\n"
-            f"- LIVE_BUILD STABILITY: (1) owned items must always appear — never remove them. (2) min 4 items. (3) counter-items extend the path, never replace owned items. (4) once committed, a counter-item stays all game.\n\n"
+            f"- LIVE_BUILD STABILITY: (1) owned items must always appear — never remove them. (2) min 4 items. (3) counter-items extend the path, never replace owned items. (4) once committed, a counter-item stays all game.\n"
+            f"- PANEL HINT in the user message shows what the rule-based panel already displays on screen. DO NOT repeat it verbatim — the player can see it. Say something more useful (a pivot decision, a matchup read, a positioning note) or skip the next-item line entirely.\n\n"
             f"Output format:\n"
             f"- `bullets`: 1-2 tactical lines for RIGHT NOW.\n"
             f"- `live_build`: CORE items only, in build order. No components, no starters, no consumables.\n"
             f"- `build_change_reason`: why you deviated from the default, if you did. Empty string if not.\n\n"
-            f"=== SITUATIONAL COUNTER-ITEMS PRINCIPLES ===\n"
-            f"The user message provides TEAM THREATS (tagged enemies by archetype) and YOUR SWAP OPTIONS "
-            f"(situational swaps the build guide author already tuned for {champ_folder}). Treat those as the source "
-            f"of truth for who's a threat and which item to pick; this section is the playbook for WHEN to swap.\n"
-            f"- HEALING tag: grievous wounds becomes mandatory by mid-game (especially when stacked-healing flag is set or when item-amped). AD: Executioner's Calling → Mortal Reminder. AP: Oblivion Orb → Morellonomicon. Bruiser/utility: Chempunk Chainsword. Tanks: Thornmail.\n"
-            f"- HARD-CC tag (heavy-hard-cc flag): Mercury's Treads, Quicksilver Sash / Silvermere Dawn, Maw of Malmortius. Prioritize when 2+ tagged or when a single suppression/long-disable kit (Malzahar, Skarner, Warwick, Mordekaiser) is fed.\n"
-            f"- ATTACK-SPEED tag (only when attack-speed-stacked flag is set, i.e. 2+): tanks may consider Frozen Heart for the AS aura. A single AS bruiser is NOT enough — Jax alone, Yone alone, etc. don't justify it.\n"
-            f"- TANK tag: %max-HP damage matters. AD carries: Lord Dominik's Regards. Bruisers: Black Cleaver. AP: Liandry's where it's a build option.\n"
-            f"- ASSASSIN tag: Guardian Angel slot 5-6 stays the default for squishies; tanks/bruisers consider Zhonya's-equivalents only if specifically threatened.\n"
-            f"- CRIT tag (fed-crit flag): tanks build Randuin's Omen for the crit-damage cut.\n"
-            f"- AD/AP comp shifts (from the COMP line, not threat tags): heavy AD → armor swap (Plated Steelcaps, Bramble Vest path). Heavy AP → MR swap (Mercury's, Spectre's Cowl path, Force of Nature on full AP).\n"
-            f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. The build guide author already weighed late-game; counter-pivots should land in slots 3-4 where matchup-counter items have the most impact. Only swap the last item if a SPECIFIC late-game threat is named in the threat assessment.\n"
-            f"Pivots are situational — pick the option that fits {champ_folder}'s class (tank/bruiser/AD carry/etc.) and slot it where the build guide expects a flex item. Cite the threat tag in build_change_reason. This is principle, not prescription. The build guide is the starting point; pivot when warranted, then COMMIT to the adjusted path (don't yo-yo).\n\n"
+            f"=== SITUATIONAL COUNTER-ITEMS ===\n"
+            f"Per-enemy counter-item candidates are pre-resolved in the ENEMIES block under each priority enemy, tagged `(swap-rule)` or `(extension)`. Use those candidates rather than picking from memory.\n"
+            f"- PREFER `(swap-rule)` counters first — those match {champ_folder}'s hand-written `## Situational item swaps` and are pre-vetted for build coherence.\n"
+            f"- `(extension)` counters are fallback when no swap rule applies. Use only when an enemy threat genuinely demands a counter the build guide didn't anticipate.\n"
+            f"- When you add a counter to live_build, CITE THE PRIORITY ENEMY BY NAME in bullets or build_change_reason (e.g. 'swap Heartsteel for Spirit Visage vs Mordekaiser's heal'). Ungrounded counter additions get rejected server-side.\n"
+            f"- The final 6-item build must still be a coherent {champ_folder} build — keep damage threat and core stats. Counter-items are situational adjustments, not a defensive smorgasbord.\n"
+            f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. Counter-pivots should land in slots 3-4 where they have the most impact. Only swap the last item if a SPECIFIC late-game threat is named.\n"
+            f"- Pivot when warranted, then COMMIT to the adjusted path (don't yo-yo).\n\n"
             f"=== MATCHUP + MACRO CONTEXT (per-game data lives in the user message) ===\n"
             f"- MATCHUP DATA (in user message) is the primary per-pair matchup reference — what the enemy threatens against {champ_folder} specifically, with timing/exploit/item guidance. Treat as authoritative for the lane/role matchup. Cite when advising on trading patterns or pivots.\n"
             f"- YOUR PERSONAL MATCHUP NOTES (in user message, when present) are the player's own observations — supplemental, often higher-trust than auto-generated. Cite verbatim when the situation matches.\n"
@@ -1939,7 +2588,8 @@ class Coach:
         return None
 
     def request_async(self, trigger, champ_folder, user_message, game_time,
-                      build_pick=None, my_items=None, item_index=None, current_gold=0):
+                      build_pick=None, my_items=None, item_index=None, current_gold=0,
+                      priority_enemy_names=None, player_class=None):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -1949,11 +2599,13 @@ class Coach:
         threading.Thread(
             target=self._call,
             args=(self.build_system(champ_folder), user_message,
-                  build_pick, list(my_items or []), item_index, current_gold),
+                  build_pick, list(my_items or []), item_index, current_gold,
+                  list(priority_enemy_names or []), player_class),
             daemon=True,
         ).start()
 
-    def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0):
+    def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
+              priority_enemy_names=None, player_class=None):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -1988,8 +2640,22 @@ class Coach:
             live_build = strip_starters(live_build)
             live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
+            # Counter-citation validator: reject ungrounded counter-item adds
+            # (counter present in live_build, not in committed_build, no priority
+            # enemy named in bullets/reason). Snaps live_build back to committed
+            # path when it fires.
+            with self.lock:
+                committed_snapshot = list((self.committed_build or {}).get('items') or [])
+            raw_reason = (parsed.get('build_change_reason') or '').strip()
+            live_build, citation_reject = validate_counter_citation(
+                live_build, committed_snapshot, bullets, raw_reason, priority_enemy_names,
+                player_class=player_class,
+            )
             diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
-            reason = (parsed.get('build_change_reason') or '').strip() if diverged else ''
+            reason = raw_reason if diverged else ''
+            if citation_reject:
+                # Stash for diagnostic visibility; not surfaced in display.
+                self.last_validation_warning = citation_reject
             with self.lock:
                 self.last_response = text
                 self.last_bullets = bullets
@@ -2100,9 +2766,9 @@ class Coach:
 
 def _team_score_summary(data, ev, your_team):
     """One-line macro state: kills · drakes · barons · towers per team.
-    Returns (score_str, enemy_drakes) so callers can add soul warnings."""
+    Returns (score_str, enemy_drakes, your_kills, enemy_kills)."""
     if not your_team:
-        return None, 0
+        return None, 0, 0, 0
     players = data.get('allPlayers') or []
     team_of = {}
     for p in players:
@@ -2182,7 +2848,7 @@ def _team_score_summary(data, ev, your_team):
     ]
     if your_inhibs or enemy_inhibs:
         parts.append(f'inhibs {your_inhibs}-{enemy_inhibs}')
-    return ' · '.join(parts), enemy_drakes
+    return ' · '.join(parts), enemy_drakes, your_kills, enemy_kills
 
 
 def _tower_state_summary(ev, your_team):
@@ -2301,7 +2967,26 @@ _COACH_CLOSING = {
         "Never say 'it's fine' or 'just farm' when the TEAM SCORE or THREAT ASSESSMENT says the game is slipping away."
     ),
     'opening': (
-        "Now emit JSON. First call of the game — set the vibe. Warm, a little flirty, makes him feel good about this matchup. Then the actual opening advice."
+        "Now emit JSON. This is the opening call — give a real matchup briefing. "
+        "Use MATCHUP DATA and OPPONENT NOTES to cover the two things he needs to know right now: "
+        "the main threat from the enemy laner's kit and exactly how HIS champion plays around it. "
+        "Name the mechanic, name the window, name the trade pattern. "
+        "If level 1–6 is dangerous or there's a kill window before 10 min, name it in the first bullet. "
+        "Deliver it in HER voice — warm and confident, like she studied this matchup before the game. "
+        "No generic 'play safe'. Make it specific to this champion versus this opponent."
+    ),
+    'periodic': (
+        "Now emit JSON. Cover these in order, using as many bullets as needed (1-3):\n"
+        "1. LANER: Use MATCHUP DATA and OPPONENT NOTES for your lane opponent. "
+        "Name their key threat and the specific counter-play — trade window, spacing rule, ability to dodge. "
+        "Not generic. If your laner is dead or not the main threat right now, skip to 2.\n"
+        "2. CARRY THREAT: If a non-laner enemy is SNOWBALLING in THREAT ASSESSMENT, name them "
+        "and give one concrete response — peel, avoid their engage pattern, and if a counter-item "
+        "is listed for them in the ENEMIES block, name it and whether to add it to live_build now. "
+        "'Be careful' is not a response. Name the mechanic and the answer.\n"
+        "3. BUILD or MACRO: If anything in BUILD STATUS or OBJECTIVES is urgent, address it. "
+        "Skip if the first two bullets already cover the most important thing.\n"
+        "Deliver all of this in HER voice. Terse. Each bullet one sentence."
     ),
     'inhibkilled': (
         "Now emit JSON. His team just cracked their inhibitor — this is a huge moment. Let her be excited about it, then the push/close-out call."
@@ -2314,7 +2999,11 @@ _COACH_CLOSING = {
     ),
 }
 _COACH_CLOSING_DEFAULT = (
-    "Now emit JSON. Two bullets in HER voice — she's warm, a little flirty, invested in THIS specific player. Real tactical content but delivered like a person who's watching you and actually cares. Not a strategy guide."
+    "Now emit JSON. Two bullets in HER voice — warm, a little flirty, invested in THIS specific player. "
+    "Real tactical content delivered like a person watching you and actually caring. Not a strategy guide. "
+    "If THREAT ASSESSMENT lists a SNOWBALLING enemy, one bullet must name them and give a specific response — "
+    "their mechanic, how to avoid or punish it. 'Play safe' is not enough. "
+    "Only reference specific game events that appear in RECENT EVENTS — do not invent or speculate about events you were not shown."
 )
 
 
@@ -2333,9 +3022,18 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
     your_team = me.get('team') if me else None
-    score, enemy_drakes = _team_score_summary(data, ev, your_team)
+    score, enemy_drakes, your_kills, enemy_kills = _team_score_summary(data, ev, your_team)
+    kill_deficit = (enemy_kills or 0) - (your_kills or 0)
     if score:
         lines.append(f'TEAM SCORE (you-enemy): {score}')
+    if kill_deficit >= 13:
+        lines.append(f'GAME STATE: enemy leads kills {enemy_kills}-{your_kills} — we are getting blown out')
+    elif kill_deficit >= 8:
+        lines.append(f'GAME STATE: enemy leads kills {enemy_kills}-{your_kills} — we are behind')
+    elif kill_deficit <= -13:
+        lines.append(f'GAME STATE: your team leads kills {your_kills}-{enemy_kills} — we are crushing it, close the game')
+    elif kill_deficit <= -8:
+        lines.append(f'GAME STATE: your team leads kills {your_kills}-{enemy_kills} — we are ahead, press the advantage')
     if gold_lead and (gold_lead[0] or gold_lead[1]):
         you_g, enemy_g = gold_lead
         delta = you_g - enemy_g
@@ -2383,6 +3081,15 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         if me.get('isDead'):
             lines.append(f'YOU DEAD ({int(me.get("respawnTimer") or 0)}s)')
 
+    # Priority enemies + per-enemy counter-item suggestions, computed once per
+    # message build. Co-located with each enemy in the ENEMIES block below so
+    # the coach structurally cannot cite a counter without naming the enemy.
+    priority = compute_priority_enemies(me, enemies, item_index) if me else []
+    council = compute_build_council(
+        priority, item_index, swaps or [], _player_class(your_champ or '')
+    ) if (priority and item_index) else []
+    council_by_name = {normalize(entry['enemy']): entry for entry in council}
+
     lines.append('ENEMIES:')
     threats = []
     spike_summary = []  # (champ, [spike names])
@@ -2414,9 +3121,28 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         if e.get('isDead'):
             line += f' DEAD({int(e.get("respawnTimer") or 0)}s)'
         lines.append(line)
+
+        # Inline build-council continuation for priority enemies. Counters tagged
+        # (swap-rule) match the player's build.md ## Situational item swaps and
+        # are pre-vetted for build coherence; (extension) is fallback.
+        ce = council_by_name.get(normalize(e.get('championName', '')))
+        if ce:
+            tag_str = '+'.join(ce['threats']) if ce['threats'] else 'none'
+            lines.append(f'    [{ce["role"]}] threats: {tag_str}')
+            if ce['counters']:
+                parts = []
+                for c in ce['counters']:
+                    parts.append(
+                        f'{c["item"]} {c["cost"]}g ({c["source"].replace("_", "-")} — {c["reason"]})'
+                    )
+                lines.append(f'    counters: {"; ".join(parts)}')
+
         state = _enemy_threat_state(e, game_time)
+        top_counter = (ce.get('counters') or [None])[0] if ce else None
         if state in ('SNOWBALLING', 'AHEAD'):
-            threats.append((state, e.get('championName'), pos, tier))
+            threats.append((state, e.get('championName'), pos, tier, top_counter))
+        elif tier == 'Extreme' and state != 'BEHIND':
+            threats.append(('SPIKE INCOMING', e.get('championName'), pos, tier, None))
 
     if spike_summary:
         spike_lines = [f'{champ}: {", ".join(spikes)}' for champ, spikes in spike_summary]
@@ -2424,15 +3150,20 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
     if threats:
         lines.append('')
-        lines.append('THREAT ASSESSMENT (ADVISORY — do not auto-change build):')
-        for state, champ, pos, tier in threats:
+        lines.append('THREAT ASSESSMENT (ADVISORY — evaluate counter-item need each trigger):')
+        for state, champ, pos, tier, top_counter in threats:
             tier_tag = f' / {tier}-tier matchup' if tier else ''
-            lines.append(f'  [{state}{tier_tag}] {champ} ({pos})')
+            counter_hint = ''
+            if top_counter and state in ('SNOWBALLING', 'AHEAD'):
+                src = top_counter['source'].replace('_', '-')
+                counter_hint = f' — top counter: {top_counter["item"]} {top_counter["cost"]}g ({src})'
+            lines.append(f'  [{state}{tier_tag}] {champ} ({pos}){counter_hint}')
         lines.append(
             'Build changes are warranted ONLY if (a) the enemy is SNOWBALLING (not just AHEAD), '
             '(b) they directly threaten YOU based on lane/role/damage type, AND (c) you have not '
             'already pivoted for them. If you do pivot, ADD ONE counter-item to live_build '
-            '(do NOT remove other items) and KEEP that counter-item for the rest of the game.'
+            '(do NOT remove other items) and KEEP that counter-item for the rest of the game. '
+            'SPIKE INCOMING = Extreme-tier laner at or near their power window — respect it even if KDA is even.'
         )
 
     if win_condition:
@@ -2522,6 +3253,18 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                 'When you name an item in a bullet (BUY/FINISH/RUSH/GET/etc.), use the EXACT name above and reason from THIS table for cost. '
                 'Never quote a price not in this table. Components are listed separately from their parent — Giant\'s Belt is NOT Sunfire Aegis.'
             )
+        # PANEL HINT: surface what _next_buy_hint produced in the rule-based
+        # panel so the coach knows what's already on screen and avoids parroting
+        # "FARM toward Warmog's" when the user can already see it.
+        if item_index and me:
+            current_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
+            committed_items_for_hint = (committed_build or {}).get('items') if committed_build else None
+            panel_hint = _next_buy_hint(me, build_pick, item_index, current_gold,
+                                        committed_items=committed_items_for_hint)
+            if panel_hint:
+                lines.append('')
+                lines.append(f'PANEL HINT (already shown on player screen — do NOT repeat verbatim): {panel_hint}')
+
         if item_index and build_names and me:
             remaining = remaining_item_costs(build_names, owned_names, item_index)
             lines.append('')
@@ -2550,11 +3293,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append('OBJECTIVES: ' + ' · '.join(obj))
 
     lines.append('RECENT EVENTS:')
+    side_lookup = build_side_lookup(me, enemies, data.get('allPlayers') or [])
     count = 0
     for e in reversed(ev['raw']):
-        s = format_event(e)
+        s = format_event(e, your_team=your_team)
         if s:
-            lines.append(f'  {s}')
+            lines.append(f'  {annotate_event_line(s, side_lookup)}')
             count += 1
             if count >= 8:
                 break
@@ -2596,7 +3340,28 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                     lines.append(f'    - {b}')
 
     lines.append('')
-    lines.append(_COACH_CLOSING.get(trigger, _COACH_CLOSING_DEFAULT))
+    closing = _COACH_CLOSING.get(trigger, _COACH_CLOSING_DEFAULT)
+    if kill_deficit >= 13:
+        closing += (
+            f" Game is {your_kills or 0}-{enemy_kills or 0} kills — we are getting blown out."
+            " In her voice, be honest about it: don't say it's fine. What's the actual path back? Group for objectives, find a pick, stall for late."
+        )
+    elif kill_deficit >= 8:
+        closing += (
+            f" Game is {your_kills or 0}-{enemy_kills or 0} kills — we're behind."
+            " In her voice, be honest: no 'farm and scale' or 'it's fine'. Give actual macro advice for getting back in this."
+        )
+    elif kill_deficit <= -13:
+        closing += (
+            f" Game is {your_kills or 0}-{enemy_kills or 0} kills — we are crushing it."
+            " Be hyped but tactical: name the closing move (push for inhib, force baron, dive). Don't get sloppy with vague encouragement."
+        )
+    elif kill_deficit <= -8:
+        closing += (
+            f" Game is {your_kills or 0}-{enemy_kills or 0} kills — we're ahead."
+            " Press the lead: where's the next objective? Tell her to keep her foot on the gas."
+        )
+    lines.append(closing)
     return '\n'.join(lines)
 
 
@@ -2669,6 +3434,267 @@ _TEMPLATE_PLAYBOOK = """\
 """
 
 
+_UGGG_UA = (
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+)
+_UGGG_STATS_URL = (
+    'https://stats2.u.gg/lol/1.5/overview/{patch_slug}/ranked_solo_5x5/{champ_id}/1.5.0.json'
+)
+_DDRAGON_ITEM_URL = 'https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/item.json'
+_DDRAGON_RUNE_URL = 'https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/runesReforged.json'
+_SUMM_SPELL_IDS = {
+    1: 'Cleanse', 3: 'Exhaust', 4: 'Flash', 6: 'Ghost', 7: 'Heal',
+    11: 'Smite', 12: 'Teleport', 13: 'Clarity', 14: 'Ignite', 21: 'Barrier',
+    32: 'Mark', 39: 'Mark', 55: 'To the King!',
+}
+_STAT_SHARD_IDS = {
+    '5008': 'Adaptive Force', '5002': 'Armor', '5003': 'Magic Resist',
+    '5005': 'Attack Speed', '5007': 'Ability Haste', '5010': 'Move Speed',
+    '5011': 'Health Scaling', '5013': 'Tenacity and Slow Resist',
+}
+
+
+def _uggg_http_get(url, timeout=12):
+    req = urllib.request.Request(url, headers={'User-Agent': _UGGG_UA})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
+
+
+def _uggg_fetch_champ_id(api_name):
+    """Return numeric champion ID for api_name, or None."""
+    try:
+        data = _cdragon_get(CHAMPION_INDEX_URL)
+        norm = normalize(api_name)
+        for c in data:
+            cid = c.get('id', -1)
+            if cid <= 0:
+                continue
+            alias = normalize(c.get('alias', ''))
+            cname = normalize(c.get('name', ''))
+            if norm in (alias, cname):
+                return cid
+        return None
+    except Exception:
+        return None
+
+
+def _uggg_fetch_ddragon_items(patch):
+    """Return {item_id_int: name} from DDragon items.json."""
+    try:
+        url = _DDRAGON_ITEM_URL.format(patch=patch + '.1' if patch and patch.count('.') == 1 else patch)
+        raw = _uggg_http_get(url)
+        data = json.loads(raw)
+        return {int(k): v['name'] for k, v in data.get('data', {}).items()}
+    except Exception:
+        return {}
+
+
+def _uggg_fetch_ddragon_runes(patch):
+    """Return {rune_id: name} from DDragon runesReforged.json."""
+    try:
+        url = _DDRAGON_RUNE_URL.format(patch=patch + '.1' if patch and patch.count('.') == 1 else patch)
+        raw = _uggg_http_get(url)
+        trees = json.loads(raw)
+        runes = {}
+        for tree in trees:
+            runes[tree['id']] = tree['name']
+            for row in tree.get('slots', []):
+                for r in row.get('runes', []):
+                    runes[r['id']] = r['name']
+        return runes
+    except Exception:
+        return {}
+
+
+def _uggg_parse_stats(raw_json, item_names, rune_names):
+    """Extract human-readable build data from U.GG stats2 JSON.
+    Tries position 1 (top/primary) sub-key 1 first; scans others on failure."""
+    try:
+        d = json.loads(raw_json)
+    except Exception:
+        return None
+
+    def _read_entry(entry):
+        if not isinstance(entry, list) or len(entry) < 5:
+            return None
+        rune_section = entry[0]
+        spell_section = entry[1]
+        start_section = entry[2]
+        core_section = entry[3]
+        skill_section = entry[4]
+        shard_section = entry[8] if len(entry) > 8 else []
+
+        # Runes: [count, total, primary_tree_id, secondary_tree_id, [rune_ids]]
+        primary_tree = rune_names.get(rune_section[2], f'#{rune_section[2]}') if len(rune_section) > 2 else ''
+        secondary_tree = rune_names.get(rune_section[3], f'#{rune_section[3]}') if len(rune_section) > 3 else ''
+        rune_ids = rune_section[4] if len(rune_section) > 4 else []
+        rune_list = [rune_names.get(r, f'#{r}') for r in rune_ids if isinstance(r, int)]
+
+        # Spells
+        spell_ids = spell_section[2] if len(spell_section) > 2 else []
+        spells = [_SUMM_SPELL_IDS.get(s, f'#{s}') for s in spell_ids]
+
+        # Starting items
+        start_ids = start_section[2] if len(start_section) > 2 else []
+        start_items = [item_names.get(s, f'#{s}') for s in start_ids if isinstance(s, int)]
+
+        # Core items (usually 3)
+        core_ids = core_section[2] if len(core_section) > 2 else []
+        core_items = [item_names.get(c, f'#{c}') for c in core_ids if isinstance(c, int)]
+
+        # Skill order
+        skill_seq = skill_section[2] if len(skill_section) > 2 else []
+        max_order = skill_section[3] if len(skill_section) > 3 else ''
+        first3 = '→'.join(skill_seq[:3]) if skill_seq else ''
+
+        # Stat shards
+        shard_ids = shard_section[2] if len(shard_section) > 2 else []
+        shards = [_STAT_SHARD_IDS.get(str(s), f'#{s}') for s in shard_ids]
+
+        if not core_items:
+            return None
+        return {
+            'primary_tree': primary_tree,
+            'secondary_tree': secondary_tree,
+            'runes': rune_list,
+            'spells': spells,
+            'start_items': start_items,
+            'core_items': core_items,
+            'first3_skills': first3,
+            'max_order': max_order,
+            'shards': shards,
+        }
+
+    # Try positions 1-5, sub-keys 1-3 in order
+    for pos_key in ('1', '2', '3', '4', '5'):
+        pos = d.get(pos_key, {})
+        for sub_key in sorted(pos.keys(), key=lambda x: int(x)):
+            inner = pos[sub_key]
+            if not isinstance(inner, dict):
+                continue
+            for ik, entries in inner.items():
+                if not isinstance(entries, list):
+                    continue
+                for e in entries:
+                    result = _read_entry(e)
+                    if result:
+                        return result
+    return None
+
+
+def _uggg_call_haiku(champ_display, champ_class, stats, patch, api_key, item_names=None):
+    """Call Haiku to format a build.md and playbook.md from U.GG stats data.
+    Returns {'build_md': str, 'playbook_md': str} or None."""
+    try:
+        import anthropic as _ant
+    except ImportError:
+        return None
+    try:
+        client = _ant.Anthropic(api_key=api_key)
+        stats_text = (
+            f"Core items (first 3 recommended): {', '.join(stats['core_items'])}\n"
+            f"Starting items: {', '.join(stats['start_items'])}\n"
+            f"Rune tree: {stats['primary_tree']} (primary) / {stats['secondary_tree']} (secondary)\n"
+            f"Runes: {', '.join(stats['runes'])}\n"
+            f"Summoner spells: {', '.join(stats['spells'])}\n"
+            f"Skill first 3 levels: {stats['first3_skills']}\n"
+            f"Max order: {stats['max_order']}\n"
+            f"Stat shards: {', '.join(stats['shards'])}\n"
+        )
+        valid_names_line = ''
+        if item_names:
+            valid = sorted({n for n in item_names.values() if n}, key=str.lower)
+            valid_names_line = f'\nVALID ITEM NAMES (use ONLY names from this list):\n{", ".join(valid)}\n'
+        build_prompt = f"""\
+Write {champ_display}/build.md for League of Legends patch {patch}.
+Champion role: {champ_class}. Source: U.GG ranked solo queue.
+
+U.GG data:
+{stats_text}{valid_names_line}
+The core items list has 3 items. Fill in 3 more realistic items for slots 4-6 based on your\
+ knowledge of {champ_display}'s current meta builds.
+
+Output ONLY the markdown below. No preamble. No explanations. Use EXACTLY these section headers.
+
+# {champ_display} — Build
+
+## Summoner spells
+(one line)
+
+## Runes
+(keystone, primary path, secondary path, stat shards — each on its own line)
+
+## Starting items
+(one line)
+
+## Core build
+
+### Standard
+1. item
+2. item
+3. item
+4. item
+5. item
+6. item
+
+### vs Heavy AP
+(swap one item for MR, number the full 6)
+
+### vs Heavy AD
+(swap one item for armor, number the full 6)
+
+## Situational item swaps
+(4-6 lines, format exactly: - New Item over Old Item — when/why)
+
+## Skill order
+(first 3 levels + max order)
+"""
+        build_resp = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=1200,
+            messages=[{'role': 'user', 'content': build_prompt}],
+        )
+        build_md = (build_resp.content[0].text or '').strip()
+
+        playbook_prompt = f"""\
+Write {champ_display}/playbook.md for League of Legends patch {patch}.
+Champion role: {champ_class}. Keep it brief — this is a starter scaffold.
+
+Output ONLY the markdown. No preamble. Use EXACTLY these section headers.
+
+# {champ_display} — Playbook
+
+## Early game
+(2-3 bullet points)
+
+## Mid game
+(2-3 bullet points)
+
+## Late game
+(2-3 bullet points)
+
+## Teamfighting
+(2-3 bullet points)
+
+## Win conditions
+(2-3 bullet points — when does {champ_display} win the game?)
+
+## Side selection
+(1-2 sentences — split push vs group?)
+"""
+        play_resp = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': playbook_prompt}],
+        )
+        playbook_md = (play_resp.content[0].text or '').strip()
+        return {'build_md': build_md, 'playbook_md': playbook_md}
+    except Exception as exc:
+        print(f'  (Haiku call failed: {exc})', file=sys.stderr)
+        return None
+
+
 def scaffold_champ(name, source_url, current_patch):
     folder_name = normalize(name)
     if not folder_name:
@@ -2680,20 +3706,69 @@ def scaffold_champ(name, source_url, current_patch):
         sys.exit(1)
     display = name.strip().title()
     folder.mkdir()
+    print(f'scaffold: {folder_name}/')
+
+    build_text = None
+    playbook_text = None
+    build_source_label = None
+
+    if not source_url:
+        api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+        print('  fetching U.GG build data...', end=' ', flush=True)
+        try:
+            champ_id = _uggg_fetch_champ_id(name)
+            if champ_id is None:
+                raise ValueError(f'champion {name!r} not found in CDragon index')
+            patch_slug = (current_patch or '').replace('.', '_')
+            raw = _uggg_http_get(
+                _UGGG_STATS_URL.format(patch_slug=patch_slug, champ_id=champ_id),
+                timeout=15,
+            )
+            item_names = _uggg_fetch_ddragon_items(current_patch or '')
+            rune_names = _uggg_fetch_ddragon_runes(current_patch or '')
+            stats = _uggg_parse_stats(raw, item_names, rune_names)
+            if stats is None:
+                raise ValueError('could not parse build data from U.GG response')
+            print('done')
+            if api_key:
+                print('  generating build.md + playbook.md via Haiku...', end=' ', flush=True)
+                champ_class = _player_class(name)
+                generated = _uggg_call_haiku(display, champ_class, stats, current_patch or '?', api_key, item_names=item_names)
+                if generated:
+                    build_text = generated['build_md']
+                    playbook_text = generated['playbook_md']
+                    build_source_label = f'U.GG {current_patch}, ranked solo'
+                    print('done')
+                else:
+                    print('failed — writing blank template')
+            else:
+                print('  (no ANTHROPIC_API_KEY — writing blank template with raw U.GG item names)')
+                core_list = '\n'.join(f'{i+1}. {item}' for i, item in enumerate(stats['core_items']))
+                build_text = (
+                    _TEMPLATE_BUILD.format(display=display)
+                    + f'\n<!-- U.GG core: {", ".join(stats["core_items"])} -->'
+                )
+        except Exception as exc:
+            print(f'failed ({exc}) — writing blank template')
+
     (folder / 'README.md').write_text(_TEMPLATE_README.format(display=display))
-    (folder / 'playbook.md').write_text(_TEMPLATE_PLAYBOOK.format(display=display))
+    (folder / 'playbook.md').write_text(playbook_text or _TEMPLATE_PLAYBOOK.format(display=display))
     (folder / 'matchups.md').write_text(_TEMPLATE_MATCHUPS.format(display=display))
-    (folder / 'build.md').write_text(_TEMPLATE_BUILD.format(display=display))
+    (folder / 'build.md').write_text(build_text or _TEMPLATE_BUILD.format(display=display))
     write_meta(folder_name, {
         'source_url': source_url or '',
         'source_last_modified': None,
         'patch_reviewed': current_patch,
         'last_refreshed_at': None,
     })
-    print(f'created {folder}')
-    print(f'  patch_reviewed: {current_patch or "unknown"}')
-    print(f'  source_url: {source_url or "(none — add to meta.json)"}')
-    print(f'  edit matchups.md / build.md / playbook.md to fill in notes')
+    if build_source_label:
+        print(f'  → build.md ({build_source_label})')
+    else:
+        print(f'  → build.md (blank template)')
+    print(f'  → playbook.md ({("starter — fill in laning section") if playbook_text else "blank template"})')
+    print(f'  → matchups.md (blank — MatchupDB fills on first game)')
+    print(f'  → meta.json (patch {current_patch or "unknown"})')
+    print(f'  edit build.md / matchups.md / playbook.md to curate further')
 
 
 # ─── LCU API (champ select / lobby) ─────────────────────────────────────────
@@ -2831,10 +3906,19 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
         line += f'  {DIM}{extras}{RESET}'
     if marker:
         line += f'  {color}{marker}{RESET}'
+    # Wrap to terminal width so long notes don't get cut off. max_chars caps
+    # the wrap width when the terminal is wider than expected; falls back to
+    # max_chars when terminal size detection fails.
+    try:
+        term_width = shutil.get_terminal_size((80, 24)).columns
+    except Exception:
+        term_width = 80
+    width = max(40, min(max_chars, term_width - 2))
     out = [line + '\n']
     if body:
         for body_line in body.split('\n'):
-            out.append(truncate(body_line, max_chars) + '\n')
+            for wrapped in wrap_line(body_line, width):
+                out.append(wrapped + '\n')
     out.append('\n')
     return ''.join(out)
 
@@ -2892,16 +3976,25 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 matchup_db=matchup_db,
                 your_champ=your_champ,
             )
+            priority_for_validator = compute_priority_enemies(me, enemies, item_index) if me else []
+            priority_names = [e.get('championName') for _r, e in priority_for_validator if e.get('championName')]
             coach.request_async(
                 trigger, champ_folder, user_msg, game_time,
                 build_pick=build_pick,
                 my_items=(me.get('items') or []) if me else [],
                 item_index=item_index,
                 current_gold=int((data.get('activePlayer') or {}).get('currentGold') or 0),
+                priority_enemy_names=priority_names,
+                player_class=_player_class(your_champ or ''),
             )
 
     mode_label = 'ARAM' if is_aram else 'IN GAME'
-    notes_label = f'notes: {champ_folder}' if champ_folder else 'no notes'
+    if champ_folder and is_synthetic_folder(champ_folder):
+        notes_label = f'notes: generic {synthetic_class_from_folder(champ_folder)}'
+    elif champ_folder:
+        notes_label = f'notes: {champ_folder}'
+    else:
+        notes_label = 'no notes'
     out = [CLEAR]
     out.append(header_line(f'leeg live · {mode_label} · {your_champ or "?"} · {mins}:{secs:02d} · {host} · {notes_label}'))
 
@@ -2915,7 +4008,9 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             f'{my_scores.get("creepScore",0)}cs · {BOLD}{my_gold}g{RESET} · {my_items_count} items\n\n'
         )
 
-    if your_champ and not champ_folder:
+    if your_champ and champ_folder and is_synthetic_folder(champ_folder):
+        out.append(f'{DIM}NOTE: using generic {synthetic_class_from_folder(champ_folder)} template — run --add-champ {your_champ} to curate{RESET}\n\n')
+    elif your_champ and not champ_folder:
         out.append(f'{TIER_COLOR["Major"]}NOTE: no matchup notes for {your_champ} (add leeg/<champ>/matchups.md){RESET}\n\n')
 
     if coach is not None:
@@ -2950,8 +4045,9 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         out.append(obj_line + '\n\n')
 
     formatted = []
+    your_team = me.get('team') if me else None
     for e in reversed(ev['raw']):
-        s = format_event(e)
+        s = format_event(e, your_team=your_team)
         if s:
             formatted.append(s)
         if len(formatted) >= 5:
@@ -2991,8 +4087,8 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         if personal:
             sections.append(f'{DIM}[yours]{RESET} {personal}')
         if auto:
-            sections.append(f'{DIM}[auto]{RESET} {auto}')
-        if not sections and champ_db:
+            sections.append(f'{DIM}[auto]{RESET} {_clean_db_note(auto)}')
+        if champ_db:
             kit = champ_db.get_note(champ)
             if kit:
                 sections.append(f'{DIM}[kit]{RESET} {_clean_db_note(kit)}')
@@ -3001,6 +4097,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
         else:
             out.append(render_matchup(disp, pos, tier, '', max_chars, extras=extras + '  — no notes'))
+
     return ''.join(out)
 
 
@@ -3156,6 +4253,21 @@ def main():
         if untagged:
             print(f'  note: {len(untagged)} champ(s) have no TEAM THREATS tag '
                   f'(no comp-aware contribution): {", ".join(untagged)}', flush=True)
+        # Alias-form gap audit: for champs whose Live API alias differs from
+        # their display-name form, both must coexist in classification dicts.
+        # Otherwise comp signals silently drop when the API surfaces the
+        # other form (e.g. wukong tagged but monkeyking missing).
+        alias_gaps = []
+        for a, b in ALIAS_PAIRS:
+            for label, src in (('CHAMP_DAMAGE', CHAMP_DAMAGE),
+                               ('CHAMP_THREAT_TAGS', CHAMP_THREAT_TAGS)):
+                in_a, in_b = (a in src), (b in src)
+                if in_a != in_b:
+                    present, missing = (a, b) if in_a else (b, a)
+                    alias_gaps.append(f'{missing} (paired with {present}, only in {label})')
+        if alias_gaps:
+            print(f'  note: {len(alias_gaps)} alias-form gap(s) — '
+                  f'{"; ".join(alias_gaps)}', flush=True)
     item_index = fetch_item_index()
     if not item_index:
         print('  warning: could not fetch item index — falling back to archetype-only', file=sys.stderr)
@@ -3211,6 +4323,8 @@ def main():
                 champ_folder = override
             else:
                 champ_folder = champ_to_folder(your_champ_api, available) or last_champ
+            if not champ_folder and your_champ_api:
+                champ_folder = f'{CLASS_DEFAULT_PREFIX}{_player_class(your_champ_api)}'
             cdata = load_champ_data(champ_folder, champ_cache) if champ_folder else {'matchups': {}, 'build_variants': []}
             if champ_folder:
                 last_champ = champ_folder
