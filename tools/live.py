@@ -2322,19 +2322,24 @@ class MatchupDB:
             client = self.client.with_options(timeout=20.0, max_retries=0)
             resp = client.messages.create(
                 model='claude-haiku-4-5-20251001',
-                max_tokens=250,
+                max_tokens=450,
                 messages=[{
                     'role': 'user',
                     'content': (
                         f'League of Legends matchup notes for a {player_display} player facing {enemy_display}. '
+                        f'Write as if coaching {player_display} directly — how do I handle this matchup? '
                         f'Output ONLY a bulleted list — no preamble, no headers, no closing summary, no markdown beyond the bullets. '
-                        f'Each bullet starts with "- " and is at most ~14 words. '
-                        f'Emit exactly these five bullets in this order:\n'
-                        f'- threat: enemy main threat against {player_display} (kit + lane dynamics)\n'
-                        f'- level: is level 1–6 safe or dangerous for {player_display} — name the kill-window level if any\n'
-                        f'- spike: when {enemy_display} first item-spikes, AND when {player_display} has a punish window\n'
-                        f'- exploit: one specific window or behavior {player_display} can bait/punish\n'
-                        f'- item: one situational counter-item {player_display} might add (do NOT reorder core build)\n'
+                        f'Each bullet starts with "- " and is at most ~16 words. '
+                        f'Emit exactly these nine bullets in this order:\n'
+                        f'- threat: the main thing {enemy_display} does that kills or punishes {player_display}\n'
+                        f'- early: levels 1-3 — safe farm or dangerous? what to do specifically\n'
+                        f'- trading: the trade pattern to use or avoid; which ability to dodge or bait\n'
+                        f'- post6: how the matchup shifts at level 6 or when {enemy_display} ult unlocks\n'
+                        f'- spike: when {enemy_display} first item-spikes; is it a danger window or punish window for {player_display}?\n'
+                        f'- window: when {player_display} has a power edge or punish window in this matchup\n'
+                        f'- wave: push, freeze, or slow-push — which and why in this specific matchup\n'
+                        f'- rune: Grasp, Phase Rush, or other — which fits this matchup and the one-line reason\n'
+                        f'- item: one counter-item {player_display} might add (do NOT reorder core build)\n'
                         f'No emojis. Imperative tone.'
                     ),
                 }],
@@ -3209,7 +3214,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             if not entry:
                 continue
             disp, body, tier = entry
-            body = truncate(body or '', 400)
+            body = truncate(body or '', 1000)
             if not body:
                 continue
             tag = f' [{tier}]' if tier else ''
