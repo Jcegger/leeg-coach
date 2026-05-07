@@ -2975,7 +2975,8 @@ _COACH_CLOSING = {
     ),
     'you_killed': (
         "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot. "
-        "IMPORTANT: if GAME ENDING WINDOW appears in the message, override all other advice — the only correct call is PUSH NEXUS and end the game. Don't say drake, don't say back."
+        "IMPORTANT: if GAME ENDING WINDOW appears in the message, override all other advice — the only correct call is PUSH NEXUS and end the game. Don't say drake, don't say back. "
+        "Otherwise: check the dead enemy's respawn timer in ENEMIES. If 15s or more, name the specific structure to take (tower, plates, dragon) — not just 'shove the wave'. If CS GAP appears, weave in the farm priority."
     ),
     'ace': (
         "Now emit JSON. The enemy team is wiped. "
@@ -3125,6 +3126,18 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(f'CURRENT GOLD: {gold}g')
         if me.get('isDead'):
             lines.append(f'YOU DEAD ({int(me.get("respawnTimer") or 0)}s)')
+        # CS gap vs lane opponent
+        my_cs = scores.get('creepScore', 0)
+        if pos and pos != '?' and enemies:
+            laner = next((e for e in enemies if (e.get('position') or '').lower() == pos), None)
+            if laner:
+                laner_cs = (laner.get('scores') or {}).get('creepScore', 0)
+                gap = laner_cs - my_cs
+                if gap >= 20:
+                    lines.append(
+                        f'CS GAP: you have {my_cs}cs, {laner.get("championName")} has {laner_cs}cs '
+                        f'— {gap} behind. Farm is the priority.'
+                    )
 
     # Priority enemies + per-enemy counter-item suggestions, computed once per
     # message build. Co-located with each enemy in the ENEMIES block below so
