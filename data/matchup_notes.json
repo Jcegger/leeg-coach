@@ -1,0 +1,159 @@
+{
+  "version": 2,
+  "pairs": {
+    "drmundo__yuumi": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Yuumi",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Yuumi's poke and healing sustain force extended trades; kite away from Mundo's engage\n- Yuumi spikes post-first-item; punish early game before she attaches to stronger carry\n- Bait her Q cooldown, then all-in immediately; she's vulnerable without healing ready\n- Build Hollow Radiance early if Yuumi + another enchanter; amplify grievous wounds coverage"
+    },
+    "drmundo__mordekaiser": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Mordekaiser",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Mordekaiser's sustained damage and shield tank stats outscale Mundo's poke early.\n- Morde spikes level 6; Mundo punishes pre-6 with cleavers and sustain.\n- Bait Morde's E pull, then kite backward while healing; he overextends.\n- Build Abyssal Mask after core items to reduce his burst and healing."
+    },
+    "drmundo__jarvaniv": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Jarvan IV",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Jarvan's early armor and burst damage threaten Mundo's health before scaling kicks in.\n- Jarvan spikes level 6; punish him pre-6 and when his ult is down.\n- Bait Jarvan's EQ combo, then all-in while cooldowns reset and Mundo regenerates.\n- Build Kaenic Lifeburst early if Jarvan stacks armor; amplifies your true damage output."
+    },
+    "drmundo__lux": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Lux",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Lux's long-range poke and root combo prevent Mundo from engaging or healing freely.\n- Lux spikes at level 6; punish her pre-6 when cooldowns are long.\n- Bait her E into melee range, then all-in before root comes back up.\n- Buy Adaptive Helm to reduce her ability damage and shield yourself from burst."
+    },
+    "drmundo__draven": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Draven",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Draven's early all-in damage and axe resets snowball into unstoppable late-game carry threat.\n- Draven spikes level 2-3; punish him post-6 when Mundo gains sustain and tankiness.\n- Bait Draven's all-in by walking up, then cleanse with Mundo's passive and outheal.\n- Build Spirit Visage early if Draven gets ahead; amplifies your healing against his burst."
+    },
+    "drmundo__briar": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Briar",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Briar's relentless engage and healing make her dominate all-in fights early game.\n- Briar spikes level 6; Mundo punishes her cooldowns and mana constraints pre-6.\n- Bait her W leap onto minions, then kite back and chunk her down.\n- Buy Thornmail early to reduce her healing and return damage on engages."
+    },
+    "drmundo__thresh": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Thresh",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Thresh's hook and lantern deny Mundo positioning; his utility scales hard.\n- Thresh spikes level 6; Mundo punishes him before 6 and post-mythic.\n- Bait hook near minions, then all-in when cooldown ends immediately.\n- Rush Hollow Radiance if Thresh lands frequent hooks; adapt after mythic."
+    },
+    "drmundo__xerath": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Xerath",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Xerath's long-range poke and CC lock down immobile Mundo from distance safely.\n- Xerath spikes at level 6 and two items; punish pre-6 lane phase aggressively.\n- Bait Xerath's E stun, then all-in before cooldown resets; dodge backwards.\n- Build Adaptive Helm third or fourth to reduce his poke and burst damage."
+    },
+    "drmundo__urgot": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Urgot",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Urgot's low-cooldown shotgun knees lock you down; his execute ult catches careless positioning.\n- Urgot spikes at six with execute ult; punish him pre-six with sustained trades.\n- Bait his E flip, then all-in while cooldown is down; kite backward afterward.\n- Buy Force of Nature early if Urgot lands repeated Qs; reduces poke damage significantly."
+    },
+    "drmundo__caitlyn": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Caitlyn",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Caitlyn's long-range poke and traps control lane, kite away from your engage attempts.\n- Caitlyn spikes early; punish her at level 6 when your ultimate enables all-in.\n- Bait her into using traps defensively, then all-in while cooldowns are down.\n- Build Force of Nature early if she has multiple magic damage threats on team."
+    },
+    "drmundo__irelia": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Irelia",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Irelia's true damage and mobility let her kite and burst through your tankiness early.\n- Irelia spikes at level 6 and Sheen; punish her pre-6 with sustained trading.\n- Bait her dash onto minions, then all-in when her Bladesurge cooldown resets poorly.\n- Buy Adaptive Helm after core items to reduce her sustained magic damage output."
+    },
+    "drmundo__masteryi": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Master Yi",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Master Yi's true damage and attack speed shred your resistances; kite carefully.\n- Yi spikes post-6 and with Guinsoo's; punish pre-6 lane and early teamfights.\n- Bait Yi's Alpha Strike with your Barrel; land Cleaver during cooldown.\n- Build Thornmail early if Yi stacks attack speed; maintains your tankiness well."
+    },
+    "drmundo__leona": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Leona",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Leona's point-and-click stun chains lock down Mundo; her engage is relentless.\n- Leona spikes level 6; punish her pre-6 with poke and sustain.\n- Bait her E engage, then kite back; punish her cooldown with aggression.\n- Rush Abyssal Mask against her magic damage and to reduce her burst."
+    },
+    "drmundo__tristana": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Tristana",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Threat: Tristana's attack range and burst combo easily kite and burst Dr. Mundo down.\n- Spike: Tristana spikes at level 6 with ultimate; punish her pre-6 lane.\n- Exploit: Bait her E reset aggression, then all-in when cooldown wasted on minions.\n- Item: Buy Force of Nature early if she snowballs; prioritize MR reduction."
+    },
+    "drmundo__lillia": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Lillia",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Lillia's kiting and sustained damage wear Dr. Mundo down over time\n- Lillia spikes at level 6; punish her pre-6 with aggression\n- Bait her into Q then all-in; she has limited escape tools\n- Build Kaenic Lifeburst early to reduce her sustained magic damage"
+    },
+    "drmundo__swain": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Swain",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Swain's root and damage combo lock you down; kite away from his pull range always\n- Swain spikes at level 6 ultimate; punish him pre-6 with aggressive short trades\n- Bait his root by moving unpredictably, then all-in when cooldown ends immediately\n- Buy Adaptive Helm early to reduce his repeated damage and ultimate burn threat"
+    },
+    "drmundo__yone": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Yone",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Yone's mobility and true damage let him kite and burst through your tankiness easily.\n- Yone spikes at level 6 and Sheen; punish him pre-6 and before Sheen completion.\n- Bait Yone's E return by walking into fog; all-in when he must teleport back.\n- Build Force of Nature early if Yone lands consistent hits and stacks magic damage."
+    },
+    "drmundo__fiora": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Fiora",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Fiora's true damage and parry block your tankiness; kite and poke relentlessly early\n- Fiora spikes at trinity force; punish her pre-6 and before sheen completion\n- Bait her parry on your Q; follow immediately with E for guaranteed damage\n- Build Kaenic Lifeburst early to reduce her true damage scaling and heal simultaneously"
+    },
+    "drmundo__jinx": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Jinx",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Jinx's long-range poke and cc chain threaten Dr. Mundo's engage attempts constantly.\n- Levels 1\u20133 are dangerous; Jinx kill-window peaks at level 2.\n- Jinx spikes at Manamune; Dr. Mundo punishes post-6 when ultimate sustain activates.\n- Bait Jinx's root by moving predictably, then all-in during cooldown.\n- Build Force of Nature after core items to reduce her burst damage."
+    },
+    "drmundo__illaoi": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Illaoi",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Her tentacles deal massive damage; dodge E to avoid all-in burst and test of spirit\n- Levels 1\u20133 manageable, but levels 4\u20136 extremely dangerous; avoid extended trades near walls\n- Illaoi spikes at Mythic; Mundo punishes her if she wastes E cooldown early\n- Bait her E tentacle slam, then all-in while cooldown resets; she's vulnerable without it\n- Buy Force of Nature early if facing full AD team or multiple magic damage threats"
+    },
+    "drmundo__tahmkench": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Tahm Kench",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Tahm Kench's Tongue lash spam and Grey Health shield make trading impossible for Mundo.\n- Levels 1\u20133 are dangerous; avoid all-ins until level 6 ultimate available.\n- Tahm spikes at Hollow Radiance; Mundo punishes post-level 9 when cooldowns matter less.\n- Bait Tahm's Tongue out, then all-in immediately before cooldown resets for kill.\n- Purchase Force of Nature early to reduce his poke damage and Grey Health value."
+    },
+    "drmundo__lissandra": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Lissandra",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Lissandra's root and burst combo force Dr. Mundo to play around cooldowns carefully.\n- Levels 2\u20134 are dangerous; Lissandra kills with root into burst combo.\n- Lissandra spikes at Lost Chapter; Mundo punishes her post-6 when ult up.\n- Bait her E (Ice Shard) into fog, then all-in with Ghost plus ult.\n- Build Adaptive Helm after core to reduce her burst damage and cooldown spam."
+    }
+  }
+}

@@ -1,1037 +1,137 @@
 {
-  "version": 1,
+  "version": 2,
   "champions": {
-    "aatrox": {
-      "display_name": "Aatrox",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Aatrox's cooldowns since his extended Q combo is his primary threat. Respect his power spike at level 6 when he gains ultimate mobility. Exploit windows when his Q is on cooldown to trade safely or all-in. Build grievous wounds early to cripple his healing and reduce his dueling potential significantly."
-    },
-    "akshan": {
-      "display_name": "Akshan",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and map carefully as Akshan roams frequently after level 6. Exploit his vulnerability early game before he scales into a threat. Focus him hard during the first 15 minutes before his item spike becomes oppressive. Build armor and health items to reduce his burst damage output. Never let him get close to your backline or he will duel your carry."
-    },
-    "ahri": {
-      "display_name": "Ahri",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Watch for her charm engage pattern and respect its range in lane. Play around her cooldowns early since she struggles before level 6. Punish her after she uses charm on minions or misses her skillshots. Build early magic resistance and maintain distance from walls where she lands charms easily."
-    },
-    "akali": {
-      "display_name": "Akali",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward her shroud exit points to track her movements. Play around her power spike at level 6 when her ultimate unlocks\u2014respect her all-in potential. Exploit the early game before she scales; abuse her weak laning phase with poke and aggressive trades. Build Hollow Radiance or Abyssal Mask to reduce her burst damage and lock her down with crowd control."
-    },
-    "alistar": {
-      "display_name": "Alistar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay away from Alistar during level 6 when his ultimate makes him unkillable in fights. Exploit the early game before his combo comes online by respecting his headbutt-pulverize range. Ward river and play around your minimap to avoid surprise engages from fog of war. Build grievous wounds early to reduce his healing and deny him sustain in extended trades."
-    },
-    "ambessa": {
-      "display_name": "Ambessa",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay away from her engage range in early game when she lacks items. Respect her level 6 power spike and avoid extended fights. Abuse the window before she completes her first mythic item to trade favorably. Build armor early and kite her relentlessly, as her threat diminishes at range."
-    },
-    "anivia": {
-      "display_name": "Anivia",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her stun and avoid tight corridors where she controls space with her wall. Play around her early mana constraints before level 6 when she becomes exponentially stronger. Punish her immobile laning phase with aggressive all-ins before her egg comes online. Build magic resist early and force fights in open areas where her wall provides minimal protection."
-    },
-    "amumu": {
-      "display_name": "Amumu",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid clustering together as Amumu's ultimate stuns everyone in range. Respect his power spike at level 6 when his bandage toss and curse combination become devastating. Exploit the early game before he reaches level 6 by pressuring him and denying farm. Build early magic resist and mobility items like Mercury's Treads and Banshee's Veil to survive his engage."
-    },
-    "aphelios": {
-      "display_name": "Aphelios",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on eliminating Aphelios before he completes Infinity Edge, his primary power spike around 2-3 items. Exploit the early game window before he scales, when he lacks damage and survivability. Stay behind minions to block his Chakram and Severum bullets. Build Maw of Malmortius or Force of Nature to survive his burst and reduce his effectiveness."
-    },
-    "annie": {
-      "display_name": "Annie",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay outside Annie's effective range in lane to avoid her burst combo. Respect her power spike at level 6 when she unlocks Tibbers and gains all-in potential. Exploit early game before her first back when she lacks items and defensive stats. Build Hextech Protobelt or get early magic resist to mitigate her overwhelming burst damage in teamfights."
-    },
-    "aurelionsol": {
-      "display_name": "Aurelion Sol",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay out of Aurelion Sol's rotating star range to avoid his burst damage. Exploit his weak early game before level 6 by aggressing in lane and denying his farm. Watch for his level 11 spike when his stars expand significantly. Build Abyssal Mask or Mercury's Treads to reduce his magic damage and roam potential."
-    },
-    "ashe": {
-      "display_name": "Ashe",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Ashe's endless poke and kiting from range. Abuse her weak early game before she gains attack speed items around level 9. Exploit windows when her Ultimate is down to all-in aggressively. Build Mercury's Treads early to reduce her stun duration and rush mobility or a defensive mythic to dodge her volleys."
-    },
-    "aurora": {
-      "display_name": "Aurora",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Aurora's burst damage from her Q-E combo in extended trades. Abuse her weak early game before level 6 when her ultimate becomes available. Exploit her immobility by kiting and maintaining distance from her engagement range. Build early magic resist and prioritize mercury treads to reduce her crowd control effectiveness."
-    },
-    "azir": {
-      "display_name": "Azir",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Azir's soldier damage and kiting potential in mid-game teamfights when he spikes hard. Exploit his early weakness before level 6 by aggressive trading and ganks. Stay mobile and dodge his Shurima Shuffle engages at choke points. Build early magic resist or sustain to survive his poke, then itemize for mobility to kite away from his soldiers."
-    },
-    "bard": {
-      "display_name": "Bard",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid Bard's meeps and poke early as he scales into the game. Respect his kill pressure at level 6 when his ultimate comes online. Exploit his roaming by punishing his lane partner when he leaves. Build early magic resist and stay grouped to minimize his ultimate's impact on teamfights."
-    },
-    "belveth": {
-      "display_name": "Bel'Veth",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and track Bel'Veth early since her scaling threat becomes unmanageable late game. Exploit the first 15 minutes before she completes core items and reaches critical attack speed thresholds. Collapse and shut down her void gate whenever possible to deny her resets and map control. Build Thornmail and grievous wounds to reduce her sustained damage and healing while grouping with your team."
-    },
-    "blitzcrank": {
-      "display_name": "Blitzcrank",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay behind minions to block Blitzcrank's hook. Ward river and jungle entrances to spot him before he engages. Abuse the early game before he reaches level 6, as his hook cooldown is long. Build tanky items or pick champions with mobility to dodge his grab. Play around his cooldowns and punish him when hook is down."
-    },
-    "braum": {
-      "display_name": "Braum",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on poking Braum before he lands his stun combo. Play around his cooldowns after he uses Glacial Fissure, as he loses his primary engage tool. Exploit the early game before he completes his support items and becomes unkillable. Build grievous wounds to reduce his self-healing and make extended fights unwinnable for him."
-    },
-    "brand": {
-      "display_name": "Brand",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Brand's passive burn and avoid grouping in teamfights where he chains damage. Dodge his Q in lane to prevent early snowballing before level 6. Abuse the window between his cooldown rotations to trade aggressively. Build Hextech Protobelt or force him into sidelanes where his AOE teamfight pressure becomes useless."
-    },
-    "briar": {
-      "display_name": "Briar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her cooldowns since Briar struggles when abilities are down. Respect her early game power and avoid fighting her level 3-6 when she dominates. Abuse her immobility in lane before she gets items by poking safely from range. Build grievous wounds immediately to counter her sustain and reduce her tankiness in fights."
-    },
-    "caitlyn": {
-      "display_name": "Caitlyn",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her superior range and never walk into her trap zones. She spikes hardest at level 6 with her ultimate and again at two items, so play safer during these windows. Exploit her weak early game before level 3 by all-inning aggressively. Build Prowler's Claw or mobility boots to dodge her attacks and close the gap quickly."
-    },
-    "camille": {
-      "display_name": "Camille",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Camille's all-in burst when she lands True Grit. Avoid fighting her after she completes Trinity Force and Titanic Hydra, as she spikes massively. Exploit her cooldowns early game before she gains access to her full combo potential. Build armor and health items to mitigate her true damage and sustained pressure."
-    },
-    "chogath": {
-      "display_name": "Cho'Gath",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Cho'Gath's silence and fear combo as your primary threat. Watch for his power spike at level 6 when he gains his ultimate execute damage. Abuse the early game before he scales, trading aggressively and denying his stacks. Buy Quicksilver Sash or Force of Nature to counter his crowd control and tankiness."
-    },
-    "cassiopeia": {
-      "display_name": "Cassiopeia",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay outside her poison range and avoid her gaze. Ban or respect her mid-game spike when she completes Liandry's and Demonic Embrace. Exploit her immobility early before level 6 with aggressive ganks and roams. Build Mercury's Treads early to reduce her ultimate stun duration and rush Abyssal Mask for sustained tankiness against her damage."
-    },
-    "corki": {
-      "display_name": "Corki",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Corki's package timing and avoid grouping in narrow lanes where his rockets deal maximum damage. Exploit his weak early game before level 6 by trading aggressively in lane. Rush Hexdrinker or Maw of Malmortius to reduce his burst threat. Position carefully during teamfights since his late-game damage scales heavily with items and his aerial mobility makes him slippery."
-    },
-    "diana": {
-      "display_name": "Diana",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play safe during her level 6 spike when her ultimate becomes available. Ward your lane and jungle entrances to spot her roaming attempts. Abuse her weak early game before she completes her core items. Build Abyssal Mask or Mercury's Treads to reduce her burst damage and crowd control impact."
-    },
-    "darius": {
-      "display_name": "Darius",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid his pull and axe bleed stacks at all costs\u2014they fuel his damage and reset his dunk timer. Play safe early; he spikes hard at level 6 with ultimate execution damage. Exploit the window after he uses his pull on minions before cooldown resets. Build grievous wounds immediately to cripple his sustain and reduce bleed effectiveness in extended trades."
-    },
-    "drmundo": {
-      "display_name": "Dr. Mundo",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward his jungle entrances to track his movement and prevent surprise ganks. Abuse him early before he scales with items and levels. Kite away from his cleavers and dodge them to minimize poke damage. Build grievous wounds to reduce his regeneration and make him vulnerable in fights."
-    },
     "draven": {
       "display_name": "Draven",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Draven's early game damage and positioning threat. Avoid fighting him when he has multiple axes spinning. Exploit the mid-game window when his scaling falls off relative to scaling supports and carries. Rush Maw of Malmortius or Guardian Angel to survive his burst damage and prevent him from snowballing further."
-    },
-    "ekko": {
-      "display_name": "Ekko",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Ekko's burst damage and always track his Chronobreak cooldown. Abuse him early before level 6 when he lacks his ultimate escape tool. Dodge his Q skillshot at all costs as it defines his trading pattern. Build Abyssal Mask or Force of Nature if he deals magic damage to your team."
-    },
-    "elise": {
-      "display_name": "Elise",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle camps heavily since Elise dominates early ganks. Avoid fighting her in her spider form where she deals massive true damage. Group mid-game around level 6 when her power spikes dramatically. Exploit the early levels before she transforms by pressuring her lane. Build mercury treads to reduce her stun duration and increase survival odds."
-    },
-    "evelynn": {
-      "display_name": "Evelynn",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances and river constantly to track Evelynn's movements. Play safe until level 6 when her ultimate spike arrives, then group with teammates for vision control. Exploit the early game before she gains power by invading her jungle with your team. Build early magic resist and Control Wards to counter her burst damage and invisibility threat."
-    },
-    "ezreal": {
-      "display_name": "Ezreal",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Ezreal's cooldowns since his poke damage comes from ability spam. Watch for his power spike at two items when he deals massive damage in fights. Abuse the early game before he scales, forcing fights when he lacks resources. Buy Maw of Malmortius or Abyssal Mask to reduce his burst and sustain through his poke."
-    },
-    "fiddlesticks": {
-      "display_name": "Fiddlesticks",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrance to spot Fiddlesticks' roams before his ultimate channels. Respect his level 6 power spike when he gains access to Crowstorm and can instantly delete your team. Abuse the early game before six minutes when he lacks mobility and kill pressure. Build Quicksilver Sash or Maw of Malmortius to cleanse or block his fear and ultimate suppress."
-    },
-    "fizz": {
-      "display_name": "Fizz",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Fizz's cooldowns since his all-in threat disappears without abilities. Respect his power spike at level 6 when his ultimate becomes available. Abuse him early game before he gains enough damage to one-shot you. Build Abyssal Mask or Mercury's Treads to reduce his burst damage and survive his engage attempts."
-    },
-    "fiora": {
-      "display_name": "Fiora",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Pick a champion with strong early game pressure to abuse Fiora before her power spike at two items. Ward river constantly as she roams aggressively mid-game. Never fight her in extended trades where she stacks passive procs. Build armor early and consider Frozen Heart to cripple her attack speed and vital proc damage."
-    },
-    "galio": {
-      "display_name": "Galio",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Galio's long cooldowns before level 6. Avoid grouping when he has ultimate available as his engage threat spikes massively mid-game. Exploit early lane by poking before he gains tankiness. Build Lord Dominik's Regards or magic penetration to overcome his defensive itemization and force meaningful damage through his scaling."
-    },
-    "garen": {
-      "display_name": "Garen",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around his Judgment cooldown to punish extended trades. Kite him relentlessly since he lacks gap closers without abilities. Exploit early game before he gains tankiness and healing at level 6. Build grievous wounds to cripple his passive regeneration and sustain, then focus on range advantage to keep him at bay."
-    },
-    "gangplank": {
-      "display_name": "Gangplank",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Gangplank's barrel damage and avoid grouping in chokepoints where he controls fights. Play around his early weakness before level 6 when his ultimate provides map pressure. Exploit the window between barrel placements to trade and zone him off CS. Build Maw of Malmortius or Force of Nature into him to reduce his burst and survive his all-in combos."
-    },
-    "gnar": {
-      "display_name": "Gnar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Gnar's transformation timer and abuse him when he's in Mini form since he loses damage and utility. Ward his jungle to spot incoming ganks during his Mega transformation window when he's most vulnerable. Rush a early Negatron Cloak to mitigate his burst damage. Never cluster with teammates when he's close to transforming into Mega Gnar since his area control becomes oppressive."
-    },
-    "gragas": {
-      "display_name": "Gragas",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Watch Gragas's barrel placement carefully as it's his primary damage and crowd control threat. Play around his early cooldowns before level 6, when his ultimate becomes available and spike power increases dramatically. Abuse the window after he uses his barrel to engage by trading aggressively before it refreshes. Build early magic resist items like Hexdrinker to reduce his burst damage and increase your survivability during fights."
-    },
-    "graves": {
-      "display_name": "Graves",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Graves' long reload animation after emptying his magazine. Respect his mid-game spike when he completes his first damage item. Exploit his weak early game before level 3 by invading and fighting him. Build Plated Steelcaps early to reduce his burst damage and kite him in extended fights."
-    },
-    "gwen": {
-      "display_name": "Gwen",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Gwen's sustained damage in extended trades and avoid fighting her in her Hallowed Mist. Play around her cooldowns early before she gets ability haste. Punish her vulnerable laning phase before level 6 with short trades and ganks. Build grievous wounds immediately to reduce her healing and tank her poke effectively."
-    },
-    "heimerdinger": {
-      "display_name": "Heimerdinger",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Destroy his turrets immediately or they will overwhelm you. Respect his early power spike at level 6 when he gains his ultimate. Abuse the window before level 6 to pressure and deny his setup. Build Abyssal Mask or Hollow Radiance to reduce his turret damage and survive his burst effectively."
-    },
-    "hecarim": {
-      "display_name": "Hecarim",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to spot Hecarim's ganks before he closes in. Punish his weak early game by trading aggressively in lane before his first major item spike around level 6. Buy early armor and group with teammates when he hits his mid-game power window. Stick with your team and kite away from his charge to negate his primary threat of gap-closing and devastating engages."
-    },
-    "illaoi": {
-      "display_name": "Illaoi",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid her tentacle damage by staying outside her effective range. Play around her cooldowns after she uses Test of Spirit since she becomes vulnerable. Exploit early game before she reaches level 6 and gains her ultimate power. Build Black Cleaver or Divine Sunderer to shred her armor and burst her down before she can heal."
-    },
-    "hwei": {
-      "display_name": "Hwei",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Hwei's long ability cooldowns early game to pressure them before level 6. Respect their burst damage spike at mid-game when they complete their first item. Exploit the 10-second window after they use their ultimate to engage or all-in. Buy early magic resist like Null-Magic Mantle to reduce their poke damage and survive their combo."
-    },
-    "irelia": {
-      "display_name": "Irelia",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Irelia's sustained damage in extended trades and her ability to dash through minions. She spikes hardest at two items when she gains true damage and dueling power. Abuse her early game before level 6 when her waveclear is weak. Build armor early or prioritize kiting with range champions to nullify her close-range threat."
-    },
-    "ivern": {
-      "display_name": "Ivern",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Ivern's early game invades and coordinate vision control around his camps. Abuse the window before he hits level 6 when his gank setup is weakest. Exploit his immobility by collapsing on him when he overextends from brush control. Build grievous wounds early to counter his healing and reduce his sustained teamfight value."
-    },
-    "janna": {
-      "display_name": "Janna",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on engaging before Janna shields rotate to multiple targets. Abuse the early game before she gains items and scaling power. All-in immediately after her tornado goes on cooldown since her peel weakens significantly. Build Adaptive Force and Maw of Malmortius to pierce her shields and survive her ultimate knockback."
-    },
-    "jax": {
-      "display_name": "Jax",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Abuse Jax early before he scales into a monster. Avoid extended trades since his counter-strike turns fights in his favor. Kite him relentlessly and don't fight near walls where he gains advantages. Buy early grievous wounds or armor to neutralize his threat. Push your lead before his power spike at two items."
-    },
-    "jarvaniv": {
-      "display_name": "Jarvan IV",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your lane and river heavily to spot Jarvan's ganks before he arrives. Play safe when he hits level 6 as his ultimate becomes a lethal cage trap. Exploit his cooldowns after failed engages by trading or pushing lane immediately. Build Mercury's Treads early to reduce his crowd control duration and increase your survivability against his combo."
-    },
-    "jayce": {
-      "display_name": "Jayce",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Jayce's poke damage in ranged form and avoid grouping in choke points. Abuse him in the early game before he completes his first item spike around level 6. Exploit his immobility when he switches to hammer form by engaging immediately. Build armor or grab an early Negatron Cloak to reduce his burst potential significantly."
-    },
-    "jhin": {
-      "display_name": "Jhin",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay behind minions to block Jhin's fourth shot, his primary threat. Abuse him during early levels before he scales into a late-game hypercarry. Fight him when his reload animation triggers, creating a window to engage. Build Mercury's Treads early to reduce the impact of his root setup and follow-up CC from teammates."
-    },
-    "jinx": {
-      "display_name": "Jinx",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her long-range damage and avoid grouping in narrow spaces where her rockets devastate. Exploit her immobility in the early game before she scales into a late-game monster. Shut her down before 2-3 items when she becomes unkillable in team fights. Build Edge of Night or Kaenic Rookern to block her burst and protect your team from her ultimate execution threat."
-    },
-    "ksante": {
-      "display_name": "K'Sante",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward his jungle entrances to track his roam timing. Abuse him early before he stacks armor and becomes unkillable around minute 11. Kite away when he ults to dodge the guaranteed knockup and burst. Build Grievous Wounds immediately to reduce his self-healing sustain in extended trades."
-    },
-    "kaisa": {
-      "display_name": "Kai'Sa",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her isolated target burst in mid-game teamfights. Abuse her weak early game before she stacks evolve requirements. Group heavily around 2-3 items when her spike hits hardest. Build early magic resist and layered armor to reduce her kite damage. Prevent her from farming safely with constant pressure and vision denial."
-    },
-    "kalista": {
-      "display_name": "Kalista",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on avoiding her spear procs by spreading out and not grouping. Exploit her weak early game before she scales into a threat at items two and three. Engage aggressively at levels one through three before she gains mobility. Build Thornmail or Hollow Radiance to reflect her damage and reduce her effectiveness in extended fights."
-    },
-    "karma": {
-      "display_name": "Karma",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Karma's poke damage and root combo in lane. She spikes hard at level 6 with her ultimate, so play safe and respect her enhanced abilities. Exploit her cooldowns when Mantra is down to trade favorably. Build early magic resist if she's dealing too much damage, and consider buying boots early to dodge her skillshots more effectively."
-    },
-    "karthus": {
-      "display_name": "Karthus",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Karthus's teamfight damage and avoid grouping tightly. Abuse his weak early game and vulnerable laning phase before he scales. Invade and pressure him when his ultimate is down, forcing him to stay defensive. Buy early magic resist or Maw of Malmortius to survive his burst and maximize your survivability in fights."
-    },
-    "kassadin": {
-      "display_name": "Kassadin",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Kassadin's scaling threat and avoid extended fights once he reaches level 6. Punish him aggressively in early game before his ultimate unlocks his mobility. Abuse the level 5 window when his cooldowns are longest to secure kills or objectives. Build Void Staff early if you're magic damage to ensure your poke cuts through his growing resistances."
-    },
-    "katarina": {
-      "display_name": "Katarina",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her all-in burst damage and never fight in her optimal range. Exploit her vulnerable early game before level 6 when her kill potential spikes dramatically. Interrupt her ultimate whenever possible with hard crowd control abilities. Build early defensive items like Kaenic Lifebane or Hollow Radiance to reduce her spell damage and survive her rotations into teamfights."
-    },
-    "kayle": {
-      "display_name": "Kayle",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Abuse Kayle's weak early game before level 6 when she lacks range and damage. Exploit her vulnerability to all-in trades in the first 10 minutes. Build grievous wounds to reduce her healing output significantly. Camp her lane early or pressure other objectives while she scales slowly."
-    },
-    "kennen": {
-      "display_name": "Kennen",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Kennen's range and chain lightning damage in teamfights. Play around his ultimate cooldown since it defines his power spikes at levels 6, 11, and 16. Abuse him early before he hits level 6 when he lacks defensive tools. Build Abyssal Mask or Mercury's Treads to reduce his burst and stun duration, then engage when his ultimate is down."
-    },
-    "kayn": {
-      "display_name": "Kayn",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle exits to track Kayn's position and deny his flanks. Punish him early before his first item spike at level 6 when he gains form. Group with your team during mid-game teamfights to prevent his assassination attempts. Buy early armor or magic resist based on his form choice and stick together to limit his picking potential."
-    },
-    "khazix": {
-      "display_name": "Kha'Zix",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances to catch Kha'Zix before he isolates you. Avoid fighting alone, especially after he completes Duskblade, when his damage spikes significantly. Group with teammates in the early game before his level 6 evolution makes him lethal. Build Zhonyas or Guardian Angel to survive his burst and deny him easy kills."
-    },
-    "kindred": {
-      "display_name": "Kindred",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle relentlessly to track Kindred's position and deny their mark stacks. Exploit their weak early game before they scale by invading and fighting around their camps. Group immediately when they reach six items as they become nearly unkillable. Build grievous wounds or defensive items to mitigate their burst damage in team fights."
-    },
-    "kled": {
-      "display_name": "Kled",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Kled's Skaarl mount. Exploit the window after he loses it by trading aggressively since he becomes vulnerable. Respect his level 6 spike when he gains ultimate mobility. Build armor early to reduce his mounted burst damage. Kite backward in teamfights and collapse on him when dismounted."
-    },
-    "kogmaw": {
-      "display_name": "Kog'Maw",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Kog'Maw's extended attack range in mid-game teamfights as his primary threat. Abuse him early before he gains attack speed items and becomes a scaling monster. Engage aggressively during the first 15 minutes when he lacks defensive stats. Build Grievous Wounds immediately to counter his self-healing and reduce his sustained damage output significantly."
-    },
-    "leesin": {
-      "display_name": "Lee Sin",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances to spot Lee Sin's early ganks. Respect his level 6 power spike when his ultimate becomes available. Play safely in side lanes during mid-game teamfights since he excels at isolating targets. Build defensive items early and group with teammates to reduce his ability to make impactful plays."
-    },
-    "leblanc": {
-      "display_name": "LeBlanc",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around LeBlanc's cooldowns after she uses her combo since her burst window is limited. Watch for her level 6 spike when Recall becomes available and respect her all-in potential. Abuse her vulnerability when her W is down for positioning and trading. Build Abyssal Mask or Mercury's Treads early to reduce her damage and survive her burst patterns."
-    },
-    "leona": {
-      "display_name": "Leona",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Leona's cooldowns since her engage tools have long downtime early. Respect her level 6 power spike and avoid grouping in choke points. Exploit her immobility between rotations by positioning at range and kiting her team. Build Quicksilver Sash or Mercury's Treads to cleanse her stun chains and reduce her threat window."
-    },
-    "lillia": {
-      "display_name": "Lillia",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Lillia's mobility and kite potential in teamfights as her core threat. Watch for her power spike at two items when she becomes a sustained damage threat. Exploit early game before she completes her first major item by grouping and forcing fights. Build grievous wounds immediately to reduce her healing effectiveness and limit her sustain in extended trades."
-    },
-    "lissandra": {
-      "display_name": "Lissandra",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her crowd control and avoid clumping in her ultimate range. Watch for her power spike at level 6 when she gains burst potential with her ultimate. Punish her before she completes her first major item when she's weakest. Build Hextech Protobelt or push for early advantages since she struggles against aggressive poke and sustained pressure during laning phase."
-    },
-    "lucian": {
-      "display_name": "Lucian",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay behind minions to avoid Lucian's poke damage in lane. Rush armored items like Plated Steelcaps to reduce his burst during his mid-game spike at two items. Abuse him when his Relentless Kite is on cooldown by closing distance aggressively. Build health early to survive his extended fights and deny him solo kills."
-    },
-    "lulu": {
-      "display_name": "Lulu",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Lulu's poke damage and cc chain in lane. Exploit her vulnerability before level 6 when she lacks ultimate protection. Dodge her Q skillshots and avoid grouping when her team positions around polymorph range. Build early magic resist or grab hexdrinker to mitigate her burst during her mid-game spike."
-    },
-    "lux": {
-      "display_name": "Lux",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her long-range poke damage and avoid clustering with teammates to minimize her ultimate hits. She spikes hardest at level 6 and when she completes her first item, so play safer during these windows. Abuse her immobility early game by engaging aggressively before her cooldowns reset. Build a Banshee's Veil or Mercury's Treads to block or cleanse her binding and reduce burst damage."
-    },
-    "malphite": {
-      "display_name": "Malphite",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Malphite's ultimate engage in teamfights\u2014it wins fights instantly. Play safe early as he scales into a unkillable tank. Exploit levels 1-6 before he completes his first items. Build grievous wounds and focus on kiting around his armor; force extended fights where his cooldowns matter more than burst."
-    },
-    "maokai": {
-      "display_name": "Maokai",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to track Maokai's roaming threat. Respect his level 6 power spike when his ultimate becomes a game-changing teamfight tool. Exploit the early game before he scales into unkillable territory. Build grievous wounds to counter his healing and reduce his sustained damage output significantly."
-    },
-    "masteryi": {
-      "display_name": "Master Yi",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Lock down Master Yi with crowd control before he deals damage. Ward your jungle to track his movements and collapse when he ganks. Exploit the early game before he scales into a dueling threat. Build armor and invulnerability items like Zhonya's Hourglass to survive his burst. Group with your team and stick together to prevent him from picking off isolated targets."
-    },
-    "malzahar": {
-      "display_name": "Malzahar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ban Malzahar or pick a champion with cleanse or QSS. Respect his level 6 all-in as his ultimate suppression becomes lethal with jungler assistance. Dodge his void pools to avoid taking free poke damage. Build Quicksilver Sash early to cleanse his suppression and turn fights in your favor before his cooldowns reset."
-    },
-    "milio": {
-      "display_name": "Milio",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Milio's healing output in extended fights and focus him before teamfights escalate. Exploit his weak early game by invading and securing kills before level 6. Play around his cooldowns aggressively when Aqua Prison is down. Build grievous wounds immediately to severely limit his sustain impact."
-    },
-    "mel": {
-      "display_name": "Mel",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to track Mel's roam patterns before she reaches level 6. Abuse her immobility early game by all-inning before her ultimate comes online. Respect her level 6 power spike and play safer when she has ultimate up. Build Maw or Force of Nature to block her poke damage and survive her burst engages."
-    },
-    "missfortune": {
-      "display_name": "Miss Fortune",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid her ultimate at all costs as it deals massive damage in teamfights. Play around her early game weakness before she completes her first items around level 6. Exploit the windows when her abilities are on cooldown to engage. Build Mercury's Treads early to reduce her crowd control and magic damage output."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (League of Draven): Catch axes for attack damage stacking bonus\n- Q (Spinning Axe): Throw axe, auto-attack returns it to you\n- W (Blood Rush): Gain movement speed and attack speed briefly\n- E (Stand Aside): Knock back enemies, slow them down slightly\n- R (Apocalypse): Fire massive axe explosion hitting all enemies\n- spike: Level 6 with ultimate, two-item powerspike critical\n- tip: Stay behind minions to dodge spinning axes safely"
     },
     "mordekaiser": {
       "display_name": "Mordekaiser",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Mordekaiser's all-in threat at level 6 when his ultimate becomes available. Avoid extended trades in his effective melee range before this spike. Exploit the early game before level 6 to establish a lead and deny him farm. Build Mercury's Treads and a magic resistance item to survive his burst and reduce his ultimate's impact."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Darkness Rise): Gain MS and damage aura near enemies\n- Q (Obliterate): Swing hammer, hits enemies in cone area\n- W (Indestructible): Shield self, heal when shield breaks or expires\n- E (Tremors): Drag enemies toward you, deal damage around\n- R (Realm of Death): Trap enemy champion alone, steal stats\n- spike: Level 6 with ultimate; mythic item completion\n- tip: Stay mobile and avoid close range engagements"
     },
-    "morgana": {
-      "display_name": "Morgana",
+    "jarvaniv": {
+      "display_name": "Jarvan IV",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid her binding at all costs since it roots you and enables her combo. She spikes hardest at level 6 with her ultimate and again when she completes Zhonya's. Abuse her pre-6 weakness by engaging aggressively before she gains map pressure. Build Quicksilver Sash early to cleanse her bindings and neutralize her teamfight control."
-    },
-    "naafiri": {
-      "display_name": "Naafiri",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward aggressively since Naafiri excels in skirmishes with her pack. Respect her level 6 spike and avoid extended fights in her territory. Exploit the early game before her ultimate comes online by pressuring lanes hard. Build grievous wounds immediately if you're a support or jungler to reduce her sustain and teamfight dominance."
-    },
-    "nasus": {
-      "display_name": "Nasus",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Shut down Nasus early before his stacks spiral out of control. Punish him relentlessly in lane during the first 15 minutes when he's weakest. Exploit his lack of mobility by ganking frequently and collapsing on him when he overextends. Build armor and grievous wounds to reduce his lifesteal and tank his damage effectively."
-    },
-    "nami": {
-      "display_name": "Nami",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward the river to track Nami's roams since her engage range is deceptive. Respect her level 6 power spike when Aqua Prison becomes available instantly. Abuse the early game before she hits two items, as her damage output remains negligible. Build Mikael's Crucible or cleanse to counter her crowd control and secure teamfight wins."
-    },
-    "neeko": {
-      "display_name": "Neeko",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her root combo and burst damage in teamfights. She spikes hardest at level 6 with ultimate access, so play safe early. Exploit her weak laning phase before level 3 to gain an advantage. Build Quicksilver Sash or Abyssal Mask to counter her crowd control and magic damage."
-    },
-    "nautilus": {
-      "display_name": "Nautilus",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Nautilus's hook range and play behind minions to avoid his primary threat. Abuse the early game before he completes his mythic item around level 11. Exploit his immobility by kiting and avoiding close-range fights. Build Adaptive Helm or Mercury's Treads to reduce his crowd control effectiveness and burst damage."
-    },
-    "nidalee": {
-      "display_name": "Nidalee",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her early spear damage and avoid predictable pathing through river. Watch for her level 6 spike when she gains hunting range advantage. Exploit her weak mid-game before she accumulates items by grouping and fighting in fog-free areas. Build early magic resist and consider Banshee's Veil to block her engage spears."
-    },
-    "nilah": {
-      "display_name": "Nilah",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her cooldowns early since Nilah struggles pre-6. Stack crowd control and focus her before she reaches her power spike at two items. Exploit the mid-game window when she lacks defensive stats. Build grievous wounds immediately to counter her self-healing and lifesteal scaling, severely limiting her teamfight dominance."
-    },
-    "nocturne": {
-      "display_name": "Nocturne",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your map constantly to track Nocturne's position before he ults. Play safe during his mid-game spike around level 6-11 when he dominates fights. Abuse the early game before his power comes online by pressuring objectives. Build Grievous Wounds immediately if he sustains heavily, and grab a Zhonyas or Banshees to counter his all-in potential."
-    },
-    "olaf": {
-      "display_name": "Olaf",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Olaf's all-in damage and axes in extended fights. Watch for his level 6 spike when he gains ultimate invulnerability. Exploit the early game before he scales, using ranged poke and crowd control. Build grievous wounds immediately to reduce his sustain and diminish his dueling potential."
-    },
-    "nunuwillump": {
-      "display_name": "Nunu & Willump",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances to track Nunu's snowball ganks, his primary threat. Play around level 6 when his ultimate becomes devastating in teamfights. Exploit the early game before he scales, punishing him with aggressive trades. Build Quicksilver Sash or Mercury's Treads to cleanse his crowd control and survive his engage."
-    },
-    "ornn": {
-      "display_name": "Ornn",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid his flame breath and brittle effect at all costs. Exploit the early game before he completes his first mythic item and becomes unkillable. Abuse the brief window when his ultimate is down to engage. Build grievous wounds early to reduce his self-healing and counter his tankiness."
-    },
-    "orianna": {
-      "display_name": "Orianna",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Orianna's ball range and avoid grouping when it's positioned near your team. Play around her early weakness before level 6, as her waveclear and damage spike significantly post-6. Exploit her immobility by diving her with gap closers when her ball is far from her body. Build Quicksilver Sash or Banshee's Veil to cleanse or block her Command Shockwave initiation."
-    },
-    "poppy": {
-      "display_name": "Poppy",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her cooldowns in lane since she struggles when abilities are down. Respect her mid-game power spike at items two and three where she becomes a teamfight menace. Abuse the early game before her scaling kicks in to secure a lead. Build Hollow Radiance or Force of Nature to survive her burst and reduce her threat level significantly."
-    },
-    "pantheon": {
-      "display_name": "Pantheon",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Pantheon's early game all-in potential with his point-and-click stun. Play safe during levels 2-3 when he spikes hardest before his cooldowns increase. Exploit his vulnerability after he uses his empowered abilities, especially his dash. Build early armor or defensive items to reduce his burst damage significantly."
-    },
-    "pyke": {
-      "display_name": "Pyke",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and lanes constantly to spot Pyke's roams before he executes. Respect his level 6 ultimate spike and play safer near walls where he can chain kills. Abuse the early game before he gets item spikes at Prowler's Claw and Black Cleaver. Build Hollow Radiance or grab armor early to reduce his burst damage and execute threshold."
-    },
-    "qiyana": {
-      "display_name": "Qiyana",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her burst damage in lane and avoid grouping in tight spaces where she lands her ultimate. She spikes hard at level 6 and again with first item completion, so play safe during these windows. Exploit her cooldowns early game before she gets her rotation online. Build Mercury's Treads and invest in early magic resist to reduce her combo damage and survive her all-in attempts."
-    },
-    "rakan": {
-      "display_name": "Rakan",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to catch Rakan before he engages your backline. Ban or pick him early since he spikes at level 6 with his ultimate. Exploit his cooldowns after he uses his dash\u2014he becomes vulnerable for several seconds. Build Grievous Wounds to reduce his healing and sustain, significantly lowering his teamfight value."
-    },
-    "rammus": {
-      "display_name": "Rammus",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Rammus's cooldowns since his engage tools require setup time. Exploit his early game weakness before he completes his armor items and reaches level 6. Avoid grouping when he has his ultimate ready as it devastates clustered teams. Build penetration items like Black Cleaver or Void Staff to shred his defensive stats and ignore his primary scaling advantage."
-    },
-    "quinn": {
-      "display_name": "Quinn",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her roam windows and avoid extended trades in lane. Rush armor early to reduce her auto attack damage and proc value. Exploit her vulnerability when her Vision Glaive is on cooldown by engaging. Group with teammates during mid-game when she peaks in dueling power, then scale into teamfights where her single-target focus becomes less relevant."
-    },
-    "reksai": {
-      "display_name": "Rek'Sai",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and jungle entrances constantly to track her tunnels. Play safe when she hits level 6 as her ultimate gank potential spikes dramatically. Exploit the early game before her powerspike by grouping and denying her isolated picks. Build armor early and group with teammates to minimize her burst damage on squishies."
-    },
-    "rell": {
-      "display_name": "Rell",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Rell's engage range and poke damage in lane. Abuse her immobility when she dismounts to trade safely. Dodge her mounted charge or position behind minions to block it. Build early magic resist and stay spread to minimize her ultimate's effectiveness. Punish her when her horse is on cooldown before remounting."
-    },
-    "renataglasc": {
-      "display_name": "Renata Glasc",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Renata's empowered auto-attacks and avoid grouping for her area control. Watch for her power spike at level 6 when her ultimate becomes available. Exploit the early game before she gains items and levels. Build early magic resistance or sustained damage to overcome her defensive mechanics and crowd control."
-    },
-    "rengar": {
-      "display_name": "Rengar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and jungle entrances to spot Rengar before he jumps. Play safe during mid-game when his lethality items spike hardest. Exploit early game when he lacks damage to all-in you. Build Zhonyas or Mercury's early to survive his burst combo and create counterplay windows."
-    },
-    "renekton": {
-      "display_name": "Renekton",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Renekton's early aggression and sustained damage in short trades. Avoid fighting him before level 6 when he dominates the lane. Exploit windows after he uses Fury on abilities, as his damage drops significantly. Build armor early and consider Plated Steelcaps to reduce his burst potential. Play safer when he has ultimate available."
-    },
-    "riven": {
-      "display_name": "Riven",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Riven's all-in potential and avoid extended trades in her favor. Play safe early and scale into teamfights where she struggles. Abuse her cooldowns after she uses abilities for gap closing or damage. Build armor early and consider Thornmail to reduce her burst and healing from her passive."
-    },
-    "rumble": {
-      "display_name": "Rumble",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Rumble's Overheating mechanic by forcing fights when his heat is high and he must disengage. Respect his power spike at level 6 when his ultimate becomes available. Exploit early game before he gains items and mana sustain. Build Mercury's Treads early to reduce his ultimate's crowd control impact and survive teamfights."
-    },
-    "ryze": {
-      "display_name": "Ryze",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and respect his early mana pool for frequent trades. Avoid clustering with teammates when he reaches level 6 as Realm Warp enables devastating ganks. Punish him during the first ten minutes before he scales into a teamfight monster. Rush Quicksilver Sash to cleanse his root and negate his primary engagement tool."
-    },
-    "sejuani": {
-      "display_name": "Sejuani",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to track Sejuani's ganks before she reaches level 6. Play safe during her mid-game spike around levels 11-13 when her ultimate becomes devastating in teamfights. Exploit her weak early game by invading her jungle or pushing lane when she hasn't finished core items. Build Mercury's Treads and prioritize spell-resist items to reduce her ultimate stun duration and crowd control threat."
-    },
-    "samira": {
-      "display_name": "Samira",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her cooldowns since Samira struggles without abilities. Respect her power spike at level 6 and completed Mythic item, where she dominates teamfights. Abuse the early game before she scales, focusing on trading when her dash is down. Build grievous wounds immediately to reduce her healing and survivability in extended trades."
-    },
-    "senna": {
-      "display_name": "Senna",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Senna's poke damage and avoid grouping in narrow corridors where she lands free hits. Abuse her weak early game before she scales into a carry threat around mid-game teamfights. Exploit the window when her mist walk is on cooldown to engage and lock her down. Build Kaenic Cascade or Hollow Radiance to reduce her healing and make her less oppressive in extended fights."
-    },
-    "seraphine": {
-      "display_name": "Seraphine",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on her immobile backline positioning and punish early game before she scales. Dodge her root chains and don't clump against her area damage. Exploit the level 6 spike timing by invading or ganking before her ultimate dominates fights. Build Mercury's Treads and Abyssal Mask to mitigate her magic damage and lockdown threat significantly."
-    },
-    "shen": {
-      "display_name": "Shen",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your lanes and play around Shen's ultimate cooldown. Exploit the early game before he reaches level 6 when his global impact becomes devastating. Push your advantage when he's on cooldown. Build grievous wounds to counter his healing and sustainability in fights."
-    },
-    "shaco": {
-      "display_name": "Shaco",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Control vision in river and jungle to track Shaco's early roams. Respect his level 3 spike and stay grouped mid-game when his burst damage peaks. Exploit his weak teamfight by grouping before 20 minutes before he scales. Build Zhonyas or Mercury's early to survive his burst and cleanse his fear."
-    },
-    "sett": {
-      "display_name": "Sett",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Sett's all-in damage in extended trades and never fight him near walls where he lands bonus True Damage. Avoid him early, as he spikes at level 6 and again with Trinity Force. Exploit the window before he completes his first item by maintaining range and poking safely. Build Kaenic Lifesteal if you're a melee champion to reduce his True Damage output significantly."
-    },
-    "shyvana": {
-      "display_name": "Shyvana",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward her jungle entrances to track her movements and prevent ganks. Avoid fighting her after she completes Rocketbelt as her damage becomes lethal. Exploit her pre-6 weakness by invading or counterganking before her dragon form comes online. Build Hollow Radiance to reduce her sustained damage and survive her all-in burst during teamfights."
-    },
-    "singed": {
-      "display_name": "Singed",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Don't chase Singed through his poison trail as he deals damage while kiting. He spikes in mid-game when he gets tankiness items, so exploit him early before he scales. Camp him level 6 when his ultimate is down and he's most vulnerable. Build grievous wounds to reduce his self-healing and cut his sustained damage significantly."
-    },
-    "sion": {
-      "display_name": "Sion",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Sion's charged Q in teamfights as it deals massive damage and stuns. Abuse him early game before he scales into a tankwall\u2014he spikes at three items. Exploit his immobility by kiting and avoiding his charge corridor. Build grievous wounds to cut his self-healing and survivability significantly."
-    },
-    "sivir": {
-      "display_name": "Sivir",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Sivir's waveclear and teamfight damage output. She spikes hard at two items with attack speed, so pressure early before she scales. Exploit the lane during her first five minutes when she lacks mana sustain. Build grievous wounds if you have healing matchups, and focus on dodging her boomerang blade as it chunks hard."
-    },
-    "skarner": {
-      "display_name": "Skarner",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay away from Skarner when his Spire is active, as his damage and mobility spike dramatically. Ward river and jungle entrances to avoid his ganks before level 6. Exploit his weak early game by pressuring objectives and denying him space. Build Quicksilver Sash or Force of Nature to cleanse his ultimate or survive his burst damage."
-    },
-    "smolder": {
-      "display_name": "Smolder",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Smolder's late-game scaling and explosive teamfight damage as your primary threat. Abuse him early before level 6 when he lacks ultimate burst potential. Coordinate ganks during his vulnerable laning phase to delay his power spike. Build defensive items like Maw or Kaenic Rookern to mitigate his fire damage and survive his ultimate."
-    },
-    "sona": {
-      "display_name": "Sona",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Abuse her immobility before six when she lacks escape tools. Watch for her power spike at level 6 and three-item completion when her damage becomes oppressive. Dive her constantly in lane using your threat range advantage. Build Abyssal Mask or Force of Nature into her to reduce her ability power scaling and protect your team from her auras."
-    },
-    "soraka": {
-      "display_name": "Soraka",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on bursting Soraka before she heals; her sustained damage is low but healing is oppressive. She spikes hardest at level 6 with ultimate range. Exploit the early game before she reaches level 3 and gains healing. Build grievous wounds immediately to cut her healing effectiveness in half and force kills."
-    },
-    "sylas": {
-      "display_name": "Sylas",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Sylas's weak early game before his first major item spike at level 6 and mythic completion. Ward his jungle path and respect his all-in potential with his stolen ultimate. Punish him when his E is down since he lacks escape tools. Build grievous wounds early to reduce his healing and force him into longer fights he cannot sustain."
-    },
-    "swain": {
-      "display_name": "Swain",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay away from Swain's grab range in lane\u2014his pull combo deals massive damage and locks you down. Exploit his weak early game before he reaches level 6 when his ultimate transforms him into a teamfight menace. Rush Quicksilver Sash or Merc Treads to cleanse his root and reduce his burst potential. Kite him relentlessly since he lacks mobility and dies quickly when isolated."
-    },
-    "syndra": {
-      "display_name": "Syndra",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Watch for her sphere placement and respect her burst combo at level 6 and beyond. Play around her cooldowns early since her mana costs are high pre-first back. Dodge her Dark Sphere projectiles and force her to choose between offense and defense positioning. Build Hexdrinker or Mercury's Treads to survive her ultimate and gain windows to engage safely."
-    },
-    "tahmkench": {
-      "display_name": "Tahm Kench",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Tahm Kench's cooldowns since his stun and devour are his primary threats. Abuse him early before he scales into a unkillable tank around level 9. Respect his all-in potential when he has Flash up and space away from walls. Build Grievous Wounds immediately to reduce his self-healing and make him vulnerable to poke damage."
-    },
-    "taliyah": {
-      "display_name": "Taliyah",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her burst combo and avoid her W knockback near walls or cliffs. She peaks in mid-game with her ultimate, so end fights quickly before she scales. Exploit her weak early game before level 6 by trading aggressively. Build Banshee's Veil or Mercury's Treads to mitigate her damage and crowd control pressure."
-    },
-    "talon": {
-      "display_name": "Talon",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your lane heavily since Talon roams lethally post-level 6. Play safe during his early spike at levels 2-3 and avoid the lane when he reaches level 6. Exploit his weak pre-6 phase by farming safely and scaling. Buy Zhonyas or exhaust to survive his all-in burst damage and guarantee your survival during teamfights."
-    },
-    "teemo": {
-      "display_name": "Teemo",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Hunt Teemo early before he scales into a split-pushing menace with shroom control. Abuse the level 1-3 window when he lacks defensive items and shroom pressure. Gank his lane repeatedly to shut him down before midgame. Build Adaptive Helm or Mercury's Treads to mitigate his poke and shroom damage across teamfights."
-    },
-    "taric": {
-      "display_name": "Taric",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on bursting Taric before he casts Starlight's Touch, as his healing makes extended fights unwinnable. His power spikes at level 6 and when he completes Radiance, so play safe during these windows. Exploit the early game before he scales, punishing his immobility with skillshot champions. Build grievous wounds immediately to cut his healing effectiveness and deny his sustain advantage."
-    },
-    "tristana": {
-      "display_name": "Tristana",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her all-in damage and extended range as she levels. Abuse her early weakness before she scales at level 6 and 11. Ward aggressively and collapse when she jumps in recklessly. Build early armor or grievous wounds to reduce her burst and self-healing threat during mid-game skirmishes."
-    },
-    "thresh": {
-      "display_name": "Thresh",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to track Thresh before he lands crucial hook engages, his primary threat. Play around your minion wave early to block hooks when he spikes at level 2. Exploit his vulnerable cooldowns immediately after he misses a hook by trading damage aggressively. Build Maw of Malmortius or Mercury's Treads to survive his all-in combos and reduce his burst potential."
-    },
-    "trundle": {
-      "display_name": "Trundle",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Trundle's pillar control in fights and avoid grouping around it. He spikes hardest at level 6 and during extended teamfights where he can stack his passive. Abuse him early before six when he lacks ultimate dueling power. Build grievous wounds to reduce his self-healing and consider kiting items to escape his domain."
-    },
-    "tryndamere": {
-      "display_name": "Tryndamere",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect his all-in damage and never fight him extended trades. Watch for his fury bar spike at six when his ultimate makes him unkillable for five seconds. Abuse him before level six and kite away from his spin attacks. Build armor or grievous wounds to counter his sustain and ultimate durability."
-    },
-    "twistedfate": {
-      "display_name": "Twisted Fate",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your lane extensively to spot his roaming patterns before level 6. Play around his Gold Card cooldown since it's his only reliable CC and primary threat. Exploit the early game before his first back when he lacks items and ult pressure. Build Abyssal Mask or Kaenic Rookern into his burst damage to reduce incoming spell harm significantly."
-    },
-    "udyr": {
-      "display_name": "Udyr",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Udyr's sustained damage and stick with your team to prevent ganks. Watch for his power spike after completing Trinity Force around 10-12 minutes. Exploit the early game before he scales by pressuring his lanes with coordinated ganks. Build Frozen Heart or Thornmail to cripple his attack speed and reduce his dueling threat significantly."
-    },
-    "urgot": {
-      "display_name": "Urgot",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay out of Urgot's effective range since his shotgun knees deal massive damage. Respect his power spike at level 6 when his ultimate becomes a guaranteed kill threat. Exploit the early game before he scales, trading aggressively in the first three levels. Build a Manamune or early armor to survive his burst and limit his damage output."
-    },
-    "twitch": {
-      "display_name": "Twitch",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward aggressively to catch Twitch before he enters stealth and positions for ambushes. Abuse him early game when his damage is weakest and he lacks defensive items. Group with your team during mid-game teamfights to prevent his rat attacks from decimating your backline. Build Quicksilver Sash or Mikael's to cleanse his poison damage and slows before he reaches critical attack speed."
-    },
-    "varus": {
-      "display_name": "Varus",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Varus's poke damage and chain CC in teamfights as his primary threat. He spikes hardest at two items with Manamune and Lethality components. Abuse his immobility early game before he completes his build. Buy early magic resistance or Mercury's Treads to reduce his blight damage and mitigate his ultimate's crowd control impact."
-    },
-    "vayne": {
-      "display_name": "Vayne",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around Vayne's weak early game before her first item spike. Ward aggressively to catch her roaming and punish her positioning. Exploit her lack of mobility by grouping and forcing fights before three items. Build armor early and stick close to deny her condemn angles, forcing her to fight at unfavorable ranges."
-    },
-    "veigar": {
-      "display_name": "Veigar",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid his Event Horizon stun cage at all costs since it locks down entire teams. Watch for his power spike at level 6 and again at two items when his burst becomes lethal. Exploit the early game before stacks accumulate by pressuring him constantly. Build Banshee's Veil or Mercury's Treads to survive his combo and deny him easy kills."
-    },
-    "velkoz": {
-      "display_name": "Vel'Koz",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Vel'Koz's range and avoid clustering with teammates since his ultimate deals massive damage in teamfights. Watch for his power spike at level 6 and again with Liandry's completion. Exploit the early game before he gains items by pressuring aggressively with ganks. Build Abyssal Mask or Mercury's Treads to reduce his poke damage and lock him down immediately when he overextends."
-    },
-    "vex": {
-      "display_name": "Vex",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her fear cooldown since it's her primary threat. Respect her damage spike at level 6 when she unlocks her ultimate. Abuse the early game before she gains power, trading aggressively in lanes. Build early magic resist or grab a Hexdrinker to mitigate her burst and fear vulnerability window."
-    },
-    "vi": {
-      "display_name": "Vi",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrance constantly since Vi excels at early ganks through predictable paths. Respect her level 6 power spike when her ultimate becomes available for guaranteed initiation. Exploit the 8-10 second window after her Q cooldown ends to trade aggressively. Build Thornmail or KaenicItystone to reflect her burst damage and reduce her sustained threat significantly."
-    },
-    "viego": {
-      "display_name": "Viego",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle and deny Viego early kills to cripple his scaling. Play grouped after level 6 when his ultimate threat peaks. Abuse him during his first 15 minutes before he gains momentum. Build grievous wounds early to reduce his self-healing and pick him off before teamfights start."
-    },
-    "viktor": {
-      "display_name": "Viktor",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Viktor's upgraded laser in mid-game teamfights as his primary threat. Abuse the early game before he completes his first upgrade around level 9. Exploit his immobility by ganking relentlessly before he scales. Build Hextech Protobelt or Abyssal Mask to survive his burst and reduce his damage output significantly."
-    },
-    "volibear": {
-      "display_name": "Volibear",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Volibear's all-in damage and tankiness after level 6. Abuse him early before his ultimate spike gives him mobility and durability. Kite away from his engage range and punish overextension. Build grievous wounds to reduce his healing and survivability in fights."
-    },
-    "vladimir": {
-      "display_name": "Vladimir",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Punish Vladimir's weak early game before level 9 when his damage spikes dramatically. Abuse the long cooldown on Sanguine Pool by trading aggressively when it's down. Build early magic resist and sustain to survive his mid-game burst. Pick champions with hard engage or ranged poke to exploit his melee range weakness."
-    },
-    "wukong": {
-      "display_name": "Wukong",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your lane to track Wukong's roams before his level 6 spike. Play safe when he has ultimate up, as his teamfight damage is devastating. Exploit his weak early game by pressuring him before first back. Build armor early and group with your team to neutralize his engage threat."
-    },
-    "warwick": {
-      "display_name": "Warwick",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances to spot Warwick's ganks early. Play safe when he hits level 6 as his ultimate becomes lethal. Exploit the early game before his first major items spike to secure kills and gold. Build early magic resist or grab a Quicksilver Sash to cleanse his ultimate engage and survive his burst damage."
-    },
-    "xerath": {
-      "display_name": "Xerath",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Xerath's long-range poke damage and stay behind minions in lane. Exploit his immobility by engaging him before level 6 when his ultimate is unavailable. Build Abyssal Mask or Mercury's Treads to reduce his burst and crowd control effects. Gank frequently since he lacks escape tools and positioning mistakes are heavily punished."
-    },
-    "xayah": {
-      "display_name": "Xayah",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play around her feather mechanics since they're her primary damage source. Respect her power spike at two items when she becomes a dueling threat. Abuse her immobility before she builds defensive items by ganking or diving her lane. Build Maw of Malmortius or force teamfights in confined areas where she cannot kite effectively."
-    },
-    "xinzhao": {
-      "display_name": "Xin Zhao",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Xin Zhao's all-in potential in extended fights with his three-hit passive. Avoid engaging him during mid-game when he peaks around items two and three. Exploit early game before he scales by playing safe and farming under tower. Build Thornmail or Frozen Heart to reduce his sustained damage output and cripple his attack speed."
-    },
-    "yasuo": {
-      "display_name": "Yasuo",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ban Yasuo or pick a champion with cc that pierces his windwall. Respect his power spike at level 6 when he gains ultimate access and becomes a primary threat. Exploit the early game before he scales, trading aggressively when his windwall is on cooldown. Build armor early and consider purchasing a Plated Steelcaps to reduce his physical damage output significantly."
-    },
-    "yone": {
-      "display_name": "Yone",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Yone's extended range when he uses his E ability to dash back in. Play safe until level 6 when his all-in threat peaks. Abuse him early before he scales and gets his first items. Build armor or ranged harass to punish his positioning before teamfights start."
-    },
-    "yunara": {
-      "display_name": "Yunara",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river entrances to spot Yuumi before she attaches to threats. Dodge her Q missiles early game when she's weakest before her support items spike at level 9. Focus enemies she's attached to since she amplifies their damage significantly. Build grievous wounds immediately if she's healing excessively, then focus the carrier down while she's exposed."
-    },
-    "yorick": {
-      "display_name": "Yorick",
-      "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Avoid fighting Yorick near his graves or ghouls as they deal massive damage. Respect his power spike at level 6 when his ultimate becomes available. Exploit the early game before he scales by trading aggressively in lanes. Build grievous wounds early to reduce his sustain and counter his pressure."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Martial Cadence): bonus damage on-hit after ability use\n- Q (Dragon Strike): spear thrust that reduces armor, knockup\n- W (Golden Aegis): shield and slow enemies in area\n- E (Demacian Standard): place flag, gains attack speed nearby\n- R (Cataclysm): jump to enemy, create trapping walls\n- spike: level 6 with ultimate; triforce completion\n- tip: avoid bunching near walls; position to escape ultimate cage"
     },
     "yuumi": {
       "display_name": "Yuumi",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Exploit Yuumi's immobility when she detaches from her host. Pressure her during early game before she scales into a healing monster. Focus the attached champion when she clings to them, forcing her to choose between healing and positioning. Build Grievous Wounds immediately to cut her sustained healing and reduce her teamfight impact significantly."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Bop 'n' Block): Grants shield when attacking; must leave ally to attack\n- Q (Prowling Projectile): Fires homing projectile; damage increases if enemy is alone\n- W (Zoomies): Attaches to ally, grants movement speed and heal over time\n- E (Adaptive Force): Grants ally attack speed or ability power based on needs\n- R (Final Chapter): Yuumi unleashes magic waves in area, slowing enemies hit\n- spike: Level 6 ultimate provides huge teamfight value and utility\n- tip: Exploit her vulnerability when detached; focus her before she reattaches"
     },
-    "zaahen": {
-      "display_name": "Zaahen",
+    "lux": {
+      "display_name": "Lux",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward river and respect Zed's all-in after level 6 when his ultimate spike makes him lethal. Play safe during his shuriken cooldowns and exploit these windows to trade or farm freely. Build Zhonyas early to counter his burst damage and create opportunities to fight back. Never fight him alone in side lanes where he controls the space."
+      "generated_at": "2026-05-05",
+      "notes": "- passive (Illumination): Enemies hit by abilities gain weakness, next hit deals bonus damage\n- Q (Light Binding): Snare two enemies in laser line; roots them briefly\n- W (Prismatic Barrier): Shield self and allies; shield bounces back to Lux for recharge\n- E (Lucent Singularity): Place AoE that damages and slows enemies when detonated\n- R (Final Spark): Fire massive laser dealing damage; executes low-health enemies instantly\n- spike: Level 6 with ultimate; two items for consistent burst damage\n- tip: Stay behind minions to block her Q snare and poke"
     },
-    "zac": {
-      "display_name": "Zac",
+    "briar": {
+      "display_name": "Briar",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Ward your jungle entrances to track Zac's gank patterns. Dodge his E knockup by spreading out and moving unpredictably. Exploit his early game weakness before level 6 when his teamfight impact skyrockets. Buy Quicksilver Sash or Mikael's Blessing to cleanse his E stun and deny his engage potential."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Hunger): Gain attack speed when near low-health enemies\n- Q (Head Bash): Dash forward, knock up first enemy hit\n- W (Blood Frenzy): AOE attack that heals based on damage dealt\n- E (Bloodpack): Summon pack of hounds to attack nearby enemies\n- R (Apex Predator): Leap to target, gain temporary invulnerability mid-flight\n- Spike: Level 6 ultimate enables aggressive all-in teamfights immediately\n- Tip: Stay grouped with allies; never isolate against Briar"
     },
-    "zed": {
-      "display_name": "Zed",
+    "urgot": {
+      "display_name": "Urgot",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Play safe in lane against Zed's burst damage threat. Respect his power spike at level 6 when his ultimate becomes available. Exploit the window after he uses Shadow Clone to engage aggressively. Build Zhonya's Hourglass early to counter his all-in potential and survive his ultimate combo."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Echoing Flames): Attacks mark enemies; next attack triggers bonus damage.\n- Q (Charges): Fires pellets in cone; reactivates to detonate for damage.\n- W (Permanant Hulk): Toggle attacks slow and grant attack speed bonus.\n- E (Disdain): Dashes forward, knocking back and slowing first enemy hit.\n- R (Fear Beyond): Pulls and executes low-health enemies into Urgot's position.\n- Spike: Level 6 ultimate enables forced engages and execution threats.\n- Tip: Stay out of his effective range; respect ultimate execute threshold."
     },
-    "zeri": {
-      "display_name": "Zeri",
+    "caitlyn": {
+      "display_name": "Caitlyn",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Focus on kiting and stopping Zeri's all-in charge with hard crowd control. She spikes hardest at level 6 and with full attack speed items, so respect her burst damage. Exploit her weak early game before two items by punishing her overextension. Build grievous wounds early to reduce her self-healing and survive her sustained damage."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Headshot): Bonus damage every few attacks or when near walls\n- Q (Piltover Peacemaker): Fires skillshot that damages first enemy hit\n- W (Yordle Snap Trap): Places trap that stuns and reveals enemies\n- E (90 Caliber Net): Dashes backward while shooting enemies forward\n- R (Ace in the Hole): Long-range execute shot through terrain\n- spike: Level 6 with ultimate; Infinity Edge powerspike\n- tip: Stay behind minions to block trap placement and Ace shot"
     },
-    "ziggs": {
-      "display_name": "Ziggs",
+    "xerath": {
+      "display_name": "Xerath",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay behind minions to avoid his poke damage and satchel charge knockback. Respect his power spike at level 6 when his ultimate gains range to threaten your entire lane. Exploit the early game before he scales, as he's vulnerable to all-in fights before completing his first item. Build Hextech Protobelt or similar items to close the gap and burst him before he can react."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Mana Surge): Mana regeneration increases with ability power\n- Q (Arcanopulse): Charge and fire long-range explosive projectile forward\n- W (Magister's Ascent): Blast area, slowing and damaging enemies hit\n- E (Shocking Orb): Stun enemy hit, shorter range than other abilities\n- R (Rite of the Arcane): Fire multiple bolts in chosen direction, recastable\n- spike: Level 9 with Luden's Echo and boots completed\n- tip: Stay behind minions and move unpredictably to avoid skillshots"
     },
-    "zoe": {
-      "display_name": "Zoe",
+    "thresh": {
+      "display_name": "Thresh",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Stay behind minions to block Zoe's Paddle Star poke damage. Watch for her level 6 power spike when Sleepy Trouble Bubble becomes lethal. Exploit her immobility early game before she gains control of fights. Build Hexdrinker or grab early magic resist to survive her burst and secure favorable trades."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Damnation): Collect souls for armor and ability power stacks\n- Q (Death Sentence): Hook enemy; pull self toward them if hits\n- W (Dark Passage): Create lantern; allies click to dash toward it\n- E (Flay): Push or pull nearby enemies; triggers on collision\n- R (The Box): Create prison walls; enemies crossing take damage, slow\n- spike: Level 6 with ultimate; strong hook + teamfight control\n- tip: Dodge hooks by moving unpredictably; position away from walls"
     },
-    "zilean": {
-      "display_name": "Zilean",
+    "leona": {
+      "display_name": "Leona",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect Zilean's time bombs\u2014they deal massive damage and stun in teamfights. Abuse him early before level 6 when he lacks ultimate protection. Exploit his immobility by ganking and all-inning before he scales. Build Banshee's Veil or Mercury's Treads to cleanse stuns and mitigate burst damage effectively."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Sunlight): Allies deal bonus damage to Leona's marked targets.\n- Q (Shield Bash): Melee dash that stuns and deals damage.\n- W (Eclipse): Grants armor and magic resist, reduces incoming damage.\n- E (Zenith Blade): Long range dash that stuns on hit.\n- R (Solar Flare): Large AoE stun in target area.\n- spike: Level 6 with ultimate; becomes fearsome engage tool.\n- tip: Space away from her; avoid clumping near teammates."
     },
-    "zyra": {
-      "display_name": "Zyra",
+    "tristana": {
+      "display_name": "Tristana",
       "patch": "16.9",
-      "generated_at": "2026-05-02",
-      "notes": "Respect her root combo and avoid clumping near her plants. She spikes hard at level 6 and again with Liandry's, so play safer during these windows. Punish her in the early game before she scales, as she lacks mobility. Build Mercury's Treads and Adaptive Helm to reduce her damage and crowd control effectiveness."
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Minigun): Range increases each level, stacking attack speed\n- Q (Rapid Fire): Toggle attack speed boost, resets on kill/assist\n- W (Rocket Jump): Leap forward, detonates bombs on landing nearby\n- E (Explosive Charge): Stack bombs on enemies, detonate for damage\n- R (Buster Shot): Knock back enemy, dealing damage based on range\n- spike: Level 6 with ultimate, two-item power spike\n- tip: Stay outside her effective range, punish her jump cooldown"
+    },
+    "masteryi": {
+      "display_name": "Master Yi",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Double Strike): Every few attacks, Yi strikes twice instantly.\n- Q (Alpha Strike): Dash through enemies, becoming untargetable, dealing damage.\n- W (Meditate): Channel to heal and reduce incoming damage briefly.\n- E (Wuju Style): Passive attack speed boost; active true damage on hits.\n- R (Highlander): Gain massive speed and attack speed, reset cooldowns on kills.\n- spike: Level 6 with ultimate; two-item power spike around 20 minutes.\n- tip: Group with team and use crowd control before he engages."
+    },
+    "irelia": {
+      "display_name": "Irelia",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Ionian Fervor): Gain attack speed per nearby enemy, max 5 stacks\n- Q (Bladestorm): Dash to enemy, resets on kill/assist, applies on-hit effects\n- W (Defiant Dance): Block damage, slow attackers, retaliate with true damage\n- E (Flawless Duet): Stun enemies hit twice, can cast again for second hit\n- R (Vanguard's Edge): Launch blades in cone, create wall, slow enemies hit\n- spike: Level 6 ultimate and Trinity Force powerspike, dominates teamfights\n- tip: Stay spread apart to prevent multi-hit E stuns during fights"
+    },
+    "fiora": {
+      "display_name": "Fiora",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Duelist's Dance): Marks enemy on side, hit grants movespeed and true damage\n- Q (Lunge): Dash forward, hit applies on-hit effects and reduces cooldown on hit\n- W (Riposte): Block incoming damage/cc, parry stuns and reflects damage back to attacker\n- E (Bladework): Two-hit combo, second hit slows and grants attack speed boost\n- R (Grand Challenge): Mark four vitals on enemy, hitting all grants massive true damage burst\n- spike: Level 6 with ultimate; mid-game with Trinity Force or Goredrinker\n- tip: Maintain distance, group with teammates, avoid extended trades she can kite into"
+    },
+    "swain": {
+      "display_name": "Swain",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Ravenous Flock): Gain soul fragments from nearby deaths; 5 fragments heal and empower next ability\n- Q (Death's Hand): Fire projectiles in cone; hits grant vision and slow enemies\n- W (Vision of Empire): Long-range skillshot reveals and damages; slows if you hit an enemy\n- E (Nevermove): Root nearby enemies in direction; can be reactivated to pull rooted targets\n- R (Demonic Ascension): Transform into raven form, gain health, attack enemies nearby with projectiles\n- spike: Level 6 with ultimate; two-item power spike around Liandry's and Zhonyas\n- tip: Avoid clumping; space away from teammates to minimize his ultimate teamfight value"
+    },
+    "lillia": {
+      "display_name": "Lillia",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Dreamy State): bonus magic damage per nearby enemy, stacks infinitely\n- Q (Pendulum): AOE damage in cone, applies passive stacks to hit enemies\n- W (Watch Out! Eep!): dash away and leave slowing zone behind\n- E (Swiping Swirl): dash forward dealing damage, resets on enemy hit\n- R (Lillia's Lullaby): AOE sleep, damage based on enemy missing health percentage\n- spike: level 6 with ultimate; two-item power spike mid-game\n- tip: keep distance and avoid grouping; cleanse/QSS removes sleep effect"
+    },
+    "yone": {
+      "display_name": "Yone",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Spirit Cleave): Gain AD from missing health, max 50% bonus AD\n- Q (Mortal Steel): Slash in direction, third cast fires projectile, applies on-hit\n- W (Spirit's Refuge): Create shield zone, block projectiles, linger after Yone leaves\n- E (Soul Unbound): Dash away leaving body behind, return to body or recast\n- R (Fate Sealed): Knock up enemies in line, dash through them dealing damage\n- spike: Level 6 ultimate; two items (Trinity/Sheen + AD item)\n- tip: Stay away from walls; dodge his E return by positioning unpredictably"
+    },
+    "lissandra": {
+      "display_name": "Lissandra",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Iceborn Pact): Toggled\u2014gain mana per second, convert mana to AP\n- Q (Ice Shards): Hurl ice shards in line, slows enemies hit\n- W (Ring of Frost): Freeze nearby enemies in place for short duration\n- E (Glacial Path): Dash forward, leaving icy trail that slows enemies\n- R (Frozen Tomb): Stasis self or enemy, then freeze nearby units\n- spike: Level 6 with ultimate; gains teamfight control and gank setup\n- tip: Position away from her W range; buy early Merc Treads"
+    },
+    "illaoi": {
+      "display_name": "Illaoi",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Tentacle Smash): Tentacles spawn near enemies hit by abilities, attack independently\n- Q (Tentacle Slam): Slam ground, tentacles attack in line, deals damage\n- W (Harsh Lesson): Empowered auto-attack, triggers all nearby tentacles to attack\n- E (Test of Spirit): Pull enemy spirit out, fight it separately, gain stats\n- R (Leap of Faith): Leap forward, spawn tentacles around Illaoi, gain massive AOE\n- spike: Level 6 with ultimate; Trinity Force completion\n- tip: Stay away from walls and avoid grouping near Illaoi"
+    },
+    "tahmkench": {
+      "display_name": "Tahm Kench",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (An Appetite for a Kill): Stacks on enemy champion hits; at 3 stacks, devours them briefly\n- Q (Tongue Lash): Ranged projectile that stuns and damages enemies hit\n- W (Thick Skin): Damage reduction shield that converts excess blocked damage to mana\n- E (Abyssal Dive): Tahm dives into terrain, gaining movement speed and repositioning\n- R (Eat Tahm Kench): Transforms into larger form with enhanced abilities and stats\n- Spike: Level 6 ultimate; significantly stronger post-first item completion\n- Tip: Stay grouped and maintain distance; itemize grievous wounds to reduce sustain"
+    },
+    "jinx": {
+      "display_name": "Jinx",
+      "patch": "16.9",
+      "generated_at": "2026-05-05",
+      "notes": "- Passive (Get Excited!): attack speed boost after kill or tower destruction\n- Q (Switcheroo!): toggle between minigun rapid-fire and cannon slow heavy damage\n- W (Zap!): long-range skillshot that stuns if target recently took damage\n- E (Flame Chompers!): place explosive traps that detonate when enemies approach them\n- R (Super Mega Death Rocket!): global ultimate missile with increasing damage over distance\n- spike: level 6 with ultimate; early items like Manamune powerspike\n- tip: stay behind minions to block her W stun skillshot reliably"
     }
   }
 }
