@@ -2974,7 +2974,13 @@ _COACH_CLOSING = {
         "Now emit JSON. He just gave first blood. One short line acknowledging it without piling on — then exactly what to do next: reset plan, wave state, whether to back or farm through. In HER voice. Don't dwell on the death."
     ),
     'you_killed': (
-        "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot."
+        "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot. "
+        "IMPORTANT: if GAME ENDING WINDOW appears in the message, override all other advice — the only correct call is PUSH NEXUS and end the game. Don't say drake, don't say back."
+    ),
+    'ace': (
+        "Now emit JSON. The enemy team is wiped. "
+        "If GAME ENDING WINDOW appears in the message — enemy nexus or inhibs exposed, enemies dead — the ONLY call is PUSH NEXUS and end the game right now. Say it clearly. Don't mention drake, back, or objectives. "
+        "If no GAME ENDING WINDOW, give the standard follow-up play: what objective to take and how long they have."
     ),
     'multikill': (
         "Now emit JSON. First bullet: she's genuinely shocked and impressed — 'oh my god', 'okay you're actually insane', 'STOP it' — then what to do next. Make it feel like she just watched it happen."
@@ -3081,6 +3087,27 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             if lost_nexus_towers:
                 parts.append(f'nexus tower{"s" if lost_nexus_towers > 1 else ""} exposed')
             lines.append(f'MAP PRESSURE: your {", ".join(parts)} — super minions may be active, enemy likely near your base.')
+        # Detect game-ending window: YOUR team has taken enemy nexus towers / inhibs
+        enemy_nexus_fallen = sum(
+            1 for _, _, tid in ev['towers']
+            if _tower_owner(tid) != your_team and _tower_tier(tid) in ('04', '05')
+        )
+        enemy_inhibs_fallen = sum(
+            1 for _, _, iid in ev['inhibs']
+            if _tower_owner(iid) != your_team
+        )
+        if enemy_nexus_fallen or enemy_inhibs_fallen:
+            dead_count = sum(1 for e in (enemies or []) if e.get('isDead'))
+            parts2 = []
+            if enemy_inhibs_fallen:
+                parts2.append(f'{enemy_inhibs_fallen} enemy inhibitor{"s" if enemy_inhibs_fallen > 1 else ""} down')
+            if enemy_nexus_fallen:
+                parts2.append(f'enemy nexus tower{"s" if enemy_nexus_fallen > 1 else ""} exposed')
+            dead_note = f', {dead_count} enemies dead' if dead_count else ''
+            lines.append(
+                f'GAME ENDING WINDOW: {", ".join(parts2)}{dead_note} — '
+                f'if enemies are dead or respawning, PUSH NEXUS and end. Drake/back are wrong calls here.'
+            )
         tower_state = _tower_state_summary(ev, your_team)
         if tower_state:
             lines.append(tower_state)
