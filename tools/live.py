@@ -2551,7 +2551,14 @@ class Coach:
         )
         for e in new_events:
             en = e.get('EventName')
-            if en in ('FirstBlood', 'Ace', 'BaronKill'):
+            if en == 'FirstBlood':
+                recipient = (e.get('Recipient') or '').split('#')[0]
+                if you_name and recipient == you_name and recipient not in enemy_names:
+                    return 'firstblood_you'
+                if recipient in enemy_names:
+                    return 'firstblood_lost'
+                return 'firstblood'  # teammate got it
+            if en in ('Ace', 'BaronKill'):
                 return en.lower()
             if en == 'TurretKilled':
                 turret_id = e.get('TurretKilled', '')
@@ -2960,6 +2967,12 @@ def remaining_item_costs(build_names, owned_names, item_index):
 
 
 _COACH_CLOSING = {
+    'firstblood_you': (
+        "Now emit JSON. He just got first blood. First bullet: her reaction to the kill — 'YES', 'okay that's how we start', 'first blood is YOURS' — then immediately what to do with the lead. Second bullet: tactical (back timing, next item, wave state). Both in HER voice."
+    ),
+    'firstblood_lost': (
+        "Now emit JSON. He just gave first blood. One short line acknowledging it without piling on — then exactly what to do next: reset plan, wave state, whether to back or farm through. In HER voice. Don't dwell on the death."
+    ),
     'you_killed': (
         "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot."
     ),
