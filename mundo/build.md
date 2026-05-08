@@ -51,13 +51,15 @@ Doran's Shield · Health Potion · Stealth Ward
 
 ## Build paths
 
-### Current build (author's go-to)
+### Current build (author's go-to — fallback when no comp-specific path applies)
 1. Warmog's Armor
 2. Heartsteel
 3. Boots of Swiftness
 4. Titanic Hydra
 5. Dead Man's Plate
 6. Jak'Sho, The Protean
+
+When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic damage), use that path as the base — it takes priority over the go-to above. Situational swaps (Thornmail, Randuin's, etc.) still apply on top of it.
 
 ### Standard meat (no Warmog's)
 1. Heartsteel
@@ -110,10 +112,12 @@ Doran's Shield · Health Potion · Stealth Ward
 
 Grounded in the go-to Warmog's path (slot 6 = Jak'Sho). Use full alternate paths above when the whole game warrants it.
 
+Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. Dead Man's Plate (slot 5) stays regardless; do not drop it to accommodate a second slot-6 swap.
+
 - Plated Steelcaps over Boots of Swiftness — heavy AD team
-- Randuin's Omen over Jak'Sho, The Protean — heavy crit (ADC + Yone/Yasuo)
-- Thornmail over Jak'Sho, The Protean — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth)
-- Force of Nature over Jak'Sho, The Protean — full AP team
+- Thornmail over Jak'Sho, The Protean — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth, Xin Zhao); highest priority slot-6 swap
+- Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere); only if Thornmail not needed
+- Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
 - Unending Despair over Dead Man's Plate — heavy AP poke (slot 5 swap)
 
@@ -131,7 +135,7 @@ Early buy: Warden's Mail before first legendary vs heavy AS tops (Irelia, Urgot,
 - Jak'Sho, The Protean
 - Sundered Sky
 - Hullbreaker
-- Randuin's Omen
+- Randuin's Omen (only with 2+ crit carries)
 - Thornmail
 - Experimental Hexplate
 - Iceborn Gauntlet
