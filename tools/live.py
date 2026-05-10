@@ -1684,29 +1684,34 @@ def format_swap_rules(swaps):
     return out
 
 
-def filter_swaps(swaps, enemies, ap, ad):
+def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
     """Drop swap options whose comp condition isn't met by the current enemy team.
 
-    Thresholds: Thornmail/Randuin's use tag presence; FoN requires 4+ AP (full AP,
-    not just majority); Steelcaps requires 3+ AD; Unending requires 3+ AP.
-    Anything else (Hullbreaker, etc.) is always included — player-intent swaps.
+    player_pos: raw Live API position string ('TOP', 'BOTTOM', 'UTILITY', etc.).
+    ADC/SUPPORT face the enemy support every fight, so the CC threshold for
+    Mercury's Treads / Scimitar is 1; other roles use 2.
 
     Performance-based build adjustments (fed carry mid-game) are left to the coach's
     own reasoning via THREAT ASSESSMENT and enemy KDA — not the filter's job.
     """
     enemy_tags = set()
     crit_count = 0
+    hard_cc_count = 0
     for e in enemies:
         name = normalize(e.get('championName', ''))
         tags = CHAMP_THREAT_TAGS.get(name, [])
         enemy_tags.update(tags)
         if 'CRIT' in tags:
             crit_count += 1
+        if 'HARD-CC' in tags:
+            hard_cc_count += 1
+
+    cc_threshold = 1 if player_pos in ('BOTTOM', 'UTILITY') else 2
 
     result = []
     for new_item, old_item, condition in swaps:
         item_l = new_item.lower()
-        if 'thornmail' in item_l:
+        if 'thornmail' in item_l or 'mortal reminder' in item_l:
             if 'HEALING' in enemy_tags or 'ATTACK-SPEED' in enemy_tags:
                 result.append((new_item, old_item, condition))
         elif 'randuin' in item_l:
@@ -1719,6 +1724,12 @@ def filter_swaps(swaps, enemies, ap, ad):
             if ad >= 3:
                 result.append((new_item, old_item, condition))
         elif 'unending despair' in item_l:
+            if ap >= 3:
+                result.append((new_item, old_item, condition))
+        elif "mercury's treads" in item_l or 'mercurial scimitar' in item_l:
+            if ap >= 3 or hard_cc_count >= cc_threshold:
+                result.append((new_item, old_item, condition))
+        elif 'maw of malmortius' in item_l:
             if ap >= 3:
                 result.append((new_item, old_item, condition))
         else:
@@ -3085,6 +3096,10 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
     if phase:
         lines.append(f'PHASE: {phase}')
+    _pos_label = {'top': 'TOP', 'jungle': 'JUNGLE', 'middle': 'MID', 'bottom': 'ADC', 'utility': 'SUPPORT'}
+    _role = _pos_label.get((me.get('position') or '').lower() if me else '', '')
+    if _role:
+        lines.append(f'ROLE: {_role}')
     if is_aram:
         lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
@@ -4060,7 +4075,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             phase = compute_phase(game_time, players)
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
-            active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad)
+            active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper())
             user_msg = build_coach_message(
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
                 recent_responses=recent_snapshot,
