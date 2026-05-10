@@ -87,7 +87,7 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 ### Full AD enemy team
 1. Heartsteel
 2. Plated Steelcaps
-3. Bramble Vest
+3. Thornmail
 4. Dead Man's Plate
 5. Randuin's Omen
 6. Jak'Sho
@@ -121,7 +121,7 @@ Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. De
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
 - Unending Despair over Dead Man's Plate — heavy AP poke (slot 5 swap)
 
-Early buy: Warden's Mail before first legendary vs heavy AS tops (Irelia, Urgot, Tryndamere).
+Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — finish Thornmail before the next legendary in the Full AD path, or hold it as a component in other paths.
 
 ## Boots options
 

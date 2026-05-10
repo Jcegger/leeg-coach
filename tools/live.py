@@ -19,6 +19,8 @@ Quit with Ctrl-C.
 import argparse
 import base64
 import json
+import logging
+import logging.handlers
 import os
 import re
 import shutil
@@ -39,6 +41,17 @@ except ImportError:
 
 LEEG_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = LEEG_ROOT / 'data'
+
+# Rotating log — max 1 MB, keep 3 backups. tail -f tools/leeg.log to watch live.
+_log_handler = logging.handlers.RotatingFileHandler(
+    Path(__file__).resolve().parent / 'leeg.log',
+    maxBytes=1_000_000, backupCount=3, encoding='utf-8',
+)
+_log_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%H:%M:%S'))
+log = logging.getLogger('leeg')
+log.setLevel(logging.DEBUG)
+log.addHandler(_log_handler)
+
 POLL_SECONDS = 3
 TIER_ORDER = {'Extreme': 0, 'Major': 1, 'Even': 2, 'Minor': 3, 'Tiny': 4}
 
@@ -2465,6 +2478,7 @@ class Coach:
     def _reset_for_new_game(self):
         """Clear all per-game state. Called when the game time goes backward
         (new game / restart) or when the script transitions idle -> game."""
+        log.info('--- new game started ---')
         self.in_flight = False
         self.last_response = None
         self.last_response_at = 0.0
@@ -2661,6 +2675,8 @@ class Coach:
         self.last_call = time.time()
         self.last_trigger = trigger
         self.last_call_game_time = game_time
+        mins, secs = divmod(int(game_time), 60)
+        log.info('trigger=%s time=%d:%02d', trigger, mins, secs)
         threading.Thread(
             target=self._call,
             args=(self.build_system(champ_folder), user_message,
@@ -2743,6 +2759,9 @@ class Coach:
                 })
                 if len(self.recent_responses) > 5:
                     self.recent_responses.pop(0)
+                log.info('response trigger=%s build=%s', self.last_trigger, live_build)
+                for b in bullets:
+                    log.info('  bullet: %s', b)
                 # Lock the committed build only when items actually change. This
                 # prevents the timestamp from drifting on every call when the
                 # coach is reaffirming the same path.
@@ -2763,6 +2782,7 @@ class Coach:
                 permanent_reason = 'API auth failed — using rule-based advice only'
             else:
                 permanent_reason = None
+            log.error('coach error: %s: %s', type(e).__name__, e)
             with self.lock:
                 self.errors += 1
                 self.last_response = f'(coach error: {type(e).__name__}: {e})'
@@ -4405,6 +4425,7 @@ def main():
     mode_label = f'override --champ {override}' if override else f'auto-detect ({len(available)} profiles)'
     print(f'leeg live · live API hosts={hosts}  lockfile={lockfile}  notes={mode_label}', flush=True)
 
+    log.info('=== leeg started ===')
     coach = Coach()
     coach.tts = not args.no_tts
     if coach.tts:
