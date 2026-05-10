@@ -322,6 +322,76 @@
       "patch": "16.9",
       "generated_at": "2026-05-08",
       "notes": "- Trundle pillar locks you down; his ult shreds your resistances and steals stats hard.\n- Play safe levels 1-3; respect his pillar range and avoid extended trades near walls.\n- Bait his pillar before committing; trade when it's down; never fight near terrain.\n- His ultimate counters your tankiness completely; play around cooldown and kite backward always.\n- First Sunfire or Hollow Radiance spike hurts; play passive, farm safely, scale up instead.\n- Post-15 minutes when you're tankier; all-in when his ult is down in fights.\n- Slow-push into him; deny him freeze setups and pillar wall angles for ganks.\n- Grasp scales your tankiness better than Phase Rush in this sustained damage matchup.\n- Adaptive Helm reduces his sustained damage and his ult's stat-steal effectiveness significantly."
+    },
+    "drmundo__kaisa": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Kai'Sa",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Kai'Sa all-in burst with evolved Q and isolation damage chunks or kills you instantly\n- Play safe and farm at range; her early damage is low, don't get isolated\n- Never trade into her when she has isolation; bait her Q then all-in with cleaver\n- Kai'Sa gains massive kill pressure and escape; respect her range and evolved abilities post-six\n- First item spike (Manamune or Kraken) is dangerous; play passive and stack health early\n- Dr. Mundo dominates mid-game teamfights; group and use tanking to outlast her burst\n- Slow-push to deny her isolation kills; force grouped fights where her range matters less\n- Grasp for sustain and tankiness; negates her poke and scales into team fights better\n- Add Adaptive Helm if she's ahead or has AP threats; blocks her burst and synergizes"
+    },
+    "drmundo__fizz": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Fizz",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Fizz's all-in combo and untargetability make him deadly; respect his burst damage threat\n- Play safe levels 1-3; farm at range with Q, avoid pushing into his level 2 all-in\n- Bait his E with body positioning, then trade back with Q; never chase him down\n- Post-6 Fizz ult is devastating; play around fog of war and respect the massive threat\n- Fizz's first item spike (Protobelt or Lich) is dangerous; play safer, farm defensively then\n- Your window is mid-game teamfights where his cooldowns are down; abuse his immobility then\n- Slow-push waves to stack them and reduce his all-in kill range on you safely\n- Pick Grasp for scaling, sustain, and win conditions in extended trades and late teamfights\n- Buy Abyssal Mask early after core items to reduce his burst damage significantly"
+    },
+    "drmundo__teemo": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Teemo",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Teemo's blind and poison shred your tankiness and sustained damage output completely.\n- Play safe levels 1-3; Teemo out-damages you early. Farm with Q from distance only.\n- Never chase Teemo into brush. Bait his blind, then all-in with E-W combo.\n- Teemo gains map control and zone denial with shrooms; respect them constantly.\n- His first item spike (Liandry's or Nashor) is a danger window; play passive.\n- Your power window arrives at Rylai's completion; kite with slowed enemies into teamfights.\n- Slow-push into him; force him to choose between farm and shroom placement elsewhere.\n- Take Grasp; sustain through poke and gain HP stacking for tank scaling advantage.\n- Build Adaptive Helm after core to counter his poison and ability spam significantly."
+    },
+    "drmundo__vayne": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Vayne",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Vayne's true damage passive and condemn wall stun lock you down hard; respect it\n- Play safe levels 1-3; farm with cleaver; dodge condemn; don't chase her into walls\n- Never trade after she lands condemn; bait her tumble then all-in with cleavers\n- Post-6 her ult gives her stealth and kiting; your engage window shrinks significantly\n- Vayne's first item spike (Kraken) is dangerous; farm safely and scale into teamfights\n- Your window is post-Hollow Radiance when tankiness peaks; her poke becomes negligible then\n- Slow-push to deny her condemn walls; give yourself space to dodge and chase\n- Grasp for sustain and scaling; Vayne cannot burst through extended trades with Grasp procs\n- Build Adaptive Helm after core; reduces her true damage and poke harassment over time"
+    },
+    "drmundo__sett": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Sett",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Sett's Haymaker (E) stun into all-in burst kills you if you're caught extended\n- Play safe levels 1-3; dodge his E at all costs, farm with Q from range\n- Bait his E cooldown, then trade with Q and autos; never fight into prepared Haymaker\n- Mundo ult sustain keeps you alive but Sett dominates short fights; respect his damage\n- His Trinity Force spike around 10 minutes is dangerous; play defensive and stack HP early\n- You outscale him significantly; punish him when his cooldowns are down post-15 minutes consistently\n- Slow-push into him; deny him all-in opportunities and force him to overextend for farm\n- Grasp for sustained trading and HP stacking to survive his burst damage consistently\n- Hollow Radiance early slows his burst and gives you armor against his percent-health damage"
+    },
+    "drmundo__nautilus": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Nautilus",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Nautilus root chains you down; his hook combo into ult deletion destroys your teamfight presence.\n- Play safe levels 1-3; respect his hook range and farm from max distance with axe.\n- Bait his hook by moving unpredictably, then all-in with Mundo Cleavers when it misses cooldown.\n- Post-6 Nautilus ult is a guaranteed initiate; position deeper and use your ult reactively for healing.\n- First Sunfire spike around 10 minutes is dangerous; play safer and stack resistances early.\n- Your window is mid-game when Mundo tankiness peaks before Nautilus Abyssal Mask; abuse this.\n- Slow-push waves into him; forces Nautilus to engage at your tower where you scale better.\n- Take Grasp for sustain and short-trade healing; Phase Rush runs away but doesn't win trades.\n- Build Hollow Radiance after core to tank his damage and reduce his hook-combo threat significantly."
+    },
+    "drmundo__shen": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Shen",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Shen's taunt locks you down, preventing kite/escape and enabling his team burst damage\n- Play safe levels 1-3; Shen out-trades you early. Farm at range, respect his Q poke\n- Avoid his taunt range entirely. Bait it with positioning, then all-in with E+Q combo\n- Post-6 Shen ult removes him; use this window to hard-push lane or invade jungle\n- Shen's Sunfire/Hollow Radiance spike hurts but doesn't counter you. Punish his ult cooldown instead\n- Your power window is mid-game teamfights when Shen can't ult everyone. Group and engage\n- Slow-push into him to stack wave, then crash for roam or jungle pressure timing\n- Grasp of the Undying; sustain through his poke and wins extended short trades\n- Add Hollow Radiance early if his team stacks magic damage; otherwise rush your core items"
+    },
+    "drmundo__leesin": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Lee Sin",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Lee Sin's Insec kick into your tower or teammates deals massive burst damage.\n- Play safe levels 1-3; Lee Sin's early damage is high, farm cautiously.\n- Bait his Q with unpredictable movement; dodge it, then trade with cleaver.\n- His R at 6 becomes a primary kill threat; respect kick range always.\n- Lee Sin spikes hardest at Sheen/Trinity; play defensively during his first-back power window.\n- You spike when Lee Sin runs out of energy; punish his passive downtime.\n- Slow-push waves so Lee Sin cannot roam freely to gank your teammates.\n- Take Grasp for consistent sustain and poke to wear him down safely.\n- Build Adaptive Helm after core items to reduce his repeated ability damage significantly."
+    },
+    "drmundo__maokai": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Maokai",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Maokai's root chains you down; his sustained damage and CC lock you out completely.\n- Play safe levels 1-3; respect his root range and farm from distance with Cleaver.\n- Bait his root with movement, then all-in when it's on cooldown; dodge his saplings.\n- Post-6 Maokai ult negates your engage; play around cooldown windows and don't force fights.\n- First Liandry's spike hurts; play safer but this isn't your danger window yet.\n- You spike mid-game when Maokai roots miss or you've stacked enough health and regen.\n- Slow-push waves into him; force him to choose between roaming or losing CS safely.\n- Take Grasp for sustain and trading power; it outscales his poke in extended fights.\n- Consider Abyssal Mask early if he's ahead; reduces his burst and amplification threat significantly."
+    },
+    "drmundo__syndra": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Syndra",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Syndra's burst combo and stun lock you down, preventing healing and kiting away safely.\n- Play safe, farm at range with Cleaver, dodge her Q harass, don't get close early.\n- Bait her stun, then all-in when it's down; respect her damage before level 3.\n- Her ultimate scales hard; respect range and position behind minions to block orb damage.\n- First Liandry's spike hurts; farm safely and scale; you outscale her significantly post-items.\n- Mid-game teamfights when you have items; she burns mana faster than you burn health.\n- Slow-push to stack wave, then threaten all-in; prevents her from roaming and poking freely.\n- Grasp sustains through poke; gives health and damage scaling that Phase Rush doesn't provide.\n- Kaenic Lifegrip converts her damage into your healing; blocks her burst and heals you."
     }
   }
 }

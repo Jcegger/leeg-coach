@@ -82,9 +82,9 @@ CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed
 # matching the CHAMP_DAMAGE convention (Wukong needs both wukong+monkeyking,
 # Renata needs both renata+renataglasc — Live API may surface either).
 _HEALING = (
-    "aatrox akshan briar camille darius diana drmundo fiora gwen illaoi "
-    "irelia janna karma leesin masteryi mordekaiser nami nasus renata "
-    "renataglasc senna sett sona soraka swain sylas trundle tryndamere "
+    "aatrox briar camille darius drmundo fiora gwen illaoi "
+    "irelia janna karma masteryi mordekaiser nami nasus "
+    "senna sett sona soraka swain sylas trundle tryndamere "
     "udyr vladimir volibear warwick xinzhao yorick yuumi"
 ).split()
 _HARD_CC = (
@@ -1682,6 +1682,48 @@ def format_swap_rules(swaps):
     for new_item, old_item, condition in swaps:
         out.append(f'  {new_item} over {old_item} — {condition}')
     return out
+
+
+def filter_swaps(swaps, enemies, ap, ad):
+    """Drop swap options whose comp condition isn't met by the current enemy team.
+
+    Thresholds: Thornmail/Randuin's use tag presence; FoN requires 4+ AP (full AP,
+    not just majority); Steelcaps requires 3+ AD; Unending requires 3+ AP.
+    Anything else (Hullbreaker, etc.) is always included — player-intent swaps.
+
+    Performance-based build adjustments (fed carry mid-game) are left to the coach's
+    own reasoning via THREAT ASSESSMENT and enemy KDA — not the filter's job.
+    """
+    enemy_tags = set()
+    crit_count = 0
+    for e in enemies:
+        name = normalize(e.get('championName', ''))
+        tags = CHAMP_THREAT_TAGS.get(name, [])
+        enemy_tags.update(tags)
+        if 'CRIT' in tags:
+            crit_count += 1
+
+    result = []
+    for new_item, old_item, condition in swaps:
+        item_l = new_item.lower()
+        if 'thornmail' in item_l:
+            if 'HEALING' in enemy_tags or 'ATTACK-SPEED' in enemy_tags:
+                result.append((new_item, old_item, condition))
+        elif 'randuin' in item_l:
+            if crit_count >= 2:
+                result.append((new_item, old_item, condition))
+        elif 'force of nature' in item_l:
+            if ap >= 4:
+                result.append((new_item, old_item, condition))
+        elif 'plated steelcaps' in item_l:
+            if ad >= 3:
+                result.append((new_item, old_item, condition))
+        elif 'unending despair' in item_l:
+            if ap >= 3:
+                result.append((new_item, old_item, condition))
+        else:
+            result.append((new_item, old_item, condition))
+    return result
 
 
 def fetch_item_index():
@@ -4017,6 +4059,8 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             players = data.get('allPlayers') or []
             phase = compute_phase(game_time, players)
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
+            _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
+            active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad)
             user_msg = build_coach_message(
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
                 recent_responses=recent_snapshot,
@@ -4025,7 +4069,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 champ_db=champ_db,
                 is_aram=is_aram,
                 team_threats=team_threats,
-                swaps=swaps or [],
+                swaps=active_swaps,
                 matchups=matchups,
                 phase=phase,
                 gold_lead=gold_lead,

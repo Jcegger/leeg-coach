@@ -276,6 +276,66 @@
       "patch": "16.9",
       "generated_at": "2026-05-08",
       "notes": "- Passive (Inherent Melody): Nearby allies grant notes; max 5 notes, attacks consume for damage\n- Q (High Note): Projectile skill shot; bounces between enemies, scales with notes consumed\n- W (Surround Sound): Heal allies in area; grants movement speed to nearby champions\n- E (Beat Drop): Stun line skill shot; wider with more notes consumed for damage\n- R (Encore): Long range ultimate; stun line that hits all enemies in path\n- spike: Level 6 with ultimate; mid-game with Moonstone Renewer and staff items\n- tip: Play around edges of fights; dodge E and R by moving perpendicular"
+    },
+    "teemo": {
+      "display_name": "Teemo",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Passive (Invisibility): Invisible while stationary, breaks on movement or attack\n- Q (Blinding Dart): Blind enemy, reducing their accuracy for short duration\n- W (Move Quick): Self-speed buff, decays when taking damage from champions\n- E (Toxic Shot): Passive poison damage on attacks, stacks for more damage\n- R (Noxious Trap): Place invisible mushroom traps, explodes dealing damage and poison\n- spike: Level 6 when ultimate unlocks; early mushroom map control\n- tip: Use sweeper trinket and control wards to counter mushrooms"
+    },
+    "vayne": {
+      "display_name": "Vayne",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Passive (Night Hunter): Gain movement speed toward nearby enemy champions.\n- Q (Tumble): Dash and gain attack speed; next attack deals bonus damage.\n- W (Silver Bolts): Third consecutive hit on target deals percent max health true damage.\n- E (Condemn): Knock enemy back; stun if they hit terrain nearby.\n- R (Final Hour): Gain stealth, range, and movement speed for short duration.\n- spike: Level 6 with ultimate; early Sheen/Trinity Force power spike.\n- tip: Clump with teammates and restrict her kiting space aggressively."
+    },
+    "kaisa": {
+      "display_name": "Kai'Sa",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Passive (Second Skin): Gain AD/AP from items; evolve abilities at thresholds\n- Q (Icathian Rain): Fire missiles in cone; applies on-hit effects to enemies\n- W (Void Seeker): Long-range projectile; marks enemy for bonus damage on hit\n- E (Supercharge): Dash with attack speed boost; resets on takedowns\n- R (Void Assault): Become invisible, dash toward enemy; reposition and engage\n- spike: Level 6 with ultimate; stronger at two items (AD/AP)\n- tip: Respect her all-in potential; maintain distance and abuse her range limits"
+    },
+    "fizz": {
+      "display_name": "Fizz",
+      "patch": "16.9",
+      "generated_at": "2026-05-08",
+      "notes": "- Passive (Nimble Fighter): dodges projectiles; every third attack applies on-hit effects twice\n- Q (Urchin Strike): dash to enemy, apply on-hit effects, reset if it kills\n- W (Seastone Trident): empower next attack; applies poison damage over time stacking\n- E (Playful/Trickster): become untargetable, jump away or toward; dodge enemy abilities freely\n- R (Chum the Waters): launch shark that stuns and damages; knocks up on collision\n- spike: level six ultimate; two items (Protobelt, Lich Bane) enable burst\n- tip: respect E cooldown; position away from walls; buy Quicksilver for ult"
+    },
+    "shen": {
+      "display_name": "Shen",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Passive (Ki Barrier): Shield generation increases with energy, decays when out of combat\n- Q (Twilight Assault): Slash enemies, restore energy, heal based on enemies hit\n- W (Spirit's Refuge): Block projectiles in zone, redirect damage to Shen instead\n- E (Shadow Dash): Dash across terrain, taunt first enemy hit, restore energy\n- R (Stand United): Teleport to ally, grant shield, swap positions with them\n- Spike: Level 6 with ultimate; becomes global threat with map pressure\n- Tip: Spread out to limit his dash taunt targets and engagement range"
+    },
+    "sett": {
+      "display_name": "Sett",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Passive (Grit): Generates shield from enemy damage, converts to health on next hit\n- Q (Knuckle Down): Dash forward, next auto attacks twice and slows enemies hit\n- W (Haymaker): Charge and release powerful punch, damage scales with gathered grit\n- E (Facebreaker): Stun nearby enemies, pull them toward Sett in both directions\n- R (The Show Stopper): Grab enemy, suplex them, damage scales with combined health pools\n- spike: Level 6 with ultimate, Mythic item completion dramatically increases threat\n- tip: Maintain distance to avoid his E stun and W combo burst"
+    },
+    "nautilus": {
+      "display_name": "Nautilus",
+      "patch": "16.9",
+      "generated_at": "2026-05-09",
+      "notes": "- Passive (Staggering Blow): Immobilizes next basic attack target; resets on ability hit.\n- Q (Dredge Line): Pulls first enemy hit toward Nautilus; hooks terrain for mobility.\n- W (Titan's Wrath): Shields Nautilus; basic attacks burn enemies in small area.\n- E (Riptide): Sends shockwave outward; detonates near enemies for damage and slow.\n- R (Depth Charge): Charges forward tracking enemy; knocks up all enemies hit.\n- spike: Level 6 ultimate enables guaranteed engage and gank setup potential.\n- tip: Stay spread; dodge Q by moving perpendicular; buy Quicksilver against ult."
+    },
+    "maokai": {
+      "display_name": "Maokai",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Sap Magic): Heal on ability hit; stacks grant damage reduction at max\n- Q (Bramble Smash): Knockback skillshot that damages and slows hit enemies\n- W (Twisted Advance): Dash to enemy, root them, gain shield\n- E (Sapling Toss): Place saplings that explode near enemies, slow and damage\n- R (Nature's Wrath): AOE root wave that damages and roots all hit\n- spike: Level 6 with ultimate; becomes strong tank around Sunfire mythic\n- tip: Space away from walls; dodge saplings; don't group without vision"
+    },
+    "syndra": {
+      "display_name": "Syndra",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Transcendence): gain AP per enemy champion nearby, max 5 stacks\n- Q (Dark Sphere): launch sphere dealing damage, leaves sphere on ground\n- W (Force of Will): grab sphere or enemy, hurl it for damage\n- E (Scatter the Weak): detonate nearby spheres, knock back and stun enemies\n- R (Unleashed Power): launch all spheres at target for massive damage\n- spike: level 6 ultimate; completed Luden's or Liandry's item spike\n- tip: stay spread; dodge Q spheres; respect E stun combo range"
+    },
+    "leesin": {
+      "display_name": "Lee Sin",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Flurry): Attack speed boost after ability use, stacks infinitely\n- Q (Sonic Wave): Skillshot that marks enemy, recast dashes to them\n- W (Safeguard): Shield ally or self, recast dashes to shielded target\n- E (Tempest): AoE damage and slow, reveals enemies hit for seconds\n- R (Dragon's Rage): Kick enemy in direction, knocks up nearby enemies\n- spike: Level 6 with ultimate; becomes primary engage threat\n- tip: Stay spread out to avoid multi-man kick combinations"
     }
   }
 }
