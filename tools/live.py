@@ -2657,11 +2657,11 @@ class Coach:
                 if you_name and killer == you_name and killer not in enemy_names:
                     return 'you_killed'
 
-        # Periodic fallback: fire if the game has been quiet for 90s+.
+        # Periodic fallback: fire if the game has been quiet for 120s+.
         # Requires at least one prior call so a build is already committed.
         if (self.last_response is not None
                 and game_time > 4 * 60
-                and time.time() - self.last_call > 90):
+                and time.time() - self.last_call > 120):
             return 'periodic'
 
         return None
@@ -3474,6 +3474,15 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                 for b in r['bullets']:
                     lines.append(f'    - {b}')
 
+    if trigger == 'periodic' and recent_responses and recent_responses[-1].get('trigger') == 'periodic':
+        lines.append('')
+        lines.append(
+            'REPETITION NOTE: your last call was also periodic and the situation has not changed much. '
+            'One short phrase to affirm the plan is fine ("keep farming, you\'re on track"), '
+            'then pivot to something new: a specific timing window, item threshold, roam to watch, '
+            'or lane detail you haven\'t mentioned. Do not repeat the same bullets verbatim.'
+        )
+
     lines.append('')
     closing = _COACH_CLOSING.get(trigger, _COACH_CLOSING_DEFAULT)
     if kill_deficit >= 13:
@@ -4115,6 +4124,10 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             )
             priority_for_validator = compute_priority_enemies(me, enemies, item_index) if me else []
             priority_names = [e.get('championName') for _r, e in priority_for_validator if e.get('championName')]
+            for _e in enemies:
+                _ename = _e.get('championName', '?')
+                _eitems = [it.get('displayName', '?') for it in (_e.get('items') or [])]
+                log.info('  enemy: %s items=%s', _ename, _eitems or ['none'])
             coach.request_async(
                 trigger, champ_folder, user_msg, game_time,
                 build_pick=build_pick,
