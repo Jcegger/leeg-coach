@@ -63,7 +63,8 @@ Her vitals and Riposte make direct trades fatal — she parries your E and wins 
 His barrel poke and body slam into ult displacement make lane control impossible. Don't stand near your own minion wave where barrels stack damage. Scale to Warmog's — his damage falls off against max-HP tanks and you can body him post-6.
 
 ### Irelia
-She resets through your health bar and true-damage marks make extended fights dangerous. Don't trade when she has 5 stacks — she deals true damage on E and stuns. Wait for her to use abilities on minions before going in; post-Warmog's you win sustained fights.
+Her Q resets give her infinite stick — Warmog's is bad here (she follows you everywhere). Take the Full AD path: Plated Steelcaps + Thornmail early guts her Q healing and AS burst simultaneously. Don't trade when she has 5 Ionian Fervor stacks — true damage on E and stun. Wait for her to spend Q on minions, then trade. If she has Yuumi attached she's nearly unkillable 1v1 — don't try, group instead. E-max.
+Build: Full AD
 
 ### K'Sante
 His passive lets him survive everything you throw and his Q wall punishes every melee exchange. Play around his passive cooldown (every 3rd Q procs it); Q poke when he's animation-locked on Q2. He plays like a damage dealer pretending to be a tank — short trades only until post-Warmog's.

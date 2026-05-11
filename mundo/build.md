@@ -155,7 +155,7 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 
 **BAD vs:**
 - Enemy has lots of max-HP damage
-- Enemy has good stick (e.g., Nasus)
+- Enemy has good stick (e.g., Nasus, Irelia — her Q resets mean she follows you everywhere)
 - Enemy lacks poke (every fight is to-the-death)
 - You need to be online fast — Unending Despair is stronger and faster as a 2nd item
 
