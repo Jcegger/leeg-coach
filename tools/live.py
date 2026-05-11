@@ -1721,6 +1721,15 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
 
     cc_threshold = 1 if player_pos in ('BOTTOM', 'UTILITY') else 2
 
+    # Randuin's threshold drops to 1 crit carrier if they have Kraken Slayer
+    # (max-HP true damage makes even a single fed ADC warrant crit reduction).
+    kraken_crit = any(
+        'CRIT' in CHAMP_THREAT_TAGS.get(normalize(e.get('championName', '')), [])
+        and any('kraken slayer' in (it.get('displayName') or '').lower() for it in (e.get('items') or []))
+        for e in enemies
+    )
+    randuin_threshold = 1 if kraken_crit else 2
+
     result = []
     for new_item, old_item, condition in swaps:
         item_l = new_item.lower()
@@ -1728,7 +1737,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
             if 'HEALING' in enemy_tags or 'ATTACK-SPEED' in enemy_tags:
                 result.append((new_item, old_item, condition))
         elif 'randuin' in item_l:
-            if crit_count >= 2:
+            if crit_count >= randuin_threshold:
                 result.append((new_item, old_item, condition))
         elif 'force of nature' in item_l:
             if ap >= 4:
@@ -3174,7 +3183,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             1 for _, _, iid in ev['inhibs']
             if _tower_owner(iid) != your_team
         )
-        if enemy_nexus_fallen or enemy_inhibs_fallen:
+        if (enemy_nexus_fallen or enemy_inhibs_fallen) and not lost_inhibs:
             dead_count = sum(1 for e in (enemies or []) if e.get('isDead'))
             parts2 = []
             if enemy_inhibs_fallen:
