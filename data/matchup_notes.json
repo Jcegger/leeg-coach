@@ -392,6 +392,97 @@
       "patch": "16.9",
       "generated_at": "2026-05-10",
       "notes": "- Syndra's burst combo and stun lock you down, preventing healing and kiting away safely.\n- Play safe, farm at range with Cleaver, dodge her Q harass, don't get close early.\n- Bait her stun, then all-in when it's down; respect her damage before level 3.\n- Her ultimate scales hard; respect range and position behind minions to block orb damage.\n- First Liandry's spike hurts; farm safely and scale; you outscale her significantly post-items.\n- Mid-game teamfights when you have items; she burns mana faster than you burn health.\n- Slow-push to stack wave, then threaten all-in; prevents her from roaming and poking freely.\n- Grasp sustains through poke; gives health and damage scaling that Phase Rush doesn't provide.\n- Kaenic Lifegrip converts her damage into your healing; blocks her burst and heals you."
+    },
+    "drmundo__tryndamere": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Tryndamere",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Tryndamere's sustained auto-attack damage and crit chance shred your health faster than you heal.\n- Play safe levels 1-3; avoid extended trades. Farm at max range with cleaver when possible.\n- Bait his spin, then trade back with cleaver and autos. Never fight him head-to-head early.\n- His ultimate makes him unkillable for five seconds; use yours defensively or disengage during his ult.\n- First item Sheen spike around eleven minutes gives him burst; respect it and play safer then.\n- Post-twelve minutes when you have two items, you outscale and duel him in extended fights.\n- Slow-push waves into him; forces him to extend for CS or lose it to tower damage.\n- Take Grasp for sustain in a poke-heavy lane; scales better into teamfights than Phase Rush.\n- Build Thornmail second or third to reduce his crit damage and return poison from his autos."
+    },
+    "drmundo__pantheon": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Pantheon",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Pantheon's empowered Q and all-in burst combo chunk you hard; respect his damage windows\n- Play safe levels 1-3; farm at range with Q, avoid melee range where he combos\n- Bait his Q cooldown, then trade back with E; dodge his empowered Q at all costs\n- Pantheon ult gives roam pressure; use it to shove lane hard and farm safely\n- His Manamune spike around 1200g hurts; farm safely then abuse your own sustain advantage\n- Post-10 minutes your tankiness and healing outscale; win extended trades when his cooldowns are down\n- Slow-push to crash waves near your tower; forces him to choose between farming and roaming\n- Grasp for sustained trading and health stacking; synergizes better than Phase Rush into poke-heavy lanes\n- Consider KaenicActively second item if he builds AD-heavy; otherwise stick to standard tankiness path"
+    },
+    "drmundo__sylas": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Sylas",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Sylas chains you down, all-ins with stolen ult, kills you before you heal back\n- Play safe levels 1-3, respect his chain range, farm from distance, don't get greedy\n- Bait his chain with unpredictable movement, trade when chain is down, avoid extended fights\n- Mundo ult becomes his ult too\u2014his sustain matches yours, he outscales you hard\n- First item spike around 1200g is dangerous; respect his kill pressure, play safer then\n- Mid-game teamfights favor you if Sylas wastes chain; punish him when cooldowns are down\n- Slow-push to stack waves, deny him all-in angles, control when fights happen near tower\n- Take Grasp for sustain and poke safety; Phase Rush makes you kitable, avoid it\n- Build Hollow Radiance early to reduce his burst damage and strengthen your defensive layer"
+    },
+    "drmundo__ekko": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Ekko",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Ekko's burst combo and time warp teleport escape make him slippery and hard to catch\n- Play safe levels 1-3; Ekko out-trades early, so farm at range and avoid extended fights\n- Bait his Q then all-in; dodge his passive proc range and never chase into unwarded jungle\n- Post-6, Ekko gains massive escape\u2014your all-in window closes, so play for teamfights instead\n- First item Protobelt spike hurts; respect his burst but this is your window to scale\n- Your advantage comes mid-game teamfights where Ekko can't kite forever and you tank ultimate\n- Slow-push waves into him; force him to choose between wave and roam pressure constantly\n- Take Grasp for sustain and scaling; Phase Rush works but you need the healing more\n- Buy Force of Nature early if Ekko snowballs; blocks his burst damage and movespeed matters"
+    },
+    "drmundo__ahri": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Ahri",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Ahri's charm combo locks you down; burst follows before you heal enough damage\n- Play safe, farm with cleaver; dodge her charm, respect her poke range early\n- Bait charm with movement; trade when she misses; never all-in without dodging charm\n- Mundo loses all-in potential; Ahri's mobility and burst increase dramatically with ultimate access\n- First item spike (Luden's/Everfrost) threatens your health pool; farm safely, don't force trades\n- You spike mid-game with items; force extended fights where her burst matters less\n- Slow-push to stack wave; forces her toward you, reduces her safe poke angles\n- Grasp for sustained trading; healing synergy mitigates her poke and shreds her resistances\n- Adaptive Helm after core items; reduces her spell burst and charm combo damage significantly"
+    },
+    "drmundo__darius": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Darius",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Darius bleeds stacks and executes you with ultimate\u2014dodge his pull, respect his damage\n- Play safe levels 1-3, farm under tower, avoid extended trades near him, poke with Q\n- Never trade directly; bait his Q outer ring, dodge E pull, kite backward always\n- Post-6 Darius execute threat increases dramatically\u2014maintain distance, never fight low health near him\n- Darius first item spike (Stridebreaker) is dangerous\u2014respect his all-in threat, play safer window\n- Your window opens mid-game when you stack tankiness; he falls off relative to your scaling\n- Slow-push waves to deny his all-in setup; prevent him from freezing near his tower\n- Take Grasp for sustained trading and tankiness scaling; helps you survive his repeated poke\n- Buy Force of Nature early if he's ahead; magic resist helps survive repeated bleeds"
+    },
+    "drmundo__renataglasc": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Renata Glasc",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Her Enforcer buff turns you into a liability; dodge her W or you'll feed kills.\n- Play safe levels 1-3; her poke outdamages your sustain early, farm from range with axes.\n- Bait her W with positioning, then all-in when it's down; never trade into her buff.\n- Her ultimate turns fights into 4v5s for you; position away from teammates when she ults.\n- Her first item spike (usually Chemtech) is dangerous; respect her damage and play safer briefly.\n- Post-12 minutes when you hit mythic, you outscale her and sustain through her poke heavily.\n- Slow-push to set up all-ins when W is down; never hard-push into her gank setup.\n- Take Grasp for sustain and tankiness to absorb her poke and trade favorably over time.\n- Buy Force of Nature early if she stacks AP; it counters her burst and ult damage."
+    },
+    "drmundo__jhin": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Jhin",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Jhin's Fourth Shot and root trap combo burst you down before you can react or lifesteal back\n- Play safe behind minions; dodge his W root at all costs; farm with Q from distance only\n- Never walk into his effective range; bait his W by moving unpredictably, then all-in with E+Q\n- Jhin's ultimate locks you down from range; respect it and stay behind cover or push minions hard\n- His first crit item (Collector or Galeforce) one-shots you; play even safer and stack resistances early then\n- You spike harder at level nine with maxed Q; use this window to shove and roam pressure\n- Slow-push into him to stack minions; force him to farm under tower where you control all-ins better\n- Take Grasp for sustain trades and scaling; Phase Rush is too gold-dependent versus his root damage\n- Kaenic Lifeplant second converts his burst into your healing; buys time to close distance and duel him"
+    },
+    "shen__smolder": {
+      "player_display": "Shen",
+      "enemy_display": "Smolder",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Smolder's long-range poke and execute damage punish overextended positioning relentlessly\n- Play safe levels 1-3; his early damage is deceptive; respect range\n- Dodge his Q; bait it with movement then trade back immediately\n- His ult at six creates kill pressure; position near walls carefully\n- First item spike around 10-12 minutes is dangerous; play defensive then\n- Post-six when his ult is on cooldown; that's your all-in window\n- Slow-push to stack waves; forces him to choose between farm and fight\n- Take Grasp for sustain in a poke-heavy matchup; stay healthy\n- Build Hollow Radiance early to reduce his burst and poke damage"
+    },
+    "shen__lux": {
+      "player_display": "Shen",
+      "enemy_display": "Lux",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Threat: Her point-and-click E stun chains into full combo; dodge or die quickly.\n- Early: Safe farm\u2014stay behind minions, avoid her Q poke range entirely pre-three.\n- Trading: Bait her E cooldown, then trade hard; never walk through her laser.\n- Post6: Her ult execute threat forces you to ult defensively or hard-shove lane.\n- Spike: First item (Luden's or Liandry's) hurts; punish her immobility before completion.\n- Window: Mid-game teamfights when her ult is down; Taunt wins fights hard.\n- Wave: Slow-push and reset frequently; prevents her from roaming while you scale.\n- Rune: Grasp for sustain poke trading; Herald stacks win extended lane pressure battles.\n- Item: Adaptive Helm second or third blocks her repeated spell damage efficiently."
+    },
+    "shen__drmundo": {
+      "player_display": "Shen",
+      "enemy_display": "Dr. Mundo",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Threat: Dr. Mundo's infinite sustain and tank stats make him impossible to kill alone\n- Early: Play safe levels 1-3; his Infected Cleaver out-ranges your abilities dangerously\n- Trading: Bait his Cleaver, then all-in with Q-auto trades; never fight in his wave\n- Post6: His ultimate sustain makes solo kills impossible; focus on roaming and team fights\n- Spike: Mundo spikes harder at Sunfire\u2014you cannot duel him; play around your team instead\n- Window: Shen wins early skirmishes before Mundo builds tankiness; abuse this narrow 1-5 minute window\n- Wave: Slow-push to set up ganks; fast-pushing wastes mana against his wave-clear ability\n- Rune: Grasp for sustain and stacking damage; Phase Rush cannot overcome his inherent durability\n- Item: Void Staff into his natural MR stacking makes your damage actually threaten him"
+    },
+    "shen__olaf": {
+      "player_display": "Shen",
+      "enemy_display": "Olaf",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Olaf's true damage axes and sustained melee damage overwhelm your defensive stats completely.\n- Play safe levels 1-3; avoid extended trades. Farm with Q from distance when possible.\n- Bait his axe throws, then punish his cooldown. Never trade when axes are up.\n- Olaf ult removes your taunt CC; use your ult to roam instead of engage.\n- His first Mythic spike (around 10-12 min) is dangerous; farm safely and scale patiently.\n- You spike harder mid-game with Mythic and levels. Punish when his ult is down.\n- Slow-push waves into him; deny him roam while you secure side-lane pressure and farm.\n- Take Grasp for sustain in poke trades and healing to offset his true damage.\n- Rush Kaenic Lifegrip after Mythic; converts his true damage pressure into your team's advantage."
+    },
+    "shen__volibear": {
+      "player_display": "Shen",
+      "enemy_display": "Volibear",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Volibear all-ins with E-flip and W bite; respect his damage and disengage range always\n- Play safe levels 1-3; farm from distance and avoid his E engage near minions\n- Bait his E flip, then trade back hard; dodge flip or he catches you easily\n- Post-6 he gains massive chase and initiation power; respect ult range and group with team\n- First item spike (Trinity Force around 10 min) is dangerous; play safer and scale into teamfights\n- You spike harder mid-game with Titanic; abuse this window before his tank stats become unkillable\n- Slow-push waves to control his all-in range; deny him easy E angles on you\n- Take Grasp for sustained trading and health stacking; Phase Rush works if you need escape\n- Add Thornmail early if he's fed; the armor and grievous wounds cripple his healing heavily"
     }
   }
 }

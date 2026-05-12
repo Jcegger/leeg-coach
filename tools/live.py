@@ -1549,6 +1549,30 @@ def strip_starters(item_names):
     return out
 
 
+_BOOTS_NORMS = {
+    normalize(n) for n in [
+        'Boots of Swiftness', 'Plated Steelcaps', "Mercury's Treads",
+        'Ionian Boots of Lucidity', "Sorcerer's Shoes", "Berserker's Greaves",
+        'Mobility Boots', 'Crimson Lucidity',
+    ]
+}
+
+
+def strip_duplicate_boots(item_names):
+    """If live_build contains more than one boots item, keep only the first one.
+    Boots are a comp-based decision made at build time; a later LLM counter-swap
+    should not silently override that choice."""
+    seen_boots = False
+    out = []
+    for n in (item_names or []):
+        if normalize(n) in _BOOTS_NORMS:
+            if seen_boots:
+                continue
+            seen_boots = True
+        out.append(n)
+    return out
+
+
 def validate_counter_citation(live_build, committed_items, bullets, build_change_reason,
                                priority_enemy_names, player_class=None):
     """Server-side enforcement of the build-council citation rule. Two checks
@@ -2728,6 +2752,7 @@ class Coach:
             bullets = affordability_postcheck(bullets, current_gold, item_index)
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
             live_build = strip_starters(live_build)
+            live_build = strip_duplicate_boots(live_build)
             live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
             # Counter-citation validator: reject ungrounded counter-item adds
@@ -3057,13 +3082,11 @@ _COACH_CLOSING = {
     ),
     'you_killed': (
         "Now emit JSON. First bullet: open with her reaction to the kill — 'okay yes', 'THERE he is', 'that's my guy', 'I love when you do that' — then the immediate next move. Second bullet: tactical. Both sound like HER, not a coach bot. "
-        "IMPORTANT: if GAME ENDING WINDOW appears in the message, override all other advice — the only correct call is PUSH NEXUS and end the game. Don't say drake, don't say back. "
-        "Otherwise: check the dead enemy's respawn timer in ENEMIES. If 15s or more, name the specific structure to take (tower, plates, dragon) — not just 'shove the wave'. If CS GAP appears, weave in the farm priority."
+        "Check the dead enemy's respawn timer in ENEMIES. If 15s or more, name the specific structure to take (tower, plates, dragon) — not just 'shove the wave'. If CS GAP appears, weave in the farm priority."
     ),
     'ace': (
         "Now emit JSON. The enemy team is wiped. "
-        "If GAME ENDING WINDOW appears in the message — enemy nexus or inhibs exposed, enemies dead — the ONLY call is PUSH NEXUS and end the game right now. Say it clearly. Don't mention drake, back, or objectives. "
-        "If no GAME ENDING WINDOW, give the standard follow-up play: what objective to take and how long they have."
+        "Give the follow-up play: what objective to take and how long they have."
     ),
     'multikill': (
         "Now emit JSON. First bullet: she's genuinely shocked and impressed — 'oh my god', 'okay you're actually insane', 'STOP it' — then what to do next. Make it feel like she just watched it happen."
@@ -3183,7 +3206,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             1 for _, _, iid in ev['inhibs']
             if _tower_owner(iid) != your_team
         )
-        if (enemy_nexus_fallen or enemy_inhibs_fallen) and not lost_inhibs:
+        if enemy_nexus_fallen or enemy_inhibs_fallen:
             dead_count = sum(1 for e in (enemies or []) if e.get('isDead'))
             parts2 = []
             if enemy_inhibs_fallen:
@@ -3191,10 +3214,16 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             if enemy_nexus_fallen:
                 parts2.append(f'enemy nexus tower{"s" if enemy_nexus_fallen > 1 else ""} exposed')
             dead_note = f', {dead_count} enemies dead' if dead_count else ''
-            lines.append(
-                f'GAME ENDING WINDOW: {", ".join(parts2)}{dead_note} — '
-                f'if enemies are dead or respawning, PUSH NEXUS and end. Drake/back are wrong calls here.'
-            )
+            if lost_inhibs:
+                lines.append(
+                    f'GAME ENDING WINDOW: {", ".join(parts2)}{dead_note} — MUTUAL SIEGE, your base is also exposed. '
+                    f'Push only if you have a clear numbers advantage; otherwise defend your nexus first.'
+                )
+            else:
+                lines.append(
+                    f'GAME ENDING WINDOW: {", ".join(parts2)}{dead_note} — '
+                    f'if enemies are dead or respawning, PUSH NEXUS and end. Drake/back are wrong calls here.'
+                )
         tower_state = _tower_state_summary(ev, your_team)
         if tower_state:
             lines.append(tower_state)
@@ -3233,6 +3262,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         priority, item_index, swaps or [], _player_class(your_champ or '')
     ) if (priority and item_index) else []
     council_by_name = {normalize(entry['enemy']): entry for entry in council}
+
+    # Suppress counter-item hints for items already committed or owned — avoids
+    # the coach repeatedly citing a counter it already told you to build.
+    _committed_norm = {normalize(i) for i in (committed_build or [])}
+    _owned_norm = {normalize(i.get('displayName', '')) for i in (me or {}).get('items', [])}
+    _already_have = _committed_norm | _owned_norm
 
     lines.append('ENEMIES:')
     threats = []
@@ -3273,16 +3308,20 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         if ce:
             tag_str = '+'.join(ce['threats']) if ce['threats'] else 'none'
             lines.append(f'    [{ce["role"]}] threats: {tag_str}')
-            if ce['counters']:
+            pending_counters = [c for c in ce['counters']
+                                if normalize(c['item']) not in _already_have]
+            if pending_counters:
                 parts = []
-                for c in ce['counters']:
+                for c in pending_counters:
                     parts.append(
                         f'{c["item"]} {c["cost"]}g ({c["source"].replace("_", "-")} — {c["reason"]})'
                     )
                 lines.append(f'    counters: {"; ".join(parts)}')
 
         state = _enemy_threat_state(e, game_time)
-        top_counter = (ce.get('counters') or [None])[0] if ce else None
+        all_counters = (ce.get('counters') or []) if ce else []
+        pending = [c for c in all_counters if normalize(c['item']) not in _already_have]
+        top_counter = pending[0] if pending else None
         if state in ('SNOWBALLING', 'AHEAD'):
             threats.append((state, e.get('championName'), pos, tier, top_counter))
         elif tier == 'Extreme' and state != 'BEHIND':
@@ -3309,6 +3348,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             '(do NOT remove other items) and KEEP that counter-item for the rest of the game. '
             'SPIKE INCOMING = Extreme-tier laner at or near their power window — respect it even if KDA is even.'
         )
+
+    urgent_counters = [
+        (champ, top_counter)
+        for state, champ, _pos, _tier, top_counter in threats
+        if state == 'SNOWBALLING' and top_counter
+    ]
 
     if win_condition:
         lines.append('')
@@ -3514,6 +3559,34 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             f" Game is {your_kills or 0}-{enemy_kills or 0} kills — we're ahead."
             " Press the lead: where's the next objective? Tell her to keep her foot on the gas."
         )
+    game_ending_line = next((l for l in lines if l.startswith('GAME ENDING WINDOW:')), None)
+    if game_ending_line:
+        if 'MUTUAL SIEGE' in game_ending_line:
+            closing += (
+                ' IMPORTANT: GAME ENDING WINDOW says MUTUAL SIEGE — push only if enemies are'
+                ' dead/respawning AND you have numbers advantage; otherwise defend nexus first.'
+            )
+        else:
+            closing += (
+                " IMPORTANT: GAME ENDING WINDOW is active — override all other advice."
+                " PUSH NEXUS and end. Don't say drake, don't say back."
+            )
+    elif urgent_counters:
+        owned_norm = {normalize(i.get('displayName', '')) for i in (me or {}).get('items', [])}
+        committed_norm = {normalize(i) for i in (committed_build or [])}
+        needed = [
+            (champ, tc) for champ, tc in urgent_counters
+            if normalize(tc['item']) not in owned_norm
+            and normalize(tc['item']) not in committed_norm
+            and normalize(tc['item']) not in _BOOTS_NORMS
+        ]
+        if needed:
+            champ, tc = needed[0]
+            closing += (
+                f' BUILD ADAPTATION: {champ} is SNOWBALLING —'
+                f' add {tc["item"]} ({tc["cost"]}g) to live_build now.'
+            )
+
     lines.append(closing)
     return '\n'.join(lines)
 

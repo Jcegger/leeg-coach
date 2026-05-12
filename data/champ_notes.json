@@ -336,6 +336,78 @@
       "patch": "16.9",
       "generated_at": "2026-05-10",
       "notes": "- Passive (Flurry): Attack speed boost after ability use, stacks infinitely\n- Q (Sonic Wave): Skillshot that marks enemy, recast dashes to them\n- W (Safeguard): Shield ally or self, recast dashes to shielded target\n- E (Tempest): AoE damage and slow, reveals enemies hit for seconds\n- R (Dragon's Rage): Kick enemy in direction, knocks up nearby enemies\n- spike: Level 6 with ultimate; becomes primary engage threat\n- tip: Stay spread out to avoid multi-man kick combinations"
+    },
+    "tryndamere": {
+      "display_name": "Tryndamere",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Battle Trance): gain attack damage per second, up to 35 bonus AD\n- Q (Bloodlust): heal from damage dealt, scales with missing health\n- W (Mocking Shout): slow enemies, terrify minions to stop their advance\n- E (Spinning Slash): dash and reduce cooldown with each auto attack\n- R (Undying Rage): become unkillable for 5 seconds, gain movement speed\n- spike: level 6 with ultimate, nearly impossible to kill solo\n- tip: build armor and kite backward; never engage close range fights"
+    },
+    "pantheon": {
+      "display_name": "Pantheon",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Mortal Will): Gain stacks on ability use; empowered next ability at 5 stacks\n- Q (Comet Punch): Thrust spear forward; empowered version hits thrice and stuns\n- W (Guardian's Call): Leap to ally or enemy; grants shield to nearby allies\n- E (Aegis Assault): Dash forward blocking damage; reactivate to damage and stun enemies\n- R (Grand Skyfall): Leap across map and crash down, damaging and slowing area\n- spike: Level 6 with ultimate; becomes lethal roaming ganking threat immediately\n- tip: Keep distance from minions; dodge his empowered Q stun engage attempts"
+    },
+    "sylas": {
+      "display_name": "Sylas",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Petricite Burst): Gain shield after casting abilities; stacks up to 3, explodes at max\n- Q (Chain Lash): Swing chain in direction, damage enemies, pull Sylas toward them\n- W (Kingslayer): Dash forward and punch, damage and heal based on enemy missing health\n- E (Abscond): Leap away, gain temporary shield, recast to chain-pull enemies toward you\n- R (Hijack): Steal enemy ultimate and cast it once with bonus damage and cooldown\n- Spike: Levels 6 and 11 when he gains access to powerful enemy ultimates\n- Tip: Position away from Sylas to prevent his E chain from pulling you in chains"
+    },
+    "ekko": {
+      "display_name": "Ekko",
+      "patch": "16.9",
+      "generated_at": "2026-05-10",
+      "notes": "- Passive (Resonance): Hit enemies 2 times, third hit stuns and slows them\n- Q (Timewinder): Throw disc dealing damage, returns and slows on return path\n- W (Parallel Convergence): Create slow zone, reactivate to stun enemies inside it\n- E (Phase Dive): Dash forward gaining shield, resets on champion/tower hits nearby\n- R (Chronobreak): Rewind to previous position, heal based on damage taken\n- spike: Level 6 ultimate enables aggressive plays and escape potential dramatically\n- tip: Spread out to minimize W stun radius; dodge Q return path"
+    },
+    "darius": {
+      "display_name": "Darius",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Hemorrhage: Bleed stacks on hit, grants armor penetration at max stacks\n- Decimate: Cleave damage, heals if you hit enemy champions\n- Crippling Strike: Next attack slows and resets attack timer\n- Apprehend: Pull enemy closer, gain movement speed away\n- Noxian Guillotine: Execute damage, resets on kill, executes low-health enemies\n- spike: Level 6 with ultimate, Stridebreaker or Black Cleaver completed\n- tip: Stay outside his effective range, kite backwards relentlessly"
+    },
+    "jhin": {
+      "display_name": "Jhin",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Whisper): Fires 4 shots, reload after; crit chance converts to AD\n- Q (Dancing Grenade): Bouncing grenade that detonates on enemies or terrain\n- W (Deadly Flourish): Long-range root shot; roots if enemy recently hit\n- E (Captive Audience): Places lotus traps triggering slow and damage when walked on\n- R (Curtain Call): Four long-range shots from position; each shot slows enemies\n- spike: Level 6 with ultimate; power spikes at Galeforce and Collector\n- tip: Stay behind minions to block W root and deny spacing"
+    },
+    "renataglasc": {
+      "display_name": "Renata Glasc",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Glasc Protocol): Nearby enemies take increased damage; stacks per hit, max 5 stacks\n- Q (Fascinate): Fires projectile; slows and reveals enemy hit, bounces to nearby targets\n- W (Leverage): Grabs ally or enemy, pulls them toward Renata, empowers next attack\n- E (Hostile Takeover): Shield on ally increases their damage; resets on takedown, spreads nearby\n- R (Chemtech Insurgence): Enemies in area gain ramping damage vulnerability; Renata heals from damage dealt\n- Spike: Level 6 with ultimate; strong at three items with ability haste\n- Tip: Keep distance and dodge Q bounces; don't cluster against her ultimate effect"
+    },
+    "ahri": {
+      "display_name": "Ahri",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Essence Theft): Gain stack on hit; heal at 9 stacks\n- Q (Orb of Deception): Lob orb dealing damage, returns hitting enemies again\n- W (Fox-Fire): Summon foxes attacking nearby enemies, prioritize closest target\n- E (Charm): Charm enemy in direction, can't act while charmed\n- R (Spirit Rush): Dash in direction up to three times instantly\n- spike: Level 6 with ultimate; most dangerous mid-game with items\n- tip: Respect charm range; position behind minions to block projectile"
+    },
+    "olaf": {
+      "display_name": "Olaf",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Berserker Rage): Gain attack speed per 1% missing health, scales infinitely\n- Q (Undertow): Throw axe in line, returns to you, slows on hit\n- W (Vicious Strikes): Heal based on missing health, gain attack speed for duration\n- E (Reckless Swing): Melee strike dealing true damage, costs health to cast\n- R (Ragnarok): Gain armor/magic resist and immunity to crowd control briefly\n- spike: Level 6 ultimate makes him unstoppable; Tri-force completion\n- tip: Kite away from him; don't fight in his effective melee range"
+    },
+    "smolder": {
+      "display_name": "Smolder",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Scales): Gain AD per level; max stacks grant bonus attack speed\n- Q (Bite): Skillshot that damages and applies on-hit effects to enemies hit\n- W (Scorched Earth): Place fire zone; damage enemies inside, slows on exit\n- E (Embersnap Trap): Lay trap that stuns and damages enemies triggering it\n- R (Inferno's Breath): Channel fire breath cone; damage scales with missing enemy health\n- spike: Level 6 ultimate and mythic item powerspike around 2-3 items\n- tip: Play around side lanes; avoid grouping in narrow areas where R lands"
+    },
+    "volibear": {
+      "display_name": "Volibear",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Frenzied Maul): Heal on attack, stacking up to 5 for burst heal\n- Q (Rolling Thunder): Charge forward, knockup enemies, recast to leap again\n- W (Maiming Bite): Next attack heals, applies bleed that triggers on movement\n- E (Sky Splitters): Call lightning strikes in area, damaging and slowing enemies\n- R (Thousand-Burned Fist): Transform into giant bear, gain size, AOE damage, enhanced abilities\n- Spike: Level 6 with ultimate grants massive tankiness and teamfight power\n- Tip: Kite backwards and avoid tight spaces where his AOE dominates"
+    },
+    "drmundo": {
+      "display_name": "Dr. Mundo",
+      "patch": "16.9",
+      "generated_at": "2026-05-11",
+      "notes": "- Passive (Adrenaline Rush): Mundo regenerates health every second, increased by missing health percentage\n- Q (Infected Cleaver): Throw axe that damages and slows enemies hit; returns to Mundo\n- W (Burning Agony): Toggle aura dealing damage to nearby enemies; costs health per second\n- E (Masochism): Mundo gains attack damage based on missing health for short duration\n- R (Sadism): Mundo heals massively over time and gains movement speed; long cooldown\n- spike: Level 6 with ultimate; becomes unkillable without coordination or burst\n- tip: Build grievous wounds early; reduce his healing to manageable levels immediately"
     }
   }
 }
