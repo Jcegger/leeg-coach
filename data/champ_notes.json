@@ -408,6 +408,36 @@
       "patch": "16.9",
       "generated_at": "2026-05-11",
       "notes": "- Passive (Adrenaline Rush): Mundo regenerates health every second, increased by missing health percentage\n- Q (Infected Cleaver): Throw axe that damages and slows enemies hit; returns to Mundo\n- W (Burning Agony): Toggle aura dealing damage to nearby enemies; costs health per second\n- E (Masochism): Mundo gains attack damage based on missing health for short duration\n- R (Sadism): Mundo heals massively over time and gains movement speed; long cooldown\n- spike: Level 6 with ultimate; becomes unkillable without coordination or burst\n- tip: Build grievous wounds early; reduce his healing to manageable levels immediately"
+    },
+    "blitzcrank": {
+      "display_name": "Blitzcrank",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Mana Barrier): Shield based on missing mana when taking damage\n- Q (Rocket Grab): Pull enemy champion toward Blitzcrank; skillshot with long range\n- W (Overdrive): Blitzcrank gains movement and attack speed for short duration\n- E (Power Fist): Next attack knocks up enemy and deals extra damage\n- R (Static Field): AOE damage and silence around Blitzcrank; damages nearby enemies\n- spike: Level 6 with ultimate; stronger after first hook item\n- tip: Stay behind minions to block Rocket Grab; position unpredictably near walls"
+    },
+    "varus": {
+      "display_name": "Varus",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Living Vengeance): gain attack speed when killing units, stacks infinitely\n- Q (Piercing Arrow): charge and fire arrow, damage increases with charge time\n- W (Blighted Quiver): autos apply blight, three blights trigger damage and slow\n- E (Hail of Arrows): rain arrows in area, reveals and damages enemies\n- R (Chain of Corruption): infect enemy, spreads to nearby enemies on hit\n- spike: level 6 with ultimate, two items with attack speed\n- tip: stay spread out to minimize Chain of Corruption chain spread"
+    },
+    "talon": {
+      "display_name": "Talon",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Blade's End): Bleeding stack on hit; at max stacks, detonates for damage\n- Q (Noxian Diplomacy): Empowered autoattack; refunds cooldown on kill\n- W (Rake): Throw blades in cone; returns on recast, slowing enemies\n- E (Shadow Assault): Dash through target; become untargetable briefly; gain stealth after\n- R (Shadow Assault): Enhanced version with more dashes and larger stealth radius\n- spike: Level 3 all-in with E; Serrated Dirk for burst\n- tip: Stay near allies; Talon struggles fighting grouped enemies together"
+    },
+    "cassiopeia": {
+      "display_name": "Cassiopeia",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Serpentine Succession): gain movement speed when moving toward poisoned enemies\n- Q (Noxious Blast): projectile that poisons and damages; refunds cooldown on poison hit\n- W (Miasma): creates poison cloud that slows and poisons enemies inside\n- E (Twin Fang): spits at target; doubles damage and healing if poisoned\n- R (Petrifying Gaze): stuns enemies looking at her; slows those looking away\n- spike: level 6 with ultimate; stronger with Liandry's Torment\n- tip: stand behind minions or terrain to block stun angle and projectiles"
+    },
+    "aatrox": {
+      "display_name": "Aatrox",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Deathbringer Stance): Heal on third attack; scales with AD and missing health.\n- Q (The Darkin Blade): Slash in cone; recast twice more; pull enemies to center.\n- W (Infernal Chains): Chain enemies; explode after delay or if they move far enough.\n- E (Umbral Dash): Dash and gain attack speed; resets on takedowns.\n- R (World Ender): Transform; gain size, lifesteal, and extended Q range; move faster.\n- spike: Level 6 with ultimate; first Goredrinker or Black Cleaver completion.\n- tip: Stay out of Q cone range; dodge chains; kite away from melee range."
     }
   }
 }

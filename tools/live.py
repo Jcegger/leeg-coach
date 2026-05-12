@@ -1557,6 +1557,11 @@ _BOOTS_NORMS = {
     ]
 }
 
+_MR_PIVOT_NORMS = {normalize(n) for n in [
+    'Hollow Radiance', 'Spirit Visage', 'Force of Nature',
+    'Unending Despair', 'Kaenic Rookern',
+]}
+
 
 def strip_duplicate_boots(item_names):
     """If live_build contains more than one boots item, keep only the first one.
@@ -3427,6 +3432,14 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         build_summary = build_path_summary(body)
         lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_summary}')
         build_names = [n.strip() for n in build_summary.split('·') if n.strip()]
+        if committed_build:
+            pick_has_mr = any(normalize(w) in _MR_PIVOT_NORMS for w in body.split())
+            committed_has_mr = any(normalize(i) in _MR_PIVOT_NORMS for i in committed_build)
+            if pick_has_mr and not committed_has_mr:
+                lines.append(
+                    'BUILD PATH SHIFTED: rule-based now recommends an MR-focused path but your '
+                    'committed build has no MR items — update live_build to the path above.'
+                )
 
     if item_index:
         owned_names = []

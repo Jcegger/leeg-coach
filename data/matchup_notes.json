@@ -483,6 +483,41 @@
       "patch": "16.9",
       "generated_at": "2026-05-11",
       "notes": "- Volibear all-ins with E-flip and W bite; respect his damage and disengage range always\n- Play safe levels 1-3; farm from distance and avoid his E engage near minions\n- Bait his E flip, then trade back hard; dodge flip or he catches you easily\n- Post-6 he gains massive chase and initiation power; respect ult range and group with team\n- First item spike (Trinity Force around 10 min) is dangerous; play safer and scale into teamfights\n- You spike harder mid-game with Titanic; abuse this window before his tank stats become unkillable\n- Slow-push waves to control his all-in range; deny him easy E angles on you\n- Take Grasp for sustained trading and health stacking; Phase Rush works if you need escape\n- Add Thornmail early if he's fed; the armor and grievous wounds cripple his healing heavily"
+    },
+    "drmundo__blitzcrank": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Blitzcrank",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Blitzcrank's hook one-shots you out of position; respect its range always and play unpredictably.\n- Stay behind minions levels one through three; dodge hook by moving erratically near wave.\n- Bait his hook with fake movements, then trade short with Cleaver when he whiffs.\n- His ultimate silences you; counterplay is minimal, so play further back post-six for safety.\n- Blitzcrank's Tear and Rylai spike around eleven minutes; punish him before he gains utility.\n- Mundo dominates at twelve-plus minutes when tanky; use late-game teamfights to suffocate his carries.\n- Slow-push waves into him so minion advantage lets you zone him off farming safely.\n- Take Grasp for sustain and trading damage; it scales better than Phase Rush here.\n- Buy Force of Nature third or fourth if hooked repeatedly; the magic resist saves you."
+    },
+    "drmundo__talon": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Talon",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Talon's burst combo and roam threat kill you if you're caught isolated or overextended\n- Play safe; respect his all-in at level 2; farm with Q from distance only\n- Never trade when his abilities are up; bait out his combo, then punish with Q\n- His roam pressure spikes hard; play safer and shove wave before he leaves lane\n- First item spike (Prowler's or Eclipse) is dangerous; respect his kill threat, farm safely\n- You spike harder at Liandry's or after first major item; extended fights favor you\n- Slow-push or freeze near tower; prevent him roaming and force him to farm under turret\n- Grasp sustains you through his poke and all-ins; scales better than Phase Rush here\n- Add Hollow Radiance early if he's snowballing; the armor and healing reduce his burst threat"
+    },
+    "drmundo__varus": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Varus",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Varus' poke damage and chain CC chain combo burst you down from range safely\n- Play safe behind minions; avoid extended trades; farm with Q from distance when possible\n- Dodge his E skillshot; bait it with movement, then all-in before cooldown resets\n- His ultimate lockdown becomes lethal; respect range and play around fog of war carefully\n- His first item (Manamune or Lethality) spike hurts; punish him before completing mythic item\n- Post-first-item, you outscale him; survive laning phase and you win extended fights easily\n- Slow-push into him; build wave so he takes tower aggro when trading with you\n- Grasp of the Undying; sustain through poke and bonus health scaling from extended fights\n- Adaptive Helm; reduces his poke and any AP mythic damage while boosting your tankiness"
+    },
+    "drmundo__aatrox": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Aatrox",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Aatrox's extended Q range and healing burst you down before you outdamage him back.\n- Play safe level 1-3; respect his Q knockup range and avoid walking predictably into minion lines.\n- Bait his Q knockup by walking sideways, then trade back with E after he whiffs.\n- Post-6 his ultimate extends fights; you need ult active to match his sustained damage output.\n- First item spike (Stridebreaker/Goredrinker) is dangerous; farm safely and don't force trades into his item power.\n- Your window hits when he burns cooldowns; all-in after his Q combo resolves and heal through poke.\n- Slow-push to stack wave into tower; denies his all-in setup and lets you sustain under turret.\n- Grasp of the Undying for early trading sustain and health scaling into your late-game durability tanks.\n- Consider KaenicActiveyes if he builds lifesteal; cuts his healing drain and makes your poke effective."
+    },
+    "drmundo__cassiopeia": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Cassiopeia",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Cassiopeia's twin fang applies poison then massive true damage; respect her damage output heavily\n- Play safe levels 1-3; farm at range with cleaver, avoid her Q poison damage entirely\n- Bait her Q with movement, then all-in with E-W; dodge twin fang follow-ups aggressively\n- Her petrify ult completely shuts down your engage; play around cooldown or initiate from fog\n- Liandry's completion around 10-12 minutes spikes her magic damage; respect range and don't trade then\n- Post-15 minutes when her mana depletes, force extended fights; your sustain outlasts her poke damage\n- Slow-push waves into her so she cannot safely roam; maintain pressure and deny her mobility\n- Take Grasp for extended trade sustain and bonus health; Phase Rush leaves you vulnerable to kiting\n- Add Adaptive Helm early if she reaches three items; reduces her burn and repeat damage significantly"
     }
   }
 }
