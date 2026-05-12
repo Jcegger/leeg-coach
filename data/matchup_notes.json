@@ -518,6 +518,48 @@
       "patch": "16.9",
       "generated_at": "2026-05-12",
       "notes": "- Cassiopeia's twin fang applies poison then massive true damage; respect her damage output heavily\n- Play safe levels 1-3; farm at range with cleaver, avoid her Q poison damage entirely\n- Bait her Q with movement, then all-in with E-W; dodge twin fang follow-ups aggressively\n- Her petrify ult completely shuts down your engage; play around cooldown or initiate from fog\n- Liandry's completion around 10-12 minutes spikes her magic damage; respect range and don't trade then\n- Post-15 minutes when her mana depletes, force extended fights; your sustain outlasts her poke damage\n- Slow-push waves into her so she cannot safely roam; maintain pressure and deny her mobility\n- Take Grasp for extended trade sustain and bonus health; Phase Rush leaves you vulnerable to kiting\n- Add Adaptive Helm early if she reaches three items; reduces her burn and repeat damage significantly"
+    },
+    "drmundo__vi": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Vi",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Vi's Vault Breaker stun locks you; her burst damage ignores your tankiness early\n- Play safe levels 1-3; Vi outtraded you; farm with Cleaver, avoid extended fights\n- Bait her Vault Breaker into walls; trade only after she wastes it\n- Post-6 her ult guarantees a kill if you're isolated; group or stay near towers\n- Vi's Trinity spike around 10 minutes is dangerous; respect her all-in potential hard\n- You spike at Hollow Radiance or when teamfights start; she struggles vs grouped Mundo\n- Slow-push waves into tower; forces Vi to choose between farm and roaming ganks\n- Grasp of the Undying; sustain and poke compensation for trading disadvantage early game\n- Mercury's Treads early; reduces Vault Breaker stun duration and improves survival against her combo"
+    },
+    "drmundo__viego": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Viego",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Viego's burst and healing reduce from your tankiness; his possession resets kill you fast.\n- Play safe levels 1-3; avoid extended trades. Farm at range with cleaver; respect his all-in.\n- Bait his W, then all-in with E. Never chase him into fog; kite backward always.\n- Viego gains reset potential; play around teammates. Your ult sustain still beats his burst if grouped.\n- His Kraken spike at two items hurts; farm safely and stack health before he completes mythic.\n- You spike hardest mid-game with two items; force fights before his three-item scaling takes over.\n- Slow-push side lanes to deny him farm and reset potential. Group for objectives with ult ready.\n- Take Grasp for sustained trading and scaling; Phase Rush if you need escape against ganks early.\n- Buy Adaptive Helm third or fourth; blocks his burst and healing reduction while boosting your tankiness."
+    },
+    "drmundo__aurelionsol": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Aurelion Sol",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Aurelion Sol's sustained star damage and kite potential keep you at range without kill threat windows.\n- Play safe levels 1-3; his poke outranges you. Last-hit from max range, avoid walking up needlessly.\n- Never chase him into his stars. Bait his E with fake engages, then all-in when it's down.\n- Post-6 his ultimate creates more kiting space. Your engage window shrinks; play around cooldown timers strictly.\n- His first-item spike (Liandry's or Rod) hurts around 2-3 items. Mundo spikes later; farm safely then.\n- Your window comes mid-game when he's immobile. All-in after he wastes E or ultimate cooldown.\n- Slow-push to stack waves and force him to choose between farm and poke; punish his indecision.\n- Take Grasp for sustain into poke; bonus damage helps duel when you finally close the gap.\n- Rush Abyssal Mask second or third to reduce his magic burst and sustain through his damage."
+    },
+    "drmundo__shyvana": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Shyvana",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Shyvana's sustained DPS and all-in potential with Dragon Form threaten your health pool severely\n- Play safe levels 1-3; respect her auto-attack range and avoid extended trades early\n- Bait her close with Cleaver then kite backward; dodge Dragon Form engage attempts at all costs\n- Post-6 Shyvana gains massive sustained damage and chase; respect her ultimate's cooldown and range\n- First Mythic spike (usually Sunfire or Liandry's) makes her a real threat; scale into your items\n- You spike harder mid-game with Hollow Radiance and tank items; punish her mistakes then\n- Slow-push sideways to maintain distance from her and create mana advantage through sustained waveclear\n- Take Grasp for trading sustainability and scaling; sustain keeps you healthy against her poke\n- Add Force of Nature if she stacks magic damage; reduces her percentage-based damage significantly"
+    },
+    "drmundo__velkoz": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Vel'Koz",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Vel'Koz sustained poke damage and percentage health scaling shreds your health pool relentlessly.\n- Play safe near minions; dodge his Q tentacle poke, farm with axe from distance.\n- Bait his Q with slight movement, then all-in when cooldown expires before backing.\n- His ultimate deals massive true damage; hide behind minions or dash away immediately.\n- First item Luden's is dangerous spike; respect range and farm safer until completed.\n- Level 9+ when your cooldowns lower; he scales harder so pressure early advantages.\n- Slow-push to stack wave, then freeze near tower to limit his poke angles.\n- Grasp for sustain trades and health scaling; Phase Rush works if you need escape.\n- Build Adaptive Helm as fourth or fifth item to reduce his magic damage significantly."
+    },
+    "drmundo__drmundo": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Dr. Mundo",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Threat: Dr. Mundo's superior sustain and tankiness outscales you; manage mana efficiently.\n- Early: Play safe levels 1-3; dodge his cleavers and avoid extended trades early.\n- Trading: Bait his cleaver, then all-in with Q-E combo when he's on cooldown.\n- Post6: His ultimate healing makes him unkillable; focus on wave control and roaming instead.\n- Spike: His Hollow Radiance spike is dangerous; back off and farm safely that window.\n- Window: Punish him early before level 6 when his sustain is weakest and manageable.\n- Wave: Slow-push to stack minions; forces him to decide between farm and trading.\n- Rune: Grasp of the Undying for sustained trading and healing to match his sustain.\n- Item: Add Morellonomicon second to reduce his healing and pressure his sustainability significantly."
     }
   }
 }

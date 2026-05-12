@@ -509,7 +509,7 @@ def wrap_line(line, width, continuation_indent='  '):
     return out_lines
 
 
-def _clean_db_note(text):
+def _clean_db_note(text, max_bullets=8, max_sentences=5):
     """Strip markdown headers; preserve bullet structure if present, otherwise
     split prose into one sentence per line. Returns a string with embedded
     newlines (each line is one bullet/sentence; first line carries no indent
@@ -523,11 +523,11 @@ def _clean_db_note(text):
         if stripped.startswith(('-', '*', '•')):
             bullets.append('• ' + stripped.lstrip('-*• ').strip())
     if bullets:
-        return '\n  '.join(bullets[:8])
+        return '\n  '.join(bullets[:max_bullets])
     # Fallback: prose split into sentences.
     collapsed = re.sub(r'\s+', ' ', ' '.join(raw)).strip()
     sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', collapsed) if s.strip()]
-    return '\n  '.join(sentences[:5])
+    return '\n  '.join(sentences[:max_sentences])
 
 
 def windows_host_ip():
@@ -4311,6 +4311,14 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         entry = matchups.get(normalize(p.get('championName', '')))
         return TIER_ORDER.get(entry[2] if entry else 'Tiny', 99)
 
+    my_pos = (me or {}).get('position') or ''
+    laner_norm = None
+    if my_pos:
+        for _p in enemies:
+            if (_p.get('position') or '') == my_pos:
+                laner_norm = normalize(_p.get('championName') or '')
+                break
+
     for p in sorted(enemies, key=sort_key):
         champ = p.get('championName', '?')
         pos = p.get('position', '') or ''
@@ -4328,12 +4336,21 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         tier = entry[2] if entry else None
         personal = entry[1].strip() if entry else ''
         auto = matchup_db.get_note(your_champ, champ) if (matchup_db and your_champ) else None
+        is_laner = laner_norm and normalize(champ) == laner_norm
+        is_snowballing = _enemy_threat_state(p, game_time) == 'SNOWBALLING'
+        full_display = is_laner or is_snowballing
         sections = []
         if personal:
-            sections.append(f'{DIM}[yours]{RESET} {personal}')
+            if full_display:
+                personal_text = personal
+            else:
+                sents = re.split(r'(?<=[.!?])\s+', personal.strip())
+                personal_text = ' '.join(sents[:3])
+            sections.append(f'{DIM}[yours]{RESET} {personal_text}')
         if auto:
-            sections.append(f'{DIM}[auto]{RESET} {_clean_db_note(auto)}')
-        if champ_db:
+            auto_limits = (8, 5) if full_display else (3, 3)
+            sections.append(f'{DIM}[auto]{RESET} {_clean_db_note(auto, max_bullets=auto_limits[0], max_sentences=auto_limits[1])}')
+        if full_display and champ_db:
             kit = champ_db.get_note(champ)
             if kit:
                 sections.append(f'{DIM}[kit]{RESET} {_clean_db_note(kit)}')

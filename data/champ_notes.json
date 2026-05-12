@@ -438,6 +438,36 @@
       "patch": "16.9",
       "generated_at": "2026-05-12",
       "notes": "- Passive (Deathbringer Stance): Heal on third attack; scales with AD and missing health.\n- Q (The Darkin Blade): Slash in cone; recast twice more; pull enemies to center.\n- W (Infernal Chains): Chain enemies; explode after delay or if they move far enough.\n- E (Umbral Dash): Dash and gain attack speed; resets on takedowns.\n- R (World Ender): Transform; gain size, lifesteal, and extended Q range; move faster.\n- spike: Level 6 with ultimate; first Goredrinker or Black Cleaver completion.\n- tip: Stay out of Q cone range; dodge chains; kite away from melee range."
+    },
+    "vi": {
+      "display_name": "Vi",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Blast Shield): Gain shield after hitting enemies with abilities\n- Q (Vault Breaker): Charge dash forward, knocking up enemies hit\n- W (Wince Force): Passive attack speed; active punches in direction, damages nearby\n- E (Excessive Force): Next attack hits twice, applies on-hit effects twice\n- R (Final Spark): Dash to enemy champion, knocking aside enemies, stunning target\n- spike: Level 6 with ultimate; mid-game with Black Cleaver\n- tip: Space away from walls; avoid grouping; build armor or mobility"
+    },
+    "aurelionsol": {
+      "display_name": "Aurelion Sol",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Breath of Light): Stars orbit, damage enemies, heal on hit\n- Q (Sparking Spellstone): Fire skill shot, explodes on enemy hit or delay\n- W (Celestial Expansion): Toggle stars larger, slower, more damage and healing\n- E (Escape Velocity): Dash forward, gain speed, leave star trail behind\n- R (Voice of Light): Push enemies away, stun if they hit terrain\n- spike: Level 6 ultimate and Liandry's Torment completion\n- tip: Stay outside star orbit range, dodge Q, use mobility"
+    },
+    "viego": {
+      "display_name": "Viego",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Sovereign's Domination): heal per hit; possess enemy champion on kill\n- Q (Blade of the Ruined King): slash in direction, applies on-hit effects\n- W (Harrowed Path): dash forward leaving trail, allies gain movement speed\n- E (Material Weakness): dash to target, mark them, next hit deals bonus damage\n- R (Heartbreak): leap into target, possess them temporarily, gain their stats\n- spike: level 6 with ultimate; becomes lethal with Black Cleaver\n- tip: stay grouped and position away from isolated targets Viego can catch"
+    },
+    "shyvana": {
+      "display_name": "Shyvana",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Fury): gain fury on hits; transform into dragon at 100 fury\n- Q (Twin Bite): next attack hits twice, resets auto attack timer\n- W (Burnout): AOE burn damage around you; movement speed buff while active\n- E (Flame Breath): breathe fire in cone dealing damage; applies dragon form bonus\n- R (Dragon's Descent): transform into dragon, gain stats, move toward location\n- spike: level 6 with ultimate; power spike after trinity force\n- tip: kite backwards and avoid short trades; buy grievous wounds early"
+    },
+    "velkoz": {
+      "display_name": "Vel'Koz",
+      "patch": "16.9",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Void Rush): Stacks on hit, 3 stacks triggers true damage proc and brief move speed\n- Q (Plasma Fission): Fires plasma bolt, splits into two projectiles on terrain or max range\n- W (Void Rift): Launches rift that damages and slows enemies in area of effect\n- E (Tectonic Disruption): Knocks up enemies hit, can combo with Q split for multi-target disruption\n- R (Life Form Disintegration Ray): Channeled laser dealing heavy damage, reorients freely while active\n- Spike: Level 6 with ultimate; power increases significantly at Liandry's completion\n- Tip: Stay behind minions to block Q splits and deny easy true damage stacks"
     }
   }
 }
