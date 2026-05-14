@@ -1799,6 +1799,13 @@ def fetch_item_index():
             iid = it.get('id')
             if not iid:
                 continue
+            # Skip Arena/special-mode items (ID >= 200000) and items removed
+            # from SR (inStore=False with no specialRecipe transform path).
+            # Seraph's Embrace / Muramana have specialRecipe set — keep them.
+            if iid >= 200000:
+                continue
+            if not it.get('inStore', True) and not it.get('specialRecipe', 0):
+                continue
             cost = it.get('priceTotal')
             if cost is None:
                 cost = (it.get('gold') or {}).get('total', 0)

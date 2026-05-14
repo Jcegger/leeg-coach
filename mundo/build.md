@@ -119,7 +119,7 @@ Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. De
 - Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere); only if Thornmail not needed
 - Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
-- Unending Despair over Dead Man's Plate — heavy AP poke (slot 5 swap)
+- Unending Despair over Dead Man's Plate — teamfights where multiple enemies cluster on you; passive procs every 4s dealing 3% bonus HP as AoE magic damage to all nearby enemies and healing 250% of post-mitigation damage dealt per target hit — scales with your HP stack, fires constantly when grouped on; also gives 15 AH (slot 5 swap)
 
 Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — finish Thornmail before the next legendary in the Full AD path, or hold it as a component in other paths.
 
