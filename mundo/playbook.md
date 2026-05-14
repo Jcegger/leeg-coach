@@ -107,10 +107,27 @@
 
 ## Side selection
 
-- Mundo is an Illaoi/Sion-type splitter — kill the responder, not Garen/Trynd run-away.
-- **If you can't 1v1 the responder, don't split. Group.** Splitting is often a flat-out bad choice for Mundo.
-- Default to grouping unless you have a clear 1v1 advantage on the side responder. "If you don't know what to do, group. It isn't always the best option but it's very rarely a bad choice."
-- Hyper-late (full builds): split is viable but more carefully — the ADC will shred you, and without R up you can't 1v1 anyone meaningful.
+**The threshold rule: group before Warmog's, split after.** Before Warmog's your regen can't keep pace in extended side lane trades and your R is too weak. Once it's online you can 1v1 almost anyone and regen back between trades.
+
+**Mundo is an Illaoi/Sion-type splitter — kill whoever shows up, not Garen/Trynd run-away. If you can't 1v1 the responder, don't split. Group.**
+
+### Split when:
+- Your team has another frontline (tanky jungler, tanky support) — you're not the only tank
+- Enemy win condition is teamfight-dependent (Malphite + Orianna, engage + AoE) — force them to fight 4v5
+- You're ahead of your laner — free pressure forces a 2-man response, opening up the map for your team
+- No major objective (Baron/Soul Drake) spawning in the next 2 minutes
+- R is up — don't side lane with R down unless you're far ahead
+- Enemy has poke/disengage comp (Janna, Lulu, Jayce) — your team can't group into that anyway, so side lane pressure is more useful
+
+### Group when:
+- Your team has zero frontline without you — 4v5 with squishies is unplayable
+- Enemy has a split push threat that beats or matches you (Fiora, Tryndamere, Camille) — don't play their game on their terms
+- Baron or Soul Drake is spawning within 2 minutes
+- You're behind in items — 1v1 side lane is riskier when behind; being an unkillable wall in grouped fights is more forgiving
+- Enemy has heavy CC engage (Amumu, Leona, Vi) that punishes your 4-man in a 4v5
+
+### Hyper-late (full builds):
+Split is viable but more carefully — ADC will start to shred you, and without R up you can't 1v1 anyone meaningful. "If you don't know what to do, group. It isn't always the best option but it's very rarely a bad choice."
 
 ## Teamfighting
 
