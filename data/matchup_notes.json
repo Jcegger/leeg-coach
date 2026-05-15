@@ -637,6 +637,76 @@
       "patch": "16.10",
       "generated_at": "2026-05-15",
       "notes": "- Lulu's polymorph locks you down; she kites and bursts while you're helpless and vulnerable\n- Play safe early; Lulu out-trades you levels 1-3 with poke; farm at range with cleaver\n- Never chase Lulu into her team; bait polymorph by playing predictably, then all-in when it's down\n- Post-6 Lulu gains CC and peel; her ult makes her untargetable\u2014play around cooldown windows only\n- Lulu's first item (Luden's or Liandry's) spike is dangerous; respect her burst and play safer\n- Mundo spikes hard at three items with tankiness; leverage this mid-game window before scaling teamfights\n- Slow-push waves into Lulu; force her to respond, then rotate for kills elsewhere on map\n- Take Grasp for sustain and winning extended trades; Phase Rush is too passive for this matchup\n- Add Hollow Radiance early if burst becomes too much; gives CDR, tankiness, and grievous wounds utility"
+    },
+    "shen__caitlyn": {
+      "player_display": "Shen",
+      "enemy_display": "Caitlyn",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Caitlyn's long-range poke and headshot combo punish extended trades and aggressive positioning\n- Play safe behind minions; farm carefully at range and avoid her trap zones\n- Dodge her Q with side movement; never trade when her headshot is ready\n- Taunt range limits her kiting; your ultimate enables teamfight presence she cannot match\n- Her first item (RFC or Lord Dom's) extends her range\u2014respect it and farm safer\n- Mid-game teamfights favor you when Caitlyn overextends; punish positioning mistakes with flash-taunt\n- Slow-push waves to set up ganks and prevent her from freely poking your team\n- Grasp sustains poke damage and scales better than Phase Rush into her sustained pressure\n- Hollow Radiance blocks her poke and headshot damage while providing tankiness and utility"
+    },
+    "shen__mordekaiser": {
+      "player_display": "Shen",
+      "enemy_display": "Mordekaiser",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- His all-in combo with E-Q pull and ult isolation kills you if caught without escape cooldowns ready\n- Play safe at range, farm with Q from distance, avoid pushing into his minion wave early\n- Dodge his E pull by moving unpredictably; bait his Q ground with your E dashes then trade\n- Mordekaiser ult removes your taunt and ult value; position far back when his ult comes online\n- His Rylai spike at first item makes his E pull unavoidable; play ultra-safe during this window\n- After his ult cooldown expires, you gain major window to roam and split-push uncontested safely\n- Freeze or slow-push near your tower to limit his all-in engage range and protect your positioning\n- Grasp sustains his poke and rewards short trades, letting you survive lane and scale better\n- Adaptive Helm blocks his passive burn and reduces his overall duel threat in extended fights significantly"
+    },
+    "shen__kayn": {
+      "player_display": "Shen",
+      "enemy_display": "Kayn",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Kayn's burst damage and wall-dash mobility let him escape trades or all-in you unpredictably.\n- Play safe levels 1-3; Kayn out-damages you early. Farm under tower, avoid pushing forward aggressively.\n- Bait his Q with positioning, then trade back. Never chase him into walls or bushes.\n- Post-6 becomes dangerous; his ult gives him escape or all-in potential. Play defensive, use ult reactively.\n- First item spike (Duskblade or Prowler's) is a punish window; Shen cannot duel him then.\n- Your power window is mid-game teamfighting and map pressure via ult. Use it before his items scale.\n- Slow-push waves into tower to control his roaming. Deny him easy gank setups and side kills.\n- Take Grasp for scaling durability and healing. You need sustained tankiness against his poke and burst.\n- Buy Hollow Radiance second or third to reduce his burst and protect teammates from his damage."
+    },
+    "shen__malzahar": {
+      "player_display": "Shen",
+      "enemy_display": "Malzahar",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Malzahar's voidlings and ultimate suppress lock you down; avoid getting caught immobile near minions\n- Play safe levels 1-3; stay max range farming, dodge voidling poke, never all-in without ult ready\n- Bait his E onto you instead of minions; dodge with Q movement, trade when voidlings expire\n- Post-6 his suppress ult is your hardest problem; respect range and never wade into fog of war\n- His first item spike (Liandry's or Luden's) hurts but isn't immediate danger; farm safely through it\n- Shen dominates after Mythic when you roam and teamfight; his wave control doesn't threaten side lane\n- Slow-push waves to crash into tower; keeps minions away from voidlings and prevents his roam setup\n- Take Phase Rush to kite voidlings and escape his suppress range before ult connects reliably\n- Abyssal Mask adds magic resist and anti-healing to survive his combo without derailing Mythic timing"
+    },
+    "shen__neeko": {
+      "player_display": "Shen",
+      "enemy_display": "Neeko",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Neeko root chain stuns you, then bursts you down before taunt lands or escape possible\n- Play safe levels 1-3, respect her root range, farm with Q, avoid walking into her\n- Bait her root by moving unpredictably, then trade back; dodge E by positioning behind minions\n- Her ultimate is a teamfight tool, not a duel threat; use your taunt to interrupt\n- First item spike around 1100 gold is minimal threat; punish her immobility and farm safely\n- Power spike mid-game when you complete mythic and have taunt; she cannot kite forever\n- Slow-push waves to build stacks and deny her all-in; reset when ult comes up\n- Grasp for sustain and scaling; Phase Rush if you need escape tools against early\n- Abyssal Mask second or third to block her magic damage and amplify your tankiness"
+    },
+    "shen__bluecasterminion": {
+      "player_display": "Shen",
+      "enemy_display": "Blue Caster Minion",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Threat: Blue Caster Minion's sustained poke damage forces you to respect range and repositioning constantly\n- Early: Play safe levels 1-3; farm from max range with Q to avoid minion aggression entirely\n- Trading: Never all-in when minion has full mana; bait its spells before committing to engage\n- Post6: Your ultimate provides escape and roam potential; minion lacks mobility to punish your map plays\n- Spike: First item spike is minimal threat; use this window to scale and impact sidelanes freely\n- Window: Level 6+ onwards when you ult for plays; minion cannot match your global pressure strength\n- Wave: Slow-push to extend lane; forces minion to overextend or miss CS under tower pressure consistently\n- Rune: Phase Rush allows you to dodge minion poke and kite when needed; mobility outweighs sustain\n- Item: Add Spectre's Cowl early if poke becomes unbearable; converts magic damage into effective durability"
+    },
+    "shen__sightward": {
+      "player_display": "Shen",
+      "enemy_display": "Sight Ward",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Threat: Sight Ward provides enemy vision; you cannot hide roams or flanks effectively\n- Early: Play safe levels 1-3; Sight Ward has no combat threat, farm freely and scale\n- Trading: Sight Ward cannot trade back; abuse this by poking freely with Q slashes\n- Post6: Your ultimate remains superior; Sight Ward still cannot duel or threaten you directly\n- Spike: Sight Ward never spikes; it provides utility only, never a danger window for Shen\n- Window: Mid-game teamfights favor you; roam and create plays Sight Ward cannot prevent or counter\n- Wave: Slow-push into Sight Ward; deny it information and control while scaling safely\n- Rune: Grasp punishes extended trades; Sight Ward cannot retaliate, making free damage guaranteed\n- Item: Kaenic Lifeline adds waveclear and sustain against poke if enemy team has threats"
+    },
+    "shen__bluemeleeminion": {
+      "player_display": "Shen",
+      "enemy_display": "Blue Melee Minion",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Blue Melee Minion has no threat; it deals minimal damage and cannot kill or punish Shen meaningfully.\n- Levels 1-3 are entirely safe; farm freely with autos and Q without fear of retaliation or all-in.\n- No meaningful trades exist; use this time to stack Grasp procs and build health advantage safely.\n- Level 6 changes nothing; Blue Mealie Minion lacks ultimate and poses zero threat to Shen's Standstill ultimate.\n- Blue Melee Minion has no item spike; Shen can farm safely through all enemy item timings without danger.\n- Shen has constant power edge; Blue Melee Minion cannot match Shen's tankiness, sustain, or trading ability ever.\n- Push wave consistently to deny Blue Melee Minion gold and experience while maintaining safety near enemy tower.\n- Take Grasp for free health stacking; Blue Melee Minion cannot punish your extended trading or aggressive proc usage.\n- Thornmail is unnecessary here; prioritize standard tank items like Kaenic Nashors or Hollow Radiance instead for value."
+    },
+    "shen__bluesiegeminion": {
+      "player_display": "Shen",
+      "enemy_display": "Blue Siege Minion",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Threat: Blue Siege Minion's explosive AOE damage zones you out and melts through your health bar.\n- Early: Play safe levels 1-3; farm with Q from distance and avoid walking into cannon blast range.\n- Trading: Bait its attack animation before engaging; dodge the blast cone by moving perpendicular to its aim.\n- Post6: Your ultimate provides escape and teamfight utility; use it to save allies caught in siege blasts.\n- Spike: First item spike (likely Abyssal Mask) increases its AOE damage\u2014play safer and respect its range.\n- Window: Pre-6 before cannon charges; engage when its blast is on cooldown after wasting on minions.\n- Wave: Slow-push to stack minions near tower; this limits its effective blast radius and lowers kill pressure.\n- Rune: Grasp of the Undying\u2014sustain lets you absorb poke and stay healthy through siege damage.\n- Item: Adaptive Helm reduces its repeated AOE damage and provides health regeneration against sustained pressure."
+    },
+    "shen__blastcone": {
+      "player_display": "Shen",
+      "enemy_display": "Blast Cone",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Blast Cone's explosive knockback disrupts your positioning, preventing taunt follow-up or escape.\n- Play safe levels 1-3; respect its range and avoid extended trades near walls.\n- Bait its knockback ability, then all-in when it's on cooldown; dodge sideways.\n- Your ultimate becomes stronger; use it to catch Blast Cone after it commits.\n- Watch its first item spike; abuse Shen's mid-game teamfight strength during its power dip.\n- Levels 9-11 when your cooldowns peak; force fights when Blast Cone can't kite effectively.\n- Slow-push to deny it wall resets; control wave near your tower for safety.\n- Take Grasp for sustain and tankiness; Phase Rush if you need extra kite escape.\n- Buy Hollow Radiance early if taking excessive burst; maintains tankiness without disrupting core build."
     }
   }
 }

@@ -1602,6 +1602,32 @@ _LOCKDOWN_CC_CHAMPS = set(
     "alistar amumu blitzcrank jarvaniv leona lissandra "
     "malphite malzahar morgana nautilus sejuani skarner zac".split()
 )
+_REFUSAL_PHRASES = {
+    "i don't have", "i do not have", "i cannot", "i can't",
+    "doesn't appear to be", "does not appear to be",
+    "not a champion", "not a character", "no information",
+    "as of my knowledge", "i'm not aware", "i am not aware",
+    "i apologize", "i'm sorry", "i am sorry",
+}
+
+
+def _is_valid_champ_notes(text):
+    low = text.lower()
+    if any(p in low for p in _REFUSAL_PHRASES):
+        return False
+    if '- q ' not in low and '- q(' not in low:
+        return False
+    if '- r ' not in low and '- r(' not in low:
+        return False
+    return True
+
+
+def _is_valid_matchup_notes(text):
+    low = text.lower()
+    if any(p in low for p in _REFUSAL_PHRASES):
+        return False
+    bullets = [ln for ln in text.splitlines() if ln.strip().startswith('- ')]
+    return len(bullets) >= 4
 
 
 def strip_duplicate_boots(item_names):
@@ -2375,6 +2401,10 @@ class ChampDB:
                 }],
             )
             notes = resp.content[0].text.strip()
+            if not _is_valid_champ_notes(notes):
+                with self._lock:
+                    self._pending.discard(key)
+                return
             with self._lock:
                 self._notes[key] = {
                     'display_name': display_name,
@@ -2498,6 +2528,10 @@ class MatchupDB:
                 }],
             )
             notes = resp.content[0].text.strip()
+            if not _is_valid_matchup_notes(notes):
+                with self._lock:
+                    self._pending.discard(key)
+                return
             with self._lock:
                 self._notes[key] = {
                     'player_display': player_display,
