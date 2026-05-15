@@ -1243,13 +1243,32 @@ def laner_build_tag(matchup_entry):
     return None
 
 
-def pick_build_variant(variants, profile_kind, preferred_tag=None):
+def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, ad_count=0, has_healer=False, no_warmogs=False):
     """Match comp profile to a build.md variant. preferred_tag (from a matchup
-    note 'Build:' line) is tried first; falls back to damage profile, then Standard."""
+    note 'Build:' line) is tried first; falls back to damage profile, then Standard.
+
+    Shortcuts (applied before the generic profile match):
+    - no_warmogs (heavy CC or % max-HP damage enemy): prefer a Standard path that
+      omits Warmog's — Warmog's regen is unreliable when you can't escape to recover.
+    - 3+ AP with significant AD (Standard profile): prefer a non-AD/non-Standard path
+      that provides MR. When a healer is also present, additionally require grievous wounds."""
     if preferred_tag:
         tag_norm = normalize(preferred_tag)
         for heading, body in variants:
             if tag_norm in normalize(heading):
+                return heading, body
+    if profile_kind == 'Standard' and no_warmogs:
+        for heading, body in variants:
+            if classify_variant(heading) == 'Standard' and 'warmog' not in normalize(body):
+                return heading, body
+    if profile_kind == 'Standard' and ap_count >= 3:
+        for heading, body in variants:
+            if classify_variant(heading) in ('AD', 'Standard'):
+                continue
+            b_norm = normalize(body)
+            has_mr = any(n in b_norm for n in _MR_PIVOT_NORMS)
+            has_gw = any(n in b_norm for n in _GRIEVOUS_NORMS)
+            if has_mr and (has_gw or not has_healer):
                 return heading, body
     for heading, body in variants:
         if classify_variant(heading) == profile_kind:
@@ -1561,6 +1580,28 @@ _MR_PIVOT_NORMS = {normalize(n) for n in [
     'Hollow Radiance', 'Spirit Visage', 'Force of Nature',
     'Unending Despair', 'Kaenic Rookern',
 ]}
+_GRIEVOUS_NORMS = {normalize(n) for n in [
+    'Thornmail', 'Chempunk Chainsword', 'Mortal Reminder', 'Bramble Vest',
+    "Executioner's Calling",
+]}
+# Crit items and components — used to confirm a CRIT-tagged enemy is actually
+# building crit rather than on-hit. Randuin's only fires when at least one
+# CRIT-tagged enemy has one of these in their inventory.
+_CRIT_ITEM_NORMS = {normalize(n) for n in [
+    'Infinity Edge', 'Galeforce', 'Kraken Slayer', 'Navori Quickblades',
+    'Navori Flickerblade', 'Phantom Dancer', 'Rapid Firecannon', 'Statikk Shiv',
+    'Stormrazor', 'Kircheis Shard', 'Cloak of Agility', 'Zeal',
+]}
+# Champs whose kit punishes HP stacking via % max-HP damage. Warmog's big HP spike
+# is weaker against these — prefer Standard meat (no Warmog's) path.
+_ANTI_WARMOGS_CHAMPS = set("camille fiora gwen kogmaw urgot vayne".split())
+# Champs whose CC commits you to a fight you cannot leave — even one is enough to
+# make Warmog's regen unreliable. Distinct from HARD-CC (which includes Brand, Heimer
+# etc. with skillshot/setup CCs that don't prevent disengaging).
+_LOCKDOWN_CC_CHAMPS = set(
+    "alistar amumu blitzcrank jarvaniv leona lissandra "
+    "malphite malzahar morgana nautilus sejuani skarner zac".split()
+)
 
 
 def strip_duplicate_boots(item_names):
@@ -1744,7 +1785,9 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
         tags = CHAMP_THREAT_TAGS.get(name, [])
         enemy_tags.update(tags)
         if 'CRIT' in tags:
-            crit_count += 1
+            item_norms = {normalize((it or {}).get('displayName', '')) for it in (e.get('items') or [])}
+            if item_norms & _CRIT_ITEM_NORMS:
+                crit_count += 1
         if 'HARD-CC' in tags:
             hard_cc_count += 1
 
@@ -1775,8 +1818,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
             if ad >= 3:
                 result.append((new_item, old_item, condition))
         elif 'unending despair' in item_l:
-            if ap >= 3:
-                result.append((new_item, old_item, condition))
+            result.append((new_item, old_item, condition))
         elif "mercury's treads" in item_l or 'mercurial scimitar' in item_l:
             if ap >= 3 or hard_cc_count >= cc_threshold:
                 result.append((new_item, old_item, condition))
@@ -4604,7 +4646,12 @@ def main():
             laner = next((e for e in enemies if my_pos and (e.get('position') or '').upper() == my_pos), None)
             laner_entry = cdata['matchups'].get(normalize(laner.get('championName', ''))) if laner else None
             laner_tag = laner_build_tag(laner_entry)
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag) if cdata['build_variants'] else None
+            _threats = compute_team_threats(enemies, item_index)
+            has_healer = bool(_threats.get('tags', {}).get('HEALING'))
+            _has_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
+            _has_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in enemies)
+            no_warmogs = _has_anti_warmogs or _has_lockdown
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag, ap_count=profile[1], ad_count=profile[2], has_healer=has_healer, no_warmogs=no_warmogs) if cdata['build_variants'] else None
 
             sig = json.dumps({
                 'mode': 'game',
@@ -4649,7 +4696,12 @@ def main():
             their_team = cs.get('theirTeam') or []
             cs_enemies = [{'championName': champ_index.get(p.get('championId') or 0, '')} for p in their_team if (p.get('championId') or 0) > 0]
             profile = compute_damage_profile(cs_enemies)  # no items in champ select
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0]) if cdata['build_variants'] and cs_enemies else None
+            _cs_threats = compute_team_threats(cs_enemies)  # no items; healer detection by archetype only
+            cs_has_healer = bool(_cs_threats.get('tags', {}).get('HEALING'))
+            _cs_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in cs_enemies)
+            _cs_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in cs_enemies)
+            cs_no_warmogs = _cs_anti_warmogs or _cs_lockdown
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], ap_count=profile[1], ad_count=profile[2], has_healer=cs_has_healer, no_warmogs=cs_no_warmogs) if cdata['build_variants'] and cs_enemies else None
 
             sig = json.dumps({
                 'mode': 'cs',

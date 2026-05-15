@@ -468,6 +468,66 @@
       "patch": "16.9",
       "generated_at": "2026-05-12",
       "notes": "- Passive (Void Rush): Stacks on hit, 3 stacks triggers true damage proc and brief move speed\n- Q (Plasma Fission): Fires plasma bolt, splits into two projectiles on terrain or max range\n- W (Void Rift): Launches rift that damages and slows enemies in area of effect\n- E (Tectonic Disruption): Knocks up enemies hit, can combo with Q split for multi-target disruption\n- R (Life Form Disintegration Ray): Channeled laser dealing heavy damage, reorients freely while active\n- Spike: Level 6 with ultimate; power increases significantly at Liandry's completion\n- Tip: Stay behind minions to block Q splits and deny easy true damage stacks"
+    },
+    "graves": {
+      "display_name": "Graves",
+      "patch": "16.10",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Grit): Gains armor and magic resist per nearby enemy, stacks infinitely\n- Q (End of the Line): Fires spread shot that explodes on terrain or max range\n- W (Smoke Screen): Creates smoke cloud blocking vision and slowing enemies inside\n- E (Quickdraw): Dashes in direction, gains armor temporarily, refreshes on unit kills\n- R (Collateral Damage): Fires massive shotgun blast in cone, knocks back enemies hit\n- spike: Level 6 with ultimate; first completed mythic item powerspike\n- tip: Maintain distance and avoid tight corridors where his spread damage lands"
+    },
+    "mel": {
+      "display_name": "Mel",
+      "patch": "16.10",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Concussive Blows): Attacks stack; at 5 stacks, stun and shatter armor\n- Q (Comet Punch): Punch forward, resets on ability hits, damage increases per punch\n- W (Aftershock): Leap and slam, creating shockwave that knocks up enemies\n- E (Mparenthesis): Dash backward while gaining shield and temporary attack speed boost\n- R (Full Metal Alchemist): Transform into hammer form, gain AOE damage and crowd control\n- Spike: Level 6 with ultimate; trinity force or similar items\n- Tip: Stay spread out to minimize shockwave hits and stun setup damage"
+    },
+    "janna": {
+      "display_name": "Janna",
+      "patch": "16.10",
+      "generated_at": "2026-05-12",
+      "notes": "- Passive (Tailwind): Move speed buff when moving toward nearby allies or away from enemies\n- Q (Howling Gale): Channel then release to knock up enemies in a line\n- W (Zephyr): Slow enemy and gain movement speed toward them; repeatable\n- E (Eye Of The Storm): Shield ally and empower their attacks with bonus damage\n- R (Monsoon): Push back enemies and heal nearby allies; lasts several seconds\n- spike: Level 6 ultimate and completed Mandate item for team fight presence\n- tip: Spread out to reduce ultimate knockback effectiveness and prevent chain CC"
+    },
+    "zed": {
+      "display_name": "Zed",
+      "patch": "16.10",
+      "generated_at": "2026-05-13",
+      "notes": "- Passive (Contempt for the Weak): Deal bonus damage to enemies below 50% health\n- Q (Razor Shuriken): Throw shuriken in straight line, hits enemies twice with shadows\n- W (Living Shadow): Dash to shadow location, shadow mirrors your abilities for extra damage\n- E (Shadow Slash): Slash nearby enemies, restore energy if shadow hits same target\n- R (Death Mark): Become untargetable, create shadow clone, swap positions at end for burst\n- spike: Level 6 ultimate enables all-in kills; Serrated Dirk first item spike\n- tip: Build armor early and stay grouped; dodge shadow shurikens by moving sideways"
+    },
+    "galio": {
+      "display_name": "Galio",
+      "patch": "16.10",
+      "generated_at": "2026-05-13",
+      "notes": "- Passive (Innate Stonehide): Gains magic resist equal to bonus armor, converts it to health\n- Q (Winds of War): AOE projectile that damages and slows enemies hit\n- W (Shield of Durand):Channeled shield that reflects damage back to attackers nearby\n- E (Justice Punch): Dashes forward, knocking up enemies and dealing damage\n- R (Hero's Entrance): Teleports to ally, knocking up nearby enemies on arrival\n- spike: Level 6 with ultimate; further spiked at Hollow Radiance first item\n- tip: Spread out to minimize ultimate knockup effectiveness and damage output"
+    },
+    "akali": {
+      "display_name": "Akali",
+      "patch": "16.10",
+      "generated_at": "2026-05-13",
+      "notes": "- passive (Assassin's Mark): Gain MS near enemies; mark on hit deals bonus magic damage\n- Q (Five Point Strike): Throw stars in cone, returns to you, refund energy on hit\n- W (Twilight Shroud): Dash and gain stealth cloud, slow enemies who enter it\n- E (Shuriken Flip): Dash forward and flip backward, flip stuns if you hit Q first\n- R (Perfect Execution): Dash to target twice, each dash deals damage and applies mark\n- spike: Level 6 with ultimate; stronger with Protobelt or Lich Bane\n- tip: Ward river and side bushes; position away from walls she can dash near"
+    },
+    "riven": {
+      "display_name": "Riven",
+      "patch": "16.10",
+      "generated_at": "2026-05-13",
+      "notes": "- Passive (Runic Affinity): Gains attack speed per ability cast, stacks to five.\n- Q (Broken Wings): Three slash combo, third slash knocks enemies back.\n- W (Ki Burst): Stun nearby enemies in short radius around her.\n- E (Valor): Dash forward, gains shield scaling with attack damage.\n- R (Blade of the Exile): Empowers attacks, extends range, fires projectile slash.\n- spike: Level 6 with ultimate and completed Black Cleaver.\n- tip: Space away from her combo range, block third Q."
+    },
+    "yunara": {
+      "display_name": "Yunara",
+      "patch": "16.10",
+      "generated_at": "2026-05-14",
+      "notes": "I don't have reliable information about a champion named \"Yunara\" in League of Legends. This doesn't appear to be a current or past champion in the game. Could you verify the spelling or provide additional context? I want to give you accurate information rather than guess incorrectly."
+    },
+    "heimerdinger": {
+      "display_name": "Heimerdinger",
+      "patch": "16.10",
+      "generated_at": "2026-05-14",
+      "notes": "- Passive (Hextech Soul): gain stacks on ability cast; upgraded ability at max stacks\n- Q (Hextech Turret): place turret that shoots enemies; upgrades fire faster and wider\n- W (Techno Barrage): shoot missiles at enemies; upgrade fires more missiles in spread\n- E (CH-2 Electron Storm Grenade): throw grenade stunning and damaging; upgrades stun longer and wider\n- R (UPGRADE!!!): empower next ability; turrets gain shields, missiles spread, grenade stuns larger area\n- spike: level 6 with ultimate; becomes zone control nightmare with upgraded abilities\n- tip: destroy turrets immediately; don't group in narrow areas where grenades chain"
+    },
+    "lulu": {
+      "display_name": "Lulu",
+      "patch": "16.10",
+      "generated_at": "2026-05-15",
+      "notes": "- Passive (Pix, Faerie Companion): Pix grants attack speed; attacks on same target stack, max 3 stacks bonus damage\n- Q (Glitterlance): Projectile passes through enemies, slows all hit\n- W (Whimsy): Polymorphs enemy or grants ally haste and stats\n- E (Help, Pix!): Shield on ally or damage on enemy with Pix positioning\n- R (Wild Growth): Enlarges ally, knocks back enemies, grants health and slow aura\n- Spike: Level 6 with ultimate; becomes unkillable support with ally protection\n- Tip: Stay spread to minimize polymorph impact; dodge Q by moving sideways"
     }
   }
 }

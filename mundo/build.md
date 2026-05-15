@@ -76,6 +76,14 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 4. Titanic Hydra
 5. Overlord's Bloodmail
 
+### Warmog's mixed AP (Spirit Visage + Thornmail)
+1. Warmog's Armor
+2. Heartsteel
+3. Boots of Swiftness
+4. Spirit Visage
+5. Dead Man's Plate
+6. Thornmail
+
 ### Full AP enemy team
 1. Heartsteel
 2. Boots of Swiftness
@@ -120,6 +128,7 @@ Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. De
 - Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
 - Unending Despair over Dead Man's Plate — teamfights where multiple enemies cluster on you; passive procs every 4s dealing 3% bonus HP as AoE magic damage to all nearby enemies and healing 250% of post-mitigation damage dealt per target hit — scales with your HP stack, fires constantly when grouped on; also gives 15 AH (slot 5 swap)
+- Unending Despair over Jak'Sho, The Protean — attack-speed stacked comp (3+ on-hit/AS enemies e.g. Yi + Teemo + Varus Rageblade); when multiple enemies are auto-attacking you every fight, the proc heals you from each attacker every 4s; prefer this over Jak'Sho when you already have 4 armor items and resistance stacking has diminishing returns (slot 6 swap)
 
 Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — finish Thornmail before the next legendary in the Full AD path, or hold it as a component in other paths.
 
