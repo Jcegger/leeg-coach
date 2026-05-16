@@ -96,30 +96,32 @@ CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed
 # Renata needs both renata+renataglasc — Live API may surface either).
 _HEALING = (
     "aatrox briar camille darius drmundo fiora gwen illaoi "
-    "irelia janna karma masteryi mordekaiser nami nasus "
-    "senna sett sona soraka swain sylas trundle tryndamere "
+    "irelia janna karma masteryi milio mordekaiser nami nasus "
+    "senna seraphine sett sona soraka swain sylas trundle tryndamere "
     "udyr vladimir volibear warwick xinzhao yorick yuumi"
 ).split()
 _HARD_CC = (
-    "ahri alistar amumu annie ashe bard blitzcrank braum camille "
-    "cassiopeia fiddlesticks galio gnar gragas hecarim heimerdinger "
-    "jarvaniv jax kennen leesin leona lillia lissandra lulu malphite "
-    "malzahar maokai mordekaiser morgana nami nautilus orianna ornn "
-    "pantheon pyke rakan rell riven sejuani sett sion skarner sona "
-    "syndra tahmkench thresh twistedfate urgot veigar vi warwick wukong "
+    "ahri alistar amumu anivia annie ashe aurelionsol azir bard blitzcrank brand braum camille "
+    "cassiopeia diana elise fiddlesticks galio gnar gragas hecarim heimerdinger "
+    "ivern jarvaniv jax kennen kled leesin leona lillia lissandra lulu lux malphite "
+    "malzahar maokai mordekaiser morgana nami nautilus neeko orianna ornn "
+    "pantheon pyke rakan reksai rell renata renataglasc renekton riven ryze "
+    "sejuani seraphine sett singed sion skarner sona "
+    "syndra tahmkench taliyah thresh twistedfate urgot "
+    "varus veigar velkoz vex vi viktor warwick wukong "
     "monkeyking xerath xinzhao zac zilean zoe zyra"
 ).split()
 _ATTACK_SPEED = (
-    "aphelios belveth jax jinx kaisa kayle kindred kogmaw masteryi "
-    "quinn samira tristana tryndamere twitch vayne xayah yasuo yone"
+    "aphelios belveth jax jinx kaisa kalista kayle kindred kogmaw masteryi "
+    "olaf quinn samira shyvana tristana tryndamere twitch vayne xayah yasuo yone"
 ).split()
 _TANK = (
-    "alistar amumu chogath drmundo galio ksante malphite maokai "
-    "nautilus ornn poppy rammus rell sejuani shen sion skarner "
+    "alistar amumu chogath drmundo galio garen ksante malphite maokai "
+    "nautilus nunu nunuwillump ornn poppy rammus rell sejuani shen sion skarner "
     "tahmkench taric volibear zac"
 ).split()
 _ASSASSIN = (
-    "akali ekko evelynn fizz katarina khazix leblanc naafiri nocturne "
+    "akali ambessa aurora ekko evelynn fizz kassadin katarina kayn khazix leblanc naafiri nocturne "
     "pyke qiyana rengar shaco talon viego zed"
 ).split()
 _CRIT = (
@@ -1091,6 +1093,62 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
 
 _SWAP_LINE_RE = re.compile(r'^\s*-\s*(.+?)\s+over\s+(.+?)\s+[—–-]+\s+(.+)$')
 
+# Sections of build.md whose items are allowed in live_build.
+# "Do NOT buy" and non-item sections are intentionally absent.
+_BUILD_POOL_SECTIONS = {
+    'build paths', 'situational item swaps', 'boots options', 'last items / situational',
+}
+
+
+def _parse_build_item_pool(text):
+    """Extract item names from approved build.md sections.
+    Returns a set of display-name strings for use in validate_on_build_guide."""
+    pool = set()
+    current_section = None
+    for line in text.splitlines():
+        if line.startswith('## '):
+            current_section = line[3:].strip().lower()
+            continue
+        if not current_section or current_section not in _BUILD_POOL_SECTIONS:
+            continue
+        line = line.strip()
+        # Numbered list entry: "1. Item Name" or "1. Item Name (note)"
+        m = re.match(r'^\d+\.\s+([A-Z][^(\n]+?)(?:\s*\(|\s*$)', line)
+        if m:
+            pool.add(m.group(1).strip())
+            continue
+        # Swap line: "- New Item over Old Item — condition"
+        m = re.match(r'^-\s+(.+?)\s+over\s+(.+?)(?:\s*[—–(]|\s*$)', line)
+        if m:
+            pool.add(m.group(1).strip())
+            pool.add(m.group(2).strip())
+            continue
+        # Simple bullet: "- Item Name" or "- Item Name (note)"
+        m = re.match(r"^-\s+([A-Z][A-Za-z'\s,:/]+?)(?:\s*\(|\s*—|\s*$)", line)
+        if m:
+            candidate = m.group(1).strip()
+            if candidate:
+                pool.add(candidate)
+    return pool
+
+
+def validate_on_build_guide(live_build, pool_names, item_index):
+    """Drop items from live_build whose IDs don't appear in the champion's build.md.
+    Prevents the coach from recommending undocumented items (e.g. Frozen Heart on Mundo)."""
+    if not pool_names or not item_index:
+        return list(live_build or [])
+    name_to_id = _build_name_to_id(item_index)
+    pool_ids = {resolve_item_id(n, name_to_id) for n in pool_names}
+    pool_ids.discard(None)
+    if not pool_ids:
+        return list(live_build or [])
+    out = []
+    for name in live_build or []:
+        iid = resolve_item_id(name, name_to_id)
+        if iid in pool_ids:
+            out.append(name)
+    return out
+
 
 def _parse_situational_swaps(text):
     """Parse '## Situational item swaps' lines into (new_item, old_item, condition) triples."""
@@ -2030,6 +2088,10 @@ def parse_events(data):
             summary['towers'].append((et, e.get('KillerName', '?'), e.get('TurretKilled', '?')))
         elif name == 'InhibKilled':
             summary['inhibs'].append((et, e.get('KillerName', '?'), e.get('InhibKilled', '?')))
+        elif name == 'InhibRespawned':
+            rid = e.get('InhibRespawned', '')
+            if rid:
+                summary['inhibs'] = [(t, k, i) for (t, k, i) in summary['inhibs'] if i != rid]
         elif name == 'ChampionKill':
             summary['kills'].append((et, e.get('KillerName', '?'), e.get('VictimName', '?'), e.get('Assisters') or []))
         elif name == 'FirstBlood':
@@ -2582,6 +2644,7 @@ class Coach:
         self.last_event_count = 0
         self.errors = 0
         self._system_cache = (None, None)  # (champ_folder, prompt)
+        self._build_item_pool_names = set()  # item names parsed from champ's build.md
         self.recent_responses = []  # list of dicts; last 5
         self.last_bullets = []
         self.last_live_build = []
@@ -2637,6 +2700,7 @@ class Coach:
         playbook_text = playbook_raw if any(
             l.strip() and not l.startswith('#') for l in playbook_raw.splitlines()
         ) else None
+        self._build_item_pool_names = _parse_build_item_pool(build_text)
         prompt = (
             f"You are an in-game League of Legends coach for someone playing {champ_folder}. "
             f"You're a flirty, sharp girlfriend who actually knows the game — invested in this specific player, "
@@ -2757,11 +2821,10 @@ class Coach:
                     return 'tower_taken'
             if en == 'InhibKilled':
                 inhib_id = e.get('InhibKilled', '')
-                id_lower = inhib_id.lower()
-                if your_team == 'ORDER' and ('t1' in id_lower or 'order' in id_lower):
-                    return 'inhib_lost'
-                if your_team == 'CHAOS' and ('t2' in id_lower or 'chaos' in id_lower):
-                    return 'inhib_lost'
+                _iparts = inhib_id.split('_')
+                inhib_owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(_iparts[1]) if len(_iparts) > 1 else None
+                if inhib_owner and your_team:
+                    return 'inhib_lost' if inhib_owner == your_team else 'inhibkilled'
                 killer = (e.get('KillerName') or '').split('#')[0]
                 if killer and killer in enemy_names:
                     return 'inhib_lost'
@@ -2843,6 +2906,7 @@ class Coach:
             live_build = strip_duplicate_boots(live_build)
             live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
+            live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
@@ -4188,6 +4252,54 @@ def show_matchup_notes(player_champ):
         print(entry.get('notes', '(empty)'))
 
 
+def sync_champ_constants():
+    """Print a patch-sync diff: champs missing from CHAMP_DAMAGE or CHAMP_THREAT_TAGS.
+    Fetches the live champion list from CDragon; no game session required."""
+    print('leeg sync-champ-constants · fetching champion index from CDragon...')
+    champ_index, champ_aliases = fetch_champion_index()
+    if not champ_index:
+        print('ERROR: could not fetch champion index from CDragon', file=sys.stderr)
+        sys.exit(1)
+    print(f'  {len(champ_index)} champions found\n')
+
+    norms = sorted({normalize(a) for a in champ_aliases if normalize(a)})
+
+    # 1. Champs the Live API may surface that aren't in CHAMP_DAMAGE
+    unclassified = [n for n in norms if n not in CHAMP_DAMAGE]
+    print(f'── Missing from CHAMP_DAMAGE ({len(unclassified)}) ──')
+    if unclassified:
+        print('  Add each to _AD, _AP, or _MIXED in live.py (~L68):')
+        for c in unclassified:
+            print(f'    {c}  # TODO: AD / AP / Mixed?')
+    else:
+        print('  (up to date)')
+
+    # 2. In CHAMP_DAMAGE but missing from CHAMP_THREAT_TAGS
+    untagged = sorted(c for c in CHAMP_DAMAGE if c not in CHAMP_THREAT_TAGS)
+    print(f'\n── In CHAMP_DAMAGE, no threat tag ({len(untagged)}) ──')
+    if untagged:
+        print('  Add to _HEALING/_HARD_CC/_ATTACK_SPEED/_TANK/_ASSASSIN/_CRIT in live.py (~L97):')
+        for c in untagged:
+            print(f'    {c}')
+    else:
+        print('  (up to date)')
+
+    # 3. Alias-form gaps (must appear in both forms for Live API consistency)
+    gaps = []
+    for a, b in ALIAS_PAIRS:
+        for label, src in (('CHAMP_DAMAGE', CHAMP_DAMAGE), ('CHAMP_THREAT_TAGS', CHAMP_THREAT_TAGS)):
+            in_a, in_b = (a in src), (b in src)
+            if in_a != in_b:
+                present, missing = (a, b) if in_a else (b, a)
+                gaps.append(f'  {missing} (alias of {present}, missing from {label})')
+    print(f'\n── Alias-form gaps ({len(gaps)}) ──')
+    if gaps:
+        for g in gaps:
+            print(g)
+    else:
+        print('  (up to date)')
+
+
 # ─── rendering ──────────────────────────────────────────────────────────────
 
 CLEAR = '\033[2J\033[H'
@@ -4550,6 +4662,8 @@ def main():
                     help='disable voice coach (TTS is on by default)')
     ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
                     help='print all cached matchup pair notes for a player champion and exit')
+    ap.add_argument('--sync-champ-constants', dest='sync_champ_constants', action='store_true',
+                    help='print a patch-sync diff of champs missing from CHAMP_DAMAGE / CHAMP_THREAT_TAGS and exit')
     args = ap.parse_args()
 
     if args.add_champ:
@@ -4558,6 +4672,10 @@ def main():
 
     if args.show_matchups:
         show_matchup_notes(args.show_matchups)
+        return
+
+    if args.sync_champ_constants:
+        sync_champ_constants()
         return
 
     available = available_champs()

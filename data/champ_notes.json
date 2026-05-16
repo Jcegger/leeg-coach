@@ -534,6 +534,36 @@
       "patch": "16.10",
       "generated_at": "2026-05-15",
       "notes": "I cannot provide this information as requested. Blast Cone is a plant/map object in League of Legends, not a champion with abilities (passive, Q, W, E, R). It's an interactive element that knocks nearby units away when triggered.\n\nIf you meant a specific champion, please clarify which one and I'll format the information accordingly."
+    },
+    "evelynn": {
+      "display_name": "Evelynn",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Demon Shade): Invisible out of combat; heals when attacking weakened enemies\n- Q (Hate Spike): Projectile that bounces between nearby enemies; applies on-hit effects\n- W (Allure): Charm enemies in a cone; weakens them for follow-up damage\n- E (Whiplash): Dash with bonus damage; triggers on-hit effects and applies charm\n- R (Last Second Fragrance): AOE damage and charm in large radius; executes low-health enemies\n- spike: Level 6 with ultimate; becomes dominant after Mythic item completion\n- tip: Ward river and jungle; group with teammates to deny isolated picks"
+    },
+    "chogath": {
+      "display_name": "Cho'Gath",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Carnivore): Cho'Gath gains stacks when killing units; at 6 stacks, permanently grow in size and stats\n- Q (Rupture): Cho'Gath knocks up enemies in target area after brief delay\n- W (Feral Scream): Cho'Gath silences enemies in cone in front of him\n- E (Spiked Carapace): Cho'Gath gains armor/magic resist; reflects damage when hit\n- R (Feast): Cho'Gath devours target, dealing true damage and growing permanently if kills\n- Spike: Level 6 with ultimate provides execute threat; scales with size/items mid-game\n- Tip: Stay away from walls and grouped positions to dodge Rupture knockup combos"
+    },
+    "yasuo": {
+      "display_name": "Yasuo",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Way of the Wanderer): gains flow shield on movement, breaks at max\n- Q (Steel Tempest): slash that fires projectile, third cast knocks up\n- W (Wind Wall): creates wall blocking projectiles for short duration\n- E (Sweeping Blade): dash through enemy, reduced cooldown on same target\n- R (Last Breath): knock up enemies, gain shield, dash through knocked targets\n- spike: level 6 ultimate; immortal shieldbow first item powerspike\n- tip: respect wind wall cooldown, position away from walls for ganks"
+    },
+    "elise": {
+      "display_name": "Elise",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Spider Infusion): Gain spiderlings on ability hits; max 3, grant attack speed\n- Q (Neurotoxin/Venom): Execute spiders or damage; spider form deals percent max health\n- W (Volatile Spiderling/Skittering Frenzy): Spawn spiders attacking target; spider form deals AOE poison\n- E (Cocoon/Rappel): Stun target; spider form grants untargetable repositioning dash\n- R (Spider Form): Transform into spider; gain spiderlings and enhanced abilities\n- Spike: Level 6 with ultimate; power increases mid-game with AP items\n- Tip: Respect her cocoon stun range; position away from walls and teammates"
+    },
+    "zoe": {
+      "display_name": "Zoe",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (More Sparkpack): Gain MS after hitting abilities; stacks refreshable\n- Q (Skillshot): Shoots projectile that returns, dealing damage both ways\n- W (Spell Thief): Picks up enemy summoner spells; grants temporary use\n- E (Bubble): Stun projectile; hit enemies sleep briefly then take extra damage\n- R (Portal Jump): Blink short distance; resets position for repositioning or escaping\n- spike: Level 6 with ultimate; completes first item around minute 10\n- tip: Stay behind minions to block Q; position away from walls for E"
     }
   }
 }

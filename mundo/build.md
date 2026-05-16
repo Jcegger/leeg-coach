@@ -148,6 +148,7 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 - Thornmail
 - Experimental Hexplate
 - Iceborn Gauntlet
+- Frozen Heart (attack-speed stacked enemy, no healer warranting Thornmail)
 - Force of Nature
 - Abyssal Mask
 

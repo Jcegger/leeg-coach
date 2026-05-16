@@ -707,6 +707,41 @@
       "patch": "16.10",
       "generated_at": "2026-05-15",
       "notes": "- Blast Cone's explosive knockback disrupts your positioning, preventing taunt follow-up or escape.\n- Play safe levels 1-3; respect its range and avoid extended trades near walls.\n- Bait its knockback ability, then all-in when it's on cooldown; dodge sideways.\n- Your ultimate becomes stronger; use it to catch Blast Cone after it commits.\n- Watch its first item spike; abuse Shen's mid-game teamfight strength during its power dip.\n- Levels 9-11 when your cooldowns peak; force fights when Blast Cone can't kite effectively.\n- Slow-push to deny it wall resets; control wave near your tower for safety.\n- Take Grasp for sustain and tankiness; Phase Rush if you need extra kite escape.\n- Buy Hollow Radiance early if taking excessive burst; maintains tankiness without disrupting core build."
+    },
+    "drmundo__evelynn": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Evelynn",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Evelynn's charm + burst combo catches you immobile; dodge her engages ruthlessly always\n- Play safe early; she outduels you at low levels, farm under tower if needed\n- Never chase her into fog; bait her charm, then all-in with Cleaver slow\n- Her ultimate makes her untargetable; position away from walls or teammates she can flank\n- First item spike (Protobelt/Lich) around ten minutes is dangerous; respect her burst window\n- Post-twelve minutes when you have two items you outduel and outheal her sustained damage\n- Slow-push side lanes to control vision; deny her flanking routes through river control\n- Grasp for sustained trading and health scaling to survive her early poke attempts\n- Add Adaptive Helm second or third to reduce her spell damage and charm threat"
+    },
+    "drmundo__chogath": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Cho'Gath",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Cho'Gath's knockup and point-and-click silence utterly shut down your tankiness and healing potential.\n- Play safe levels 1-3; his all-in with Vorpal Spike poke forces you defensive.\n- Dodge his Rupture knockup, then all-in him while silence is down; bait it out.\n- His Feast at six becomes execute threat; respect the damage and play around it.\n- His first item spike (Rylai's or Liandry's) is dangerous; stay healthy and kite back.\n- Your window comes mid-game when he lacks utility cooldowns; abuse longer teamfight windows.\n- Slow-push waves to deny him freeze control and set up ganks on your terms.\n- Take Grasp for sustained trading and healing; it counters his poke-heavy early pressure.\n- Buy Force of Nature early if he stacks magic damage; preserves your health pool."
+    },
+    "drmundo__zoe": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Zoe",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Zoe's burst combo and sleep dart disable you before you can retaliate or lifesteal back.\n- Play safe, respect her Q range, farm from distance, avoid pushing into her skillshot angles.\n- Never trade when her Q is up; bait sleep dart by moving unpredictably near bushes.\n- Her ultimate gives mobility to kite you further; play around her cooldowns more carefully post-six.\n- First Luden's spike hurts; respect her damage window but farm safely until you hit items.\n- Mid-game teamfights when Zoe lacks cooldowns; all-in when her sleep dart is down in fights.\n- Slow-push to deny her roam pressure and create a numbers advantage for your jungler ganks.\n- Grasp sustains poke damage and triggers in extended trades when she wastes sleep dart early.\n- Adaptive Helm reduces her burst damage and cooldown refund punish from her repeated ability casts."
+    },
+    "drmundo__yasuo": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Yasuo",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Yasuo dashes through your cleavers and ulti-locks you after wind-wall blocks your only CC.\n- Play safe behind minions; his dash range is shorter than your cleaver. Farm safely.\n- Bait wind-wall with cleaver feints, then all-in when it's down. Avoid extended trades.\n- Yasuo ult after two tornadoes becomes lethal; respect his engage range post-six heavily.\n- First-item Sheen (Trinity) spike hurts; play defensive until your Liandry's comes online instead.\n- Mid-game when he builds full AD and you stack resistances\u2014outduel him in extended fights.\n- Slow-push to deny dash targets; prevent minion stacking near your tower for his engagement.\n- Grasp sustain keeps you healthy against his poke and repeated dash-trades all lane.\n- Add Kaenic Lifeburst early to maximize healing against his consistent physical damage output."
+    },
+    "drmundo__elise": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Elise",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Elise's burst combo from range; her cocoon stun locks you down for follow-up damage.\n- Play safe, farm defensively with Cleaver; dodge her skillshots and avoid her aggressive level two.\n- Let her waste Cocoon on minions; trade only after she commits to an ability.\n- Her Rappel gives escape and repositioning; your ult sustain still wins extended all-ins eventually.\n- First item Liandry's hurts; play around it by building early Adaptive Helm or Spirit Visage.\n- Post-fifteen minutes when you stack resistances; she falls off harder than your scaling sustain.\n- Slow-push to stack minions; denies her all-in opportunities and lets you farm safely under tower.\n- Grasp of the Undying; extra tankiness and poke damage makes you harder to burst early.\n- Spirit Visage into your typical build; the healing amp and resistances counter her percentage damage."
     }
   }
 }
