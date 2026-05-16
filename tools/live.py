@@ -1137,6 +1137,31 @@ def _parse_build_item_pool(text):
     return pool
 
 
+def _parse_emax_champs(text):
+    """Parse the E-max champion list from build.md's ## Skill order section.
+    Returns a set of normalized champion names."""
+    in_skill = False
+    champs = set()
+    for line in text.splitlines():
+        if line.startswith('## '):
+            in_skill = 'skill order' in line.lower()
+            continue
+        if not in_skill:
+            continue
+        m = re.search(r'e.max[^:]*:\s*(.+)', line, re.I)
+        if not m:
+            continue
+        for part in m.group(1).split(','):
+            part = re.sub(r'\(.*?\)', '', part)       # strip "(if proxying)" etc.
+            part = part.split('.')[0]                  # drop trailing sentence e.g. ". Smolder: ..."
+            part = re.sub(r'[*_`#]', '', part).strip()
+            if ':' in part:                            # skip "Smolder: 3 points..."
+                continue
+            if part:
+                champs.add(normalize(part))
+    return champs
+
+
 def validate_on_build_guide(live_build, pool_names, item_index):
     """Drop items from live_build whose IDs don't appear in the champion's build.md.
     Prevents the coach from recommending undocumented items (e.g. Frozen Heart on Mundo)."""
@@ -1325,14 +1350,21 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
             if classify_variant(heading) == 'Standard' and 'warmog' not in normalize(body):
                 return heading, body
     if profile_kind == 'Standard' and ap_count >= 3:
-        for heading, body in variants:
-            if classify_variant(heading) in ('AD', 'Standard'):
-                continue
-            b_norm = normalize(body)
-            has_mr = any(n in b_norm for n in _MR_PIVOT_NORMS)
-            has_gw = any(n in b_norm for n in _GRIEVOUS_NORMS)
-            if has_mr and (has_gw or not has_healer):
-                return heading, body
+        # Two-pass: prefer explicitly AP-classified paths first, then fall back to
+        # unclassified paths. This stops "Warmog's mixed AP + Thornmail" from winning
+        # over "Full AP" / "Heavy magic damage" when there are 3 AP sources but no healer.
+        for ap_only in (True, False):
+            for heading, body in variants:
+                cv = classify_variant(heading)
+                if ap_only and cv != 'AP':
+                    continue
+                if not ap_only and cv in ('AD', 'Standard', 'AP'):
+                    continue
+                b_norm = normalize(body)
+                has_mr = any(n in b_norm for n in _MR_PIVOT_NORMS)
+                has_gw = any(n in b_norm for n in _GRIEVOUS_NORMS)
+                if has_mr and (has_gw or not has_healer):
+                    return heading, body
     for heading, body in variants:
         if classify_variant(heading) == profile_kind:
             return heading, body
@@ -2650,6 +2682,7 @@ class Coach:
         self.errors = 0
         self._system_cache = (None, None)  # (champ_folder, prompt)
         self._build_item_pool_names = set()  # item names parsed from champ's build.md
+        self._emax_champs = set()             # champs where E-max is correct (from build.md)
         self.recent_responses = []  # list of dicts; last 5
         self.last_bullets = []
         self.last_live_build = []
@@ -2706,6 +2739,7 @@ class Coach:
             l.strip() and not l.startswith('#') for l in playbook_raw.splitlines()
         ) else None
         self._build_item_pool_names = _parse_build_item_pool(build_text)
+        self._emax_champs = _parse_emax_champs(build_text)
         prompt = (
             f"You are an in-game League of Legends coach for someone playing {champ_folder}. "
             f"You're a flirty, sharp girlfriend who actually knows the game — invested in this specific player, "
@@ -3299,7 +3333,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                         champ_db=None, is_aram=False, team_threats=None, swaps=None,
                         matchups=None, phase=None, gold_lead=None,
                         win_condition=None, side_selection=None,
-                        matchup_db=None, your_champ=None):
+                        matchup_db=None, your_champ=None, emax_champs=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
@@ -3577,6 +3611,14 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     if swap_lines:
         lines.append('')
         lines.extend(swap_lines)
+
+    if emax_champs and me:
+        my_pos = (me.get('position') or '').lower()
+        laner_e = next((e for e in enemies if (e.get('position') or '').lower() == my_pos), None)
+        if laner_e:
+            laner_champ = laner_e.get('championName', '')
+            if normalize(laner_champ) in emax_champs:
+                lines.append(f'SKILL NOTE: max E second (not Q) vs {laner_champ} — see build.md skill order.')
 
     build_names = []
     if build_pick:
@@ -4416,6 +4458,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 side_selection=side_selection,
                 matchup_db=matchup_db,
                 your_champ=your_champ,
+                emax_champs=coach._emax_champs,
             )
             priority_for_validator = compute_priority_enemies(me, enemies, item_index) if me else []
             priority_names = [e.get('championName') for _r, e in priority_for_validator if e.get('championName')]
