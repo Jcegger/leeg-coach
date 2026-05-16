@@ -78,6 +78,14 @@ Grounded in the go-to path (slot 6 = Protoplasm Harness).
 - Plated Steelcaps (default)
 - Mercury's Treads (heavy AP or CC-heavy)
 
+## Last items / situational
+
+- Kaenic Rookern
+- Gargoyle Stoneplate
+- Frozen Heart
+- Abyssal Mask
+- Hollow Radiance
+
 ## Do NOT buy
 
 - Heartsteel — zero waveclear; can't push the wave and R a teammate at the same time, which destroys your global ult value. Titanic Hydra gives you the HP synergy without this tradeoff.

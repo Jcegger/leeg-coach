@@ -86,28 +86,46 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 
 > Buy when you're at 5 – 5.5 items and just before a decisive teamfight. The elixir gives incredible value for the cost while it's active.
 
-## Example full builds
+## Build paths
 
 ### Standard
-Yun Tal · Berserker's · Infinity Edge · Lord Dominik's · Stormrazor · Guardian Angel · Bloodthirster · Elixir of Wrath
+1. Yun Tal Wildarrows
+2. Berserker's Greaves
+3. Infinity Edge
+4. Lord Dominik's Regards
+5. Stormrazor
+6. Guardian Angel
+
 > Very well-rounded with lots of damage and sustain thanks to GA + BT. LDR and Mortal Reminder are interchangeable.
 
 ### vs Heavy AP
-Yun Tal · Mercury's Treads · Navori Flickerblade · Infinity Edge · Lord Dominik's · Mercurial Scimitar · Guardian Angel · Elixir of Wrath
+1. Yun Tal Wildarrows
+2. Mercury's Treads
+3. Navori Flickerblade
+4. Infinity Edge
+5. Lord Dominik's Regards
+6. Mercurial Scimitar
+
 > Great tankiness against AP burst with good damage. Swap Scimitar for Maw if the enemy team doesn't have much CC. Vs all-AP, build both Scimitar and Maw as last items instead of GA.
 
 ### vs Heavy AD
-Yun Tal · Plated Steelcaps · Navori Flickerblade · Infinity Edge · Lord Dominik's · Guardian Angel · Bloodthirster · Elixir of Wrath
+1. Yun Tal Wildarrows
+2. Plated Steelcaps
+3. Navori Flickerblade
+4. Infinity Edge
+5. Lord Dominik's Regards
+6. Guardian Angel
+
 > Great tankiness against heavy AD with good damage.
 
-## Situational item swaps (quick reference)
+## Situational item swaps
 
-- Plated Steelcaps over Berserker's → Navori over IE — heavy AD
-- Mercury's Treads over Berserker's → Navori over IE — heavy AP / CC
-- Mortal Reminder over Lord Dominik's — enemy has significant healing
+- Plated Steelcaps over Berserker's Greaves — heavy AD (go Navori over IE)
+- Mercury's Treads over Berserker's Greaves — heavy AP / CC (go Navori over IE)
+- Mortal Reminder over Lord Dominik's Regards — enemy has significant healing
 - Mercurial Scimitar over Guardian Angel — heavy AP or hard CC (provides QSS)
 - Maw of Malmortius over Guardian Angel — AP team with low CC
-- Both Scimitar + Maw as last 2 — all-AP team
+- Bloodthirster over Guardian Angel — no burst threat, need more sustain
 
 ## Skill order
 

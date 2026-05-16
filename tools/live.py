@@ -1093,11 +1093,16 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
 
 _SWAP_LINE_RE = re.compile(r'^\s*-\s*(.+?)\s+over\s+(.+?)\s+[—–-]+\s+(.+)$')
 
-# Sections of build.md whose items are allowed in live_build.
+# Section-name prefixes whose items are allowed in live_build.
+# Prefix matching handles variations: "build paths" vs "build" (CLASS_TEMPLATES),
+# "situational item swaps (quick reference)" suffix (Sivir), etc.
 # "Do NOT buy" and non-item sections are intentionally absent.
-_BUILD_POOL_SECTIONS = {
-    'build paths', 'situational item swaps', 'boots options', 'last items / situational',
-}
+_BUILD_POOL_PREFIXES = (
+    'build',                   # covers "build paths", "build" (CLASS_TEMPLATES)
+    'situational item swaps',  # covers exact + "(quick reference)" suffix
+    'boots',                   # covers "boots options" and variants
+    'last items',              # covers "last items / situational" and variants
+)
 
 
 def _parse_build_item_pool(text):
@@ -1109,7 +1114,7 @@ def _parse_build_item_pool(text):
         if line.startswith('## '):
             current_section = line[3:].strip().lower()
             continue
-        if not current_section or current_section not in _BUILD_POOL_SECTIONS:
+        if not current_section or not any(current_section.startswith(p) for p in _BUILD_POOL_PREFIXES):
             continue
         line = line.strip()
         # Numbered list entry: "1. Item Name" or "1. Item Name (note)"
