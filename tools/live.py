@@ -1180,6 +1180,25 @@ def validate_on_build_guide(live_build, pool_names, item_index):
     return out
 
 
+# Items that are mutually exclusive — if the first is present, drop the second.
+# Thornmail and Frozen Heart both address attack-speed threats but Frozen Heart's
+# build.md condition is "no healer warranting Thornmail"; they never coexist.
+_ITEM_MUTEX = [
+    ('Thornmail', 'Frozen Heart'),
+    ('Frozen Heart', 'Thornmail'),
+]
+
+def _drop_conflicting_items(live_build):
+    """Drop items that conflict with already-present higher-priority items."""
+    lb = list(live_build or [])
+    lb_lower = [x.lower() for x in lb]
+    for keeper, drop in _ITEM_MUTEX:
+        if keeper.lower() in lb_lower and drop.lower() in lb_lower:
+            lb = [x for x in lb if x.lower() != drop.lower()]
+            lb_lower = [x.lower() for x in lb]
+    return lb
+
+
 def _parse_situational_swaps(text):
     """Parse '## Situational item swaps' lines into (new_item, old_item, condition) triples."""
     swaps, in_swaps = [], False
@@ -2400,7 +2419,7 @@ COACH_SCHEMA = {
         "live_build": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Your recommended 4-6 core-item build path for this game, in build order. Owned core items appear first in their built positions; planned core items follow. Stable across calls — only change when game state materially shifts (enemy pivots damage profile, fed carry, new objective threat).",
+            "description": "Your recommended 6-item build path for this game, in build order. Always exactly 6 items — never fewer. Owned core items appear first in their built positions; planned core items follow. Stable across calls — only change when game state materially shifts (enemy pivots damage profile, fed carry, new objective threat).",
         },
         "build_change_reason": {
             "type": "string",
@@ -2946,6 +2965,7 @@ class Coach:
             live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
             live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
+            live_build = _drop_conflicting_items(live_build)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed

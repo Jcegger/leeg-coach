@@ -742,6 +742,41 @@
       "patch": "16.10",
       "generated_at": "2026-05-16",
       "notes": "- Elise's burst combo from range; her cocoon stun locks you down for follow-up damage.\n- Play safe, farm defensively with Cleaver; dodge her skillshots and avoid her aggressive level two.\n- Let her waste Cocoon on minions; trade only after she commits to an ability.\n- Her Rappel gives escape and repositioning; your ult sustain still wins extended all-ins eventually.\n- First item Liandry's hurts; play around it by building early Adaptive Helm or Spirit Visage.\n- Post-fifteen minutes when you stack resistances; she falls off harder than your scaling sustain.\n- Slow-push to stack minions; denies her all-in opportunities and lets you farm safely under tower.\n- Grasp of the Undying; extra tankiness and poke damage makes you harder to burst early.\n- Spirit Visage into your typical build; the healing amp and resistances counter her percentage damage."
+    },
+    "drmundo__sion": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Sion",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Sion's charged Q stun into all-in burst kills you if you're caught out of position\n- Play safe levels 1-3; respect his all-in range and don't fight near his turret\n- Bait his Q charge, sidestep it, then trade with Cleaver; never fight when his Q loads\n- Sion ult forces you to respect his engage and roam potential; stay grouped post-6\n- His Mythic spike (around 10 min) increases tankiness and burst; farm safely, don't force fights\n- You spike harder mid-game when your tankiness and sustain outscale his burst; abuse this window\n- Slow-push waves into him; forces him to overextend or lose CS to tower damage\n- Take Grasp for sustain and tankiness to match his bruiser durability in extended trades\n- Buy Force of Nature if Sion builds AP; it negates his damage while you heal"
+    },
+    "drmundo__ryze": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Ryze",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Ryze bursts you with Combo then kites away; you cannot catch him easily.\n- Play safe near tower; dodge his Spell Flux; farm at range with Cleaver.\n- Bait his Eq combo, then all-in; avoid trading into his full spell rotation.\n- Ryze gains mobility and escape; your all-in becomes harder; play around cooldowns.\n- First item power spike is dangerous; respect his damage; farm safely until you scale.\n- Your window is mid-game when tankier; catch him out of position before teamfights.\n- Slow-push sideways; force Ryze to choose between defending and roaming; control sidelanes.\n- Phase Rush lets Ryze kite forever; take Grasp for consistent scaling and sustain trades.\n- Abyssal Mask shreds his magic resist shred; add it after core to mitigate burst."
+    },
+    "drmundo__bard": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Bard",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Bard's meeps and poke whittle you down; his portal escapes make him untargetable and unpunishable.\n- Play safe levels 1-3; respect his poke range and avoid extended trades near his meeps.\n- Bard wants short trades with meep procs; tank his poke, wait for meep cooldown, then all-in.\n- Post-6 Bard's ultimate zoning becomes oppressive; use your tankiness to tank ults and maintain pressure.\n- Bard's first item spike (typically Mandate) increases poke; farm safely and wait for your Hollow Radiance.\n- You spike harder at mythic completion; leverage tankiness to all-in Bard when he overextends or misses portal.\n- Slow-push waves to crash into tower; this denies Bard roam windows and forces him to stay.\n- Take Grasp for the sustained trading and healing; you need healing pressure to offset poke damage.\n- Consider Adaptive Helm third or fourth item to cut Bard's Mandate damage and his team's burst."
+    },
+    "drmundo__diana": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Diana",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Diana all-ins you after landing Q; her burst combo kills if you're low HP\n- Play safe levels 1-3; respect her Q range and don't get caught extending for CS\n- Bait her Q, then trade back with E when she misses; dodge her dash-in patterns\n- Post-6 Diana becomes lethal; respect ultimate cooldown and play around vision control carefully\n- Diana's first item spike (Protobelt or Luden's) makes her burst unstoppable; farm safely then\n- You spike when Diana ult is down; all-in her if cooldown burned and health low\n- Slow-push waves to deny her roam timer and control when skirmishes happen around you\n- Take Grasp for sustain and extended trading since Diana's cooldowns punish short poke trades\n- Add Adaptive Helm after core tank items to reduce her burst damage and cooldown resets"
+    },
+    "drmundo__kayle": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Kayle",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Kayle's ranged attacks and on-hit damage in mid-game shred through your tankiness relentlessly.\n- Play safe and farm under tower; her poke outranges your Q significantly early.\n- Dodge her E projectiles; bait her into close range then trade with your cleaver.\n- Her invulnerability and ranged form make extended fights impossible; kite away or disengage.\n- Her first item spike is dangerous; play around cooldowns and avoid extended duels then.\n- Punish her before level 11 when she lacks ranged form; fight early game.\n- Slow-push to deny her safe farming; force her to overextend or miss CS.\n- Take Grasp for sustain and damage trades; Phase Rush feels ineffective into her.\n- Build Adaptive Helm after core tank items; reduces her true damage and on-hits."
     }
   }
 }

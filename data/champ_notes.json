@@ -564,6 +564,42 @@
       "patch": "16.10",
       "generated_at": "2026-05-16",
       "notes": "- Passive (More Sparkpack): Gain MS after hitting abilities; stacks refreshable\n- Q (Skillshot): Shoots projectile that returns, dealing damage both ways\n- W (Spell Thief): Picks up enemy summoner spells; grants temporary use\n- E (Bubble): Stun projectile; hit enemies sleep briefly then take extra damage\n- R (Portal Jump): Blink short distance; resets position for repositioning or escaping\n- spike: Level 6 with ultimate; completes first item around minute 10\n- tip: Stay behind minions to block Q; position away from walls for E"
+    },
+    "ryze": {
+      "display_name": "Ryze",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- passive (Realm Warp): gain movement speed after casting spells, stacks infinitely\n- Q (Overload): shoot projectile, applies passive stack; refreshes E cooldown at max stacks\n- W (Rune Prison): stun target briefly, applies passive stack\n- E (Spell Flux): damage nearby enemy, applies passive stack; bounces to nearby enemies\n- R (Realm Warp): teleport short distance with allies in radius\n- spike: level 3 with Q-W combo; Everfrost mythic item power spike\n- tip: stay out of close range; dodge Q; group against his teamfight ultimate"
+    },
+    "sion": {
+      "display_name": "Sion",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Glory in Death): dies, becomes ghost, charges attack to deal damage\n- Q (Decimating Smash): charges, slams ground, knocks up and damages enemies hit\n- W (Soul Furnace): shield gained, explodes on reactivation or when shield breaks\n- E (Roar of the Slayer): shouts, damages and slows enemies in cone direction\n- R (Unstoppable Onslaught): charges forward unstoppably, knocks up enemies, gains size\n- spike: level 6 with ultimate; first armor/health item powerspike\n- tip: stay spread out to avoid ultimate knockup chain reactions"
+    },
+    "bard": {
+      "display_name": "Bard",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Meep): Collect chimes for damage and movespeed; 5 stacks grants meep\n- Q (Cosmic Binding): Skillshot stuns first enemy, slows second\n- W (Caretaker's Shrine): Place healing shrine; activates when nearby\n- E (Magical Journey): Create tunnel; allies pass through faster than enemies\n- R (Tempered Fate): Stasis all units in area; they're invulnerable\n- spike: Level 6 with ultimate; midgame roam potential peaks\n- tip: Play around tunnel entrances and avoid clustered positioning for ult"
+    },
+    "diana": {
+      "display_name": "Diana",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Moonsilver Blade): Gains attack speed; every third attack deals bonus damage in area\n- Q (Crescent Strike): Fires arc dealing damage; enemies hit gain Moonlight mark for amplified damage\n- W (Pale Cascade): Shields self and allies; orbiting spheres return to restore shields on reactivation\n- E (Lunar Rush): Dashes to enemy or ally, detonates Moonlight marks for additional damage\n- R (Moonfall): Pulls nearby enemies toward Diana and marks them with Moonlight\n- Spike: Level 6 with ultimate; devastating all-in after first item completion\n- Tip: Maintain distance and position near teammates to prevent isolated Lunar Rush engagements"
+    },
+    "kayle": {
+      "display_name": "Kayle",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Transcendence): Attack speed and ability power scaling stacks with levels and items.\n- Q (Radiant Blast): Projectile damages and slows enemies hit, heals on ally hit.\n- W (Celestial Blessing): Kayle and nearby ally gain movement speed and healing instantly.\n- E (Righteous Fury): Melee attacks become ranged, deal bonus magic damage, apply on-hit effects.\n- R (Divine Judgment): Target becomes invulnerable and takes reduced damage after, short duration.\n- spike: Level 11 transforms playstyle; Nashors Tooth and Lich Bane power spike.\n- tip: Exploit early game weakness before level 6; deny teamfights near her ult."
+    },
+    "mel": {
+      "display_name": "Mel",
+      "patch": "16.10",
+      "generated_at": "2026-05-16",
+      "notes": "- Passive (Ascension): Gain stacks on ability hits; at 5 stacks, gain movespeed and damage buff\n- Q (Spark Pack): Fire projectile; resets on hit, applies passive stack\n- W (Comet Punch): Punch forward three times; third hit knocks back and stacks passive\n- E (Full Metal Jacket): Gain shield and movespeed; reactivate to dash forward with damage\n- R (Mega Supercharger): Place zone granting allies attack speed and movespeed; Mel gains doubled bonuses\n- Spike: Level 6 with ult and first item (Divine Sunderer or Sunfire)\n- tip: Keep distance to avoid stacking her passive; dodge her Q poke carefully"
     }
   }
 }
