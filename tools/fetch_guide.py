@@ -59,7 +59,7 @@ def fetch(url: str, output_path: str, timeout_s: int = 90) -> None:
 
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"Saved {len(content):,} chars → {output_path}")
+        print(f"Saved {len(content):,} chars -> {output_path}")
 
 
 if __name__ == "__main__":

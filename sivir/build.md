@@ -45,7 +45,8 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 3. **Infinity Edge** *or* **Navori Flickerblade** (2nd item — depends on boots)
 4. **Lord Dominik's Regards** *or* **Mortal Reminder** (3rd or 4th)
 5. **Stormrazor** (3rd or 4th, completes 100% crit)
-6. **Pick two** of: Guardian Angel, Bloodthirster, Mercurial Scimitar, Maw of Malmortius
+6. **Guardian Angel** (5th, ~90% of games) *or* Mercurial Scimitar / Maw (heavy AP)
+7. **Bloodthirster** *or* the remaining MR item (Maw if you took Scimitar, Scimitar if you took Maw)
 
 ### Yun Tal first
 
@@ -74,13 +75,15 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 
 > Always build LDR if your team has (or will have) 2+ members with grievous wounds (anti-healing) or if the enemy team has close to no healing/life steal. Otherwise build Mortal Reminder. You should be building LDR in about 70% of your games.
 
-### 5th / 6th item
+### 5th / 6th / 7th item
 
-> GA as 5th is ideal in about 90% of games. After GA you'll typically build BT, but you can also choose Scimitar or Maw if you want extra MR or QSS.
+> ADC now has 7 item slots (boots count as one). You get a full extra item.
 >
-> Up against heavy AP — settle for Scimitar or Maw 5th. Scimitar is usually better unless the enemy has low CC (also: QSS doesn't work on airborne) or no scary hard-CC ability.
+> GA as 5th is ideal in about 90% of games. 6th: BT for sustain, or Scimitar/Maw if you need MR or QSS. 7th: fill the remaining defensive slot (Maw if you took Scimitar, BT if you took Maw, or Scimitar if you took BT into a heavy AP/CC game).
 >
-> All-AP team — build both Scimitar and Maw as last items.
+> Up against heavy AP — Scimitar or Maw 5th/6th. Scimitar is usually better unless enemy has low CC. With the 7th slot, you can fit both Scimitar and Maw.
+>
+> All-AP team — build both Scimitar and Maw in the last two slots.
 
 ### Don't forget Elixir of Wrath
 
@@ -95,6 +98,7 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 4. Lord Dominik's Regards
 5. Stormrazor
 6. Guardian Angel
+7. Bloodthirster
 
 > Very well-rounded with lots of damage and sustain thanks to GA + BT. LDR and Mortal Reminder are interchangeable.
 
@@ -105,8 +109,9 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 4. Infinity Edge
 5. Lord Dominik's Regards
 6. Mercurial Scimitar
+7. Maw of Malmortius
 
-> Great tankiness against AP burst with good damage. Swap Scimitar for Maw if the enemy team doesn't have much CC. Vs all-AP, build both Scimitar and Maw as last items instead of GA.
+> Great tankiness against AP burst with good damage. Swap Scimitar for Maw if the enemy team doesn't have much CC. Vs all-AP, the 7th slot lets you fit both Scimitar and Maw.
 
 ### vs Heavy AD
 1. Yun Tal Wildarrows
@@ -115,6 +120,7 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 4. Infinity Edge
 5. Lord Dominik's Regards
 6. Guardian Angel
+7. Bloodthirster
 
 > Great tankiness against heavy AD with good damage.
 

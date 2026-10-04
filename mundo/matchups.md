@@ -1,520 +1,525 @@
 # Mundo — Matchups
 
-**Source provenance.** Tier classifications from [Belle19's Mobafire guide](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678). Add `### Champion\nNotes here.` sections under any tier to layer in your own notes; only this file's headings are auto-managed.
+**Source provenance.** Tiers and notes condensed from [Belle19's Mobafire guide](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) (Sept 25, 2026 update). Add your own lines under any entry; a `Build: <tag>` line selects a build path when laning against that champ.
 
 Threat tiers (worst → best for you): **Extreme** > **Major** > **Even** > **Minor** > **Tiny**
 
 ## Quick index
 
-**Extreme (7):** Ambessa, Bel Veth, Gnar, Gwen, Illaoi, Kog Maw, Tryndamere
+**Extreme (8):** Ambessa, Fiora, Gnar, Gwen, Illaoi, Kog'Maw, Nasus, Tryndamere
 
-**Major (27):** Aatrox, Anivia, Aurelion Sol, Caitlyn, Elise, Fiora, Gragas, Irelia, K'Sante, Kai'Sa, Kled, Lillia, Lulu, Master Yi, Nasus, Nilah, Olaf, Rengar, Riven, Rumble, Ryze, Sett, Udyr, Warwick, Yorick, Yuumi, Zeri
+**Major (25):** Aatrox, Anivia, Aurelion Sol, Bel'Veth, Caitlyn, Elise, Irelia, Kai'Sa, Kled, K'Sante, Lillia, Lulu, Master Yi, Nilah, Rengar, Riven, Rumble, Ryze, Sett, Udyr, Warwick, Yorick, Yuumi, Zaahen, Zeri
 
-**Even (18):** Akshan, Kayle, Mordekaiser, Ornn, Poppy, Rell, Seraphine, Shen, Swain, Taric, Teemo, Trundle, Twitch, Urgot, Varus, Vayne, Yasuo, Zed
+**Even (20):** Akshan, Gangplank, Kayle, Mordekaiser, Olaf, Ornn, Poppy, Rell, Seraphine, Shen, Swain, Taric, Teemo, Trundle, Twitch, Urgot, Varus, Vayne, Yasuo, Zed
 
-**Minor (48):** Akali, Aphelios, Aurora, Azir, Bard, Brand, Braum, Briar, Camille, Cassiopeia, Cho'Gath, Ekko, Evelynn, Ezreal, Galio, Gangplank, Garen, Graves, Hecarim, Heimerdinger, Janna, Jarvan IV, Jayce, Jinx, Kalista, Katarina, Kayn, Milio, Morgana, Nidalee, Pantheon, Rek'Sai, Samira, Shyvana, Singed, Sivir, Sona, Soraka, Sylas, Syndra, Thresh, Viego, Viktor, Xerath, Yone, Zac, Zilean, Zyra
+**Minor (50):** Akali, Aphelios, Aurora, Azir, Bard, Brand, Braum, Briar, Camille, Cassiopeia, Cho'Gath, Ekko, Evelynn, Ezreal, Galio, Garen, Gragas, Graves, Hecarim, Heimerdinger, Janna, Jarvan IV, Jayce, Jinx, Kalista, Katarina, Kayn, Milio, Morgana, Nidalee, Nunu & Willump, Pantheon, Rek'Sai, Renata Glasc, Samira, Shyvana, Singed, Sivir, Sona, Soraka, Sylas, Syndra, Thresh, Viego, Viktor, Xerath, Yone, Zac, Zilean, Zyra
 
-**Tiny (64):** Ahri, Alistar, Amumu, Annie, Blitzcrank, Corki, Darius, Diana, Dr. Mundo, Draven, Fiddlesticks, Fizz, Hwei, Ivern, Jax, Jhin, Karma, Karthus, Kassadin, Kennen, Kha'Zix, Kindred, LeBlanc, Lee Sin, Leona, Lissandra, Lucian, Lux, Malphite, Malzahar, Maokai, Miss Fortune, Naafiri, Nami, Nautilus, Neeko, Nocturne, Orianna, Pyke, Qiyana, Quinn, Rakan, Rammus, Renekton, Sejuani, Senna, Shaco, Sion, Skarner, Smolder, Tahm Kench, Taliyah, Talon, Tristana, Twisted Fate, Veigar, Vel'Koz, Vex, Vladimir, Volibear, Wukong, Xayah, Xin Zhao, Zoe
+**Tiny (64):** Ahri, Alistar, Amumu, Annie, Blitzcrank, Corki, Darius, Diana, Draven, Dr. Mundo, Fiddlesticks, Fizz, Hwei, Ivern, Jax, Jhin, Karma, Karthus, Kassadin, Kennen, Kha'Zix, Kindred, LeBlanc, Lee Sin, Leona, Lissandra, Lucian, Lux, Malphite, Malzahar, Maokai, Miss Fortune, Naafiri, Nami, Nautilus, Neeko, Nocturne, Orianna, Pyke, Qiyana, Quinn, Rakan, Rammus, Renekton, Sejuani, Senna, Shaco, Sion, Skarner, Smolder, Tahm Kench, Taliyah, Talon, Tristana, Twisted Fate, Veigar, Vel'Koz, Vex, Vladimir, Volibear, Wukong, Xayah, Xin Zhao, Zoe
 
 ## Extreme threats
 
 ### Ambessa
-Phase Rush. Treat like a harder Renekton — trades are short and punishing. Dodge her Q2. Respect her ult post-6; her slows are heavy and she snowballs hard.
+Q max. Treat her like a harder Renekton: short, punishing trades, and respect her ult cooldown post-6. Grasp if you can reliably dodge her Q; Stormraider's Surge is safer and handles her slows and Voltaic. Dodge Q2 or stand by minions, outrange her poke, and only trade with W up. Her slows mean you can't just run past her in teamfights.
 
-### Bel'Veth
-Build Bramble immediately. She thrives on tanky brawlers with no mobility. If fed she becomes Yi on steroids with no item dependency.
+### Fiora
+Q max. Rush Bramble Vest (or Bramble + Cloth Armor); without it you lose. Grasp: bait her Q by stepping in and out of range, trade Q, auto, E, walk away; hug walls when she ults. First Strike: safer, farm with cleaver; Titanic can beat Warmog's here (not both). Stormraider's Surge for aggressive split pushing. Never die; you outscale her heavily in teamfights.
 
 ### Gnar
-No Warmogs. Scale lane, avoid extended trades with mini-Gnar (constant MS steroid + max-HP magic damage). Post-6 you can all-in if you land a cleaver and he has no rage.
+E max (preference). Even late, he can chase and kill you if you step too far; mini Gnar is the threat, not mega. Post-6, all-in if you land a cleaver and he has no rage, juking the boomerang. Otherwise it's a scale lane.
 
 ### Gwen
-Phase Rush + Scorch. Q poke attrition only — never brute-force melee trades. Phase Rush is mandatory to escape her slow/ult. She's unplayable in jungle.
+Q max with Stormraider's Surge (E max if Grasp). Use Stormraider's Surge + Scorch to poke with Q, landing cleavers on her predictive E's; aim to leave lane even. Once even, Warmog's makes sidelanes easy: combo, Stormraider's away, heal up, then all-in. Options: Grasp if you can hard outplay and stack MR, Deathfire Touch to win lane, Stormraider's Surge to not die.
 
 ### Illaoi
-Q max, Q poke only, never melee-trade into her wave. Pre-6 all-in is viable if you've poked her down. Post-6 respect her ult zone — don't push up when she has it.
+Q max. You can't fight in your wave to deny her E, so stay behind it, take safe Q trades, and break tentacles. You can kill her pre-6 with consistent poke. Post-6, thin the wave so she can't slow push and kill you under tower. With a poke team turtle; if melee-heavy, leave lane even.
 
 ### Kog'Maw
-Worst ADC matchup. He stands still and kills you in 3 seconds even at 16 while you can't burst him through an enchanter. Ban priority when no assassins on your team.
+Not a top laner, but the worst ADC for you in raw combat; with an enchanter he kills you in 3 seconds even at 16 while you can't do enough damage. Worth banning when last pick and your team has no assassins.
+
+### Nasus
+Q max. Slightly winning pre-6, then he outscales hard and wins the 1v1. Swifties and Tenacity shard mandatory unless full AD. Dead Man's Plate 4th/5th. Have mid match him if possible; otherwise clear the wave before tower aggro, unless he has Hullbreaker. Force teamfights. Stormraider's Surge is safe, Grasp to bully early or vs AP Nasus. Ban him.
 
 ### Tryndamere
-He has the strongest early laning in the game; scale, don't fight. Grasp if confident, Phase Rush if not. Falls off hard vs tanks after 2 items.
+Skill max is preference, skewed toward E max. Grasp to turtle if confident, Stormraider's Surge if you expect to get bullied or frozen on. Keep W active, avoid extended early fights, farm safely, and land cleavers whenever he steps past the wave. Rush Warden's Mail to neutralize lane, or Randuin's 3rd into a crit ADC. He falls off hard versus tanks after 2 items.
 
 ## Major threats
 
 ### Aatrox
-His Q zone forces you to play around the three AoE windows or eat full combo damage. Q poke only from distance; Phase Rush if his W keeps catching you. Post-Warmog's you can sustain through his damage but respect his ult — extended fights swing his way.
+Q max. Dodge his Q, trade back with Q when he E's forward, and don't walk up when his passive is up; farm with cleaver until he wastes it on a minion. Skip Bramble until after Heartsteel + Warmog's; ignite is your antiheal for all-ins. Poke constantly, threaten all-ins and play confidently instead of afk farming, never die, and you outscale.
 
 ### Anivia
-Her E+R poke attrition prevents reaching healing threshold and her wall hard-stops your chase. Farm safely with Q; she can't follow when you leave lane. Spirit Visage is your power spike — MR cuts her sustained output in half.
+Bad for you: heavy slows plus creatable terrain, and her health/Seraph's build means she doesn't die when you reach her. Run her down in a side lane; teamfights are rough.
 
 ### Aurelion Sol
-His passive stacks off every spell and he outrages you at range all game. Phase Rush so his W stun doesn't chain into a full roast. Once you hit Warmog's, you can chase him down if he overstays — until then, absorb and scale.
+Top Aurelion Sol: E max or you don't win the all-in. The 1v1 is easy, but in teamfights he destroys you if anyone locks you down for a couple seconds, and he doesn't get one-shot.
+
+### Bel'Veth
+She thrives on tanky brawlers with no mobility or CC. Not dangerous unless fed outside an isolated 1v1, but she's often fed. Build Bramble so she can't use you as a heal sponge. Extremely punishing when ahead.
 
 ### Caitlyn
-Pure ranged kite lane — she pokes you down from max range and headshots when you're netted. Phase Rush is mandatory; Q farm only and don't walk up. Post-Warmog's look for flanks and misposition punishes since you can never chase her directly.
+Hard for you; she kills you in a few autos even full tank, and tanks without lockdown CC struggle to tank her.
 
 ### Elise
-Strong level 6 dive threat — her rappel-into-cocoon combo can kill you before you regen. Play safe levels 1-5 and respect her all-in window; post-Warmog's her damage falls off dramatically. Track her on minimap — she dives when you're low.
-
-### Fiora
-Her vitals and Riposte make direct trades fatal — she parries your E and wins every extended duel. E-max and Q poke from range; don't trade without Phase Rush escape available. Post-2 items she can still duel you if ahead — defer to side lane pressure rather than fighting.
-
-### Gragas
-His barrel poke and body slam into ult displacement make lane control impossible. Don't stand near your own minion wave where barrels stack damage. Scale to Warmog's — his damage falls off against max-HP tanks and you can body him post-6.
+Not a problem late, but early she's elite at tower diving top. Track her; if nearby, shove at all costs or ask your jungler to hover, without forcing a losing 2v2 on them.
 
 ### Irelia
-Her Q resets give her infinite stick — Warmog's is bad here (she follows you everywhere). Take the Full AD path: Plated Steelcaps + Thornmail early guts her Q healing and AS burst simultaneously. Don't trade when she has 5 Ionian Fervor stacks — true damage on E and stun. Wait for her to spend Q on minions, then trade. If she has Yuumi attached she's nearly unkillable 1v1 — don't try, group instead. E-max.
+Q max. Back and buy Bramble without falling behind and she can't play; if she gets a lead the game is unplayable. Avoid her at 4 stacks and dodge her E by walking forward or sideways. Stormraider's Surge + Inspiration. Warmog's is bad here: her Q resets let her follow you everywhere. Take the Full AD path (Steelcaps + Thornmail).
 Build: Full AD
 
-### K'Sante
-His passive lets him survive everything you throw and his Q wall punishes every melee exchange. Play around his passive cooldown (every 3rd Q procs it); Q poke when he's animation-locked on Q2. He plays like a damage dealer pretending to be a tank — short trades only until post-Warmog's.
-
 ### Kai'Sa
-Usually bot, but top Kai'Sa pokes from range and evolves into a difficult duelist. Phase Rush to avoid her E gap close; Q farm and scale. She's weak early levels 1-5 — trade short then disengage before her passive stacks proc.
+Top Kai'Sa: E max. Lane is easy, just run her down. Post-lane she is harder to run down than Vayne, keeps her damage, and her ult makes her hard to burst. Unless she is badly out of position, don't chase her; help your team.
 
 ### Kled
-His dismount sequence and aggression at levels 1-3 is the most dangerous early window in the matchup. Survive unmounted Kled poke, but watch for remount — he becomes tanky again during the remount sequence. Post-Warmog's you win sustained fights; before that, play reactively.
+Q max. Lane is still Kled-favored but playable now that he is bruiser-built and must buy Executioner's. Turtle and farm safely. Use Q to keep him dismounted at all times rather than baiting an all-in; you lose regardless, and while he focuses on remounting, farm. With patience and good Qs you stabilize and scale.
+
+### K'Sante
+Q max. Dodge every Q3; if he ults, run away, you cannot win that 1v1. If his ult is down, run him down. Poke sticks but he doesn't care being low since he can ult. Grasp is fine in low elo where players can't combo; in high elo take Stormraider's Surge to survive his ult combo.
 
 ### Lillia
-Her Q+E DoT poke stacks constantly and her R sleep makes you vulnerable to dive. Phase Rush so her Q grazes don't chain into sleep setup. Scale to Warmog's — her DoT can't keep up with your regen once you hit the healing threshold.
+In teamfights, hope she mispositions or eats someone else's CC. In a side lane ignore her and take towers. She often overextends for a good ult and dies.
 
 ### Lulu
-Usually support but top Lulu is a poke nightmare with zero melee windows — she polymorphs your E and shields through all your damage. Scale with Q farm; there's no kill window here. Look to roam and make plays elsewhere.
+Rough matchup; hope your bot lane holds. If your jungler wants to play strongside top, deny it and have them camp bot. She is weak without a hypercarry like Vayne or Kog'Maw; Lulu-Twitch is the exception since you hard counter Twitch.
 
 ### Master Yi
-His alpha strike and meditate make direct trades very unfavorable early. Don't fight him pre-items; Phase Rush to escape his E slow. Post-Warmog's you can sustain through his damage if grievous wounds isn't built.
-
-### Nasus
-Farm race — he scales infinitely and you both scale well, but his W slow makes chasing nearly impossible. Q poke to harass his stacking but don't commit to melee trades. Post-Warmog's you win fights around objectives, but never let him freely stack for 20 minutes.
+Nearly impossible to 1v1 unless you are far ahead or he skips BotRK. You need Bramble; as jungler, rush it. Cleaver doesn't slow him during ult, so split carefully. In teamfights force him to focus you by running into him or his team when yours is ready; if he runs past you, you 1v4 his team and usually stall longer. Get him behind early with good macro.
 
 ### Nilah
-Melee ADC with passive that reduces enemy healing against her — she punishes your Warmog's regen. Don't stack max-HP items early if she rushes grievous; build Warmog's then pivot to MR. Her level 6 ult makes her nearly unkillable in short trades — wait for her to miss E before all-in.
-
-### Olaf
-His berserker axes and true-damage ultimate mean he wins all sustained fights past 6. Kite him with Q only; he ignores all CC with ult so don't rely on team follow-up. Post-Warmog's you're both juggernauts — whoever completes first usually wins the sustained fight.
+Really bad for you; she is hard to tank without heavy armor and heals off you more than you damage her. Your mid laner should delete her easily.
 
 ### Rengar
-His bush poke and level 6 one-shot jump are the kill windows to fear. Ward the bush nearest to lane and don't stand in it; post-6 track his position on minimap constantly. Once you hit Warmog's his burst doesn't one-shot — then you can fight back.
+E max. You outscale him hard, but he zones you off farm well in lane. Farm with cleaver and ask your jungler to gank if they are strong early. To fight him you need Grievous Wounds.
 
 ### Riven
-She combos through your health bar faster than you can regen; her shield eats your Q. Phase Rush and Q poke only; never stand still in an extended melee fight. Post-2 items your regen beats her burst — fight when her cooldowns are spent.
+Q or E max (preference, skewed toward Q). Stormraider's Surge with Inspiration secondary makes this far more playable. She is hard to farm against and can zone you from XP range, so never fight if possible; as long as you never die to her and keep some CS, you outscale.
 
 ### Rumble
-His Flamespitter plus E silence creates a harassment loop you can't break out of. Phase Rush to escape Flamespitter range; stay mobile and never stand in his ultimate channel. Spirit Visage as secondary — MR turns his sustained damage into irrelevance.
+Q max. Rush a null-magic mantle, then Warmog's. Give up some farm to eat his poke, and don't let him land every harpoon. He can run you down and tower dive easily with ult, so respect it. You outscale him in the sidelane.
 
 ### Ryze
-Sustained magic burst at close range and root chains make trading into him punishing. Keep distance and Q poke only; Phase Rush to break his root-to-E chain. Scale to Spirit Visage — MR cuts his DPS dramatically and you win sustained fights at full build.
+Top Ryze: if he takes Stormraider's Surge, just farm; he doesn't win an all-in. If he takes Ignite and Conqueror, lane is extremely hard, but you still outscale.
 
 ### Sett
-His W true-damage haymaker punishes every melee exchange and his grit mechanic rewards you trading into him. Dodge W by walking sideways as he winds up; Q poke from range and don't let him grab you under tower. Post-Warmog's you sustain through his W if you avoid multiple haymakers.
+Q max. Hard bully lane: his MS steroid gives him long bully range, so play slow and farm safely with cleavers. Runes: Stormraider's Surge with Inspiration or Resolve, or First Strike with Resolve to turtle; avoid Grasp. Don't die and you outscale. In teamfights, position so he can't ult your bonus HP into your backline.
 
 ### Udyr
-His Phoenix stance DoT and constant MS make him impossible to escape and painful to trade with. Phase Rush to survive his initial engagement; Q poke and don't commit to sustained melee. Post-Warmog's you win the tank fight — both scale on HP but yours regenerates.
+Q max if he lanes, E max if he perma-proxies. Only take cleaver trades if free; his sustain and shields are high. If he proxies, don't chase; farm under tower, track the enemy jungler, and back off even if you lose 1-2 waves, since Udyr plus jungler dives easily. Ping your team when he proxies. AD Udyr is weaker; just stand under tower.
 
 ### Warwick
-His E slow and attack-speed passive lock you into extended fights you can't win early. Trade short — one Q poke and back off before his stacks proc lifesteal. Rush Bramble Vest immediately; his lifesteal makes him unkillable without grievous wounds.
+Q max. Stormraider's Surge with Inspiration, or First Strike if confident. If he tanks every cleaver in front of the wave it's nearly unplayable; stay in XP range and don't die. Spam ping your jungler away from ganks; a gank never wins that 2v1 if he has Barrier, though a very early gank can now work.
 
 ### Yorick
-His Maiden and ghouls deal consistent damage that whittles you down, and his wall traps you in fights. Destroy ghouls before trading — they amplify his damage significantly. Phase Rush so you can escape his wall; post-Warmog's your max-HP regen outlasts his sustained pressure.
+Q max, focusing cleavers on Maiden; you can reliably kill her whenever he summons it. His cage is real CC. Look for aggressive cleaver and E trades early since you usually have wave priority, but if he keeps dodging, turtle and scale. Side lane is unplayable if he snowballs.
 
 ### Yuumi
-Usually support, but top Yuumi enables her carrier to freely damage you. You can never catch her — target the champion she's attached to. She has no role in a 1v1 context; ignore her and win through teamfight positioning.
+Makes whoever she's on harder to kill, but she's weaker for your gameplan than a real enchanter like Lulu.
+
+### Zaahen
+Q max (tentative). Very tough lane: his zoning is strong and you lack the burst to beat his passive, an exaggerated Darius passive you can't just ignore late.
 
 ### Zeri
-Ranged kite with near-infinite MS — she runs circles around your Q range all game. Phase Rush still isn't enough to catch her solo; Q farm and scale. Look for collapsed angles where teammates can pin her; she'll always escape your solo chases.
+Very hard to land anything on her or reach melee range. If she's in full kite mode, ignore her and go for another squishy, usually their mid laner.
 
 ## Even
 
 ### Akshan
-His passive revive and grappling hook escape make reliable kills hard. Punish his reload window after his double-shot (two autos then reload); he's committed during grapple wind-up. Trade when he misses his boomerang — he's vulnerable while E is on cooldown.
+E max. He dodges cleavers with E and outpokes you, so lane is rough. Bramble if he rushes BotRK, Randuin's if he builds crit. Stormraider's Surge + Resolve. Late game force teamfights; ranged tops get outscaled.
+
+### Gangplank
+E max preferred unless you break barrels with E, otherwise preference. Eat his poke and outscale; break barrels with auto E before he blows you up. Late game you tank him and kill him in a side lane. Stormraider's Surge + Resolve if unconfident, Grasp if confident.
 
 ### Kayle
-She's weak early and you win lane levels 1-5, but post-6 she scales harder than you and becomes nearly untouchable. Run her down levels 1-5 with Q and Grasp trades. Post-10 she wins fights — take tower plates and transition to macro rather than fighting.
+E max. Level 1 she wins to the death, so be careful. Levels 2-5 look to zone her off farm, though it's hard on Mundo. Levels 6-15 are a nightmare and she does far more in teamfights. From 16 with rank 3 R you can 1v1 her.
 
 ### Mordekaiser
-His realm mechanic pulls you into a 1v1 with ghost bonus — don't duel if you're behind in items. Trade short to proc Grasp and back off; never extended fight until post-Warmog's when your regen beats his passive healing. Phase Rush exits the realm faster if you're losing the duel.
+Q max. Dodge his stuff and you hard outscale. He looks for a kill window 6-10; at 11 you can tank 7 seconds in his R. Never get hit by E and he can't ult you through your passive. Bait Qs by stepping in and out of range. Mirror his Flash or he Flash-E-ults you at 6. Grasp for reward; Stormraider's Surge is easier and escapes even through Rylai's.
+
+### Olaf
+Q max. Stormraider's Surge with slow resist shard lets you run from him permanently. Lane is fine.
 
 ### Ornn
-Tank vs tank farm lane — who completes first and masterwork upgrades matter more than laning. Q poke each other; the real fight starts at 2 items. Track his passive upgrades — Masterwork Ornn items spike his power curve significantly.
+Q max. Cleavers land easily and you outscale in a side lane. His all-ins are strong and chain CC makes denying CC pointless; in teamfights his item upgrades make him more useful unless you hard carry. First Strike, since cleavers wreck him while he wins melee range. Grasp into a weak Ornn if you can dodge Bellow.
 
 ### Poppy
-Her W passive negates dashes (irrelevant to Mundo) and her shield reduces one big hit. Neither of you has real kill threat; Q farm and let her push. Look for early roams with TP when she's slow and committed to shoving.
+Q max. She does a lot of lane damage but you hard outscale. Grasp.
 
 ### Rell
-Support usually, but top Rell is slow and immobile — you win the movement game. Don't fight into her ult (roots everything nearby); wait for R to expire then all-in. Phase Rush lets you walk out of her ult zone if she engages while you're split.
+Her ult locks you down and resistance steal is annoying, but she is nothing to majorly worry about.
 
 ### Seraphine
-Poke mage — if top, her Q+E poke attrition and staccato shield make trading awkward. She can't escape your approach once you're in melee but her range keeps trades inefficient. Scale to Warmog's; she has zero kill threat against max-HP Mundo.
+It's very hard to kill anyone on her team in late-game teamfights, but neither mid nor support Seraphine can match your split push.
 
 ### Shen
-Skill-testing tank matchup — his Q marks punish melee trades and W shield blocks one burst window. Trade around his Q dash cooldown (3 hits to consume); don't fight while his W is active. His ult is the real threat — watch the global map, not his 1v1 strength.
+Q max. Stormraider's Surge with Resolve, mainly for Demolish. He has no sustain, so cleaver poke sticks; his trades are hard to dodge though, and a good Shen can still win lane. Farm and outscale. Your tower damage punishes him hard when he ults out of lane.
 
 ### Swain
-His E root plus Q flock damage creates sustained harassment you can't easily dodge. Move perpendicular to his E throw; he's immobile once cast, so Q poke when he's animating spells. Post-Warmog's your regen beats his drain — fights favor you at 2+ items.
+Walk out of his ult once he starts it. If he has Rylai's, just fight him; you win.
 
 ### Taric
-Support top — he out-heals your poke and stuns on approach. Neither of you dies early; farm for lategame. His ult is the teamfight power — coordinate with jungler rather than trying to 1v1.
+One of the hardest CC tank supports, but you still counter CC tanks. Just ignore him.
 
 ### Teemo
-His blind negates your E cleaver and mushrooms apply grievous wounds-equivalent to cut your regen. Don't auto-attack into blind; Q poke only. Phase Rush or Quicksilver against his shroom slow; post-Warmog's you still need QSS to duel him reliably.
+Q max. He can only auto you once or twice as you walk up. Outsustain his poke with Second Wind and Doran's Shield. He's hard to land cleavers on and run down. Late game with one or two MR items, step on shrooms so your teammates don't have to.
 
 ### Trundle
-His Q reduces your max HP which directly punishes your regen strategy, and his pillar traps you in melee range. Walk sideways around pillar; never fight when his ultimate is active (he steals your resists and HP). Post-Warmog's the HP steal hurts less — play around his ult cooldown (120s).
+Q max. Stormraider's Surge with Inspiration. Poke with cleaver, but his sustain is high. He struggles to all-in you; wait for him to ult before you do. Late game, split push yourself and force him to match you; matching him is much worse.
 
 ### Twitch
-Ranged poison stacks deal damage over time while preventing healing threshold. Phase Rush to gap close when he positions poorly; he's immobile and dies fast when you land Q into melee. He falls off hard as a duelist — get Warmog's and run him down.
+He's raw DPS that deletes squishies but has no tank-killing potential, and stealth doesn't matter much to you. Annoying with a Lulu or AP build due to slows. If everyone else is distracted, tank through Lulu's polymorph and kill him.
 
 ### Urgot
-His W chainsaw and E fear/grab make melee trades painful and his ult executes low-HP targets. Keep your HP above 25% to avoid execute threshold; Q poke from max range. Post-Warmog's your max HP stays high enough to avoid ult range unless he's very ahead.
+Q max. Grasp is fine; Stormraider's Surge with Resolve is better to escape his ult. Dodge his E and his ult can't reel you in. His cheese is Flash-E after landing Q, so take Flash instead of TP. Rush Warden's Mail after Heartsteel and Warmog's.
 
 ### Varus
-Poke ADC with slow on Q and blight stacks — he kites well but has no escape. Phase Rush to close gap after his Q (long cast time); once in melee he has no peel. Post-Warmog's he can't kill you before you reach him.
+E max. Versus AP Varus top, dodge his Q; his ult doesn't root you. If he lands it he wins melee-range 1v1s until 16. AD or lethality Varus ADC is easy for you.
 
 ### Vayne
-Her Condemn into wall stuns and Silver Bolts true damage make extended fights favor her. Never stand near terrain — she wins all wall-stun setups. Q poke only; post-Warmog's her Silver Bolts still tick but you regen back between proc windows.
+E max. Stormraider's Surge with Resolve. Your passive ruins her only peel. Turtle in lane and land cleavers if she plays aggro. From 6, run her down when you land a cleaver and have ult and passive up.
 
 ### Yasuo
-His windwall blocks your Q cleaver and his tornado-ult setup can punish you early. Walk sideways to dodge tornado; never fight when windwall is active. Post-Warmog's his burst can't kill you before you regen — walk around his windwall and run him down.
+E max. Rush Randuin's 3rd. Like Yone with more sticking power; he zones well and it takes a while to outscale the 1v1, but Yasuo top is usually weak.
 
 ### Zed
-His shadow combo and death mark make early laning risky but he falls off hard against tanks. Phase Rush to reposition away from death mark detonation; Q poke from range. Post-Warmog's his burst is at most 30% of your HP — run him down when ult is on cooldown (120s).
+A good fed Zed will 1v1 you regardless of tank items. Without a lead you can kill him in a sidelane.
 
 ## Minor
 
 ### Akali
-Her shroud makes tracking her during trades impossible but she falls off hard against max-HP tanks. Q poke when she reappears from shroud; post-Warmog's her burst does negligible damage. She'll roam — match with TP or call MIA immediately.
+Q or E max (preference, Q safer). Doran's Shield + Second Wind blunts her poke, and any poke you land sticks since she has no sustain. You win extended trades if you don't stand in shroud; respect her level 6 all-in when pushed up and low. Activate W as she uses her burst (R2 or E2), then reactivate immediately. Don't die; she snowballs fast.
 
 ### Aphelios
-ADC with multiple weapon stances — his calibrum snipe Q at range is the main poke tool. Phase Rush to reach him; he has no escape ability. Post-Warmog's he can't duel tanks regardless of weapon stance.
+You can usually run him down, and late game ignore his guns. Early/mid game, don't fight when he has red/white.
 
 ### Aurora
-Mobile hop-poke mage — she uses R to escape chases and W to reposition. Wait for her W to be down before committing to all-in; it's her primary escape tool. Scale to Spirit Visage; MR halves her burst damage.
+Top Aurora: sustain poke under tower, but weak at it. E max and run her down past 6 if you land a cleaver and aren't low.
 
 ### Azir
-His soldiers provide ranged DPS without him being in melee range, but he's immobile without ult. Trade in the window when his soldiers expire (5s duration); he can't fight you once you're in melee. Post-Warmog's you win the sustained fight — tank him down.
+Top Azir: E max. He has very high DPS so you can't ignore him. Walk through the push part of his ult; it's only terrain once it stops. Run him down generally, but in teamfights he kills you without multiple MR items if left uninterrupted.
 
 ### Bard
-Support in top lane — his Q stun requires setup and he roams globally. Trade when his Q is on cooldown; he can't fight you 1v1 at any point. Use his roam timer to take free plates and push for objectives.
+Depends on your top matchup: a roaming Bard is dangerous when you're weaksided against a bully. Otherwise easy: your passive eats his ult and his peel is weak. He usually builds tank items, so ignore him and go for the ADC.
 
 ### Brand
-His W-E-Q combo burst is high, but tanks resist his one-shot patterns. Stand spread to avoid his W bounce passive applying to nearby minions; Q poke through his low mobility. Post-Warmog's his burst is a fraction of your HP — walk him down.
+His burn hurts but he dies fast once you reach him; Rylai's slow won't keep you off him or his ADC.
 
 ### Braum
-Support top — his passive stun requires four hits from multiple sources; solo lane negates it. He can't kill you solo at any point; Q farm freely. Use his low kill threat to push and make TP plays.
+Tank support with excellent peel. Still run at his ADC to draw his CC so a teammate can kill the ADC; a 2v1 usually isn't possible.
 
 ### Briar
-Her reckless swing true-damage and bleed sustained damage make short trades painful. Watch her HP — she gets enraged at low HP and fights harder. Post-Warmog's your regen outlasts her bleed; sustained fights favor you.
+Top Briar: Q max. Farm safely and W her bursty pre-6 all-in, or look for early kills with cleaver poke. Stay out of her heal range; when she goes in, keep range and use your full combo so she E's away. Save the last cleaver for after her scream ends, since she has damage reduction while screaming.
 
 ### Camille
-Her Q true damage on second hit and W max-HP damage make extended fights dangerous pre-items. Respect her Q cone — don't let her proc both hits on you. Post-Warmog's her true-damage chunk matters less percentage-wise and sustained fights go your way.
+Q max. Skill matchup she must play perfectly; she has the early edge and uses it to roam and dive with her jungler. Never follow her roams: shove, take plates, and ping when she leaves. If she fails to snowball you outscale hard; split while ignoring or killing her, or teamfight by running past her to the backline.
 
 ### Cassiopeia
-Twin Fang poison spam plus grounding (counters your boots) makes Q chasing hard. Phase Rush pre-poison to close gap; once in melee she can't chase you without re-landing poison first. Spirit Visage helps — MR cuts her sustained poison DoT output.
+Q max. Always Swifties unless the enemy is 4 AP. A missed poison isn't a signal to go in, it's low cooldown. You win late fights and she can't match your split. Stormraider's Surge + Resolve.
 
 ### Cho'Gath
-Tank battle — he stacks HP with Feast and you do too. Dodge his Rupture (Q skillshot) — getting knocked up gives him free Feast stacks. After Warmog's you both out-sustain each other; roam and split to decide the game.
+Q max. He can cheese you at 6 and wins early trades, but your Q does huge damage to him late. Tank vs tank decided by macro; if you're much better, perma shove and Q poke.
 
 ### Ekko
-His passive shield activates at low HP making burst finishes impossible, and his ult retreats him to safety. Don't chase a low-HP Ekko — passive shield and ult escape waste your cooldowns. Post-Warmog's his rewind burst doesn't kill you; fight when his ult is on cooldown.
+Easy to tank if he isn't very fed. If he is fed, you have no CC to stop him.
 
 ### Evelynn
-Jungle pick — if top, respect her level 6 all-in (ult execute) but she's squishy. Q farm freely pre-6; post-Warmog's her charm-ult burst is irrelevant to your HP pool. Pink ward river brush to deny her approach.
+She can one-shot you if you misuse W or ult.
 
 ### Ezreal
-His E blink makes catching him nearly impossible but he's physically weak. Q poke when he uses E offensively (5s cooldown after cast); he can't trade melee. Scale to Warmog's — his poke damage falls off completely against max-HP tanks.
+Eating every ability chunks you, but he's easy to run down and can't burst you.
 
 ### Galio
-His taunt and magic damage make short trades punishing, but he's immobile without ult. Dodge his W taunt (long wind-up animation); trade when his Q is on cooldown. Post-Warmog's his burst doesn't kill you; his value is global ult, not 1v1 dueling.
-
-### Gangplank
-His Q applies Grievous Wounds on every hit — this is his primary counter-tool against Mundo's regen. Don't let him freely Q you down; Phase Rush to close gap and deny barrel detonations. Complete Warmog's before worrying about his sustained GW application — the threshold still matters.
+Careful if he's 6+ and out of vision during laning phase.
 
 ### Garen
-His silence stops your E and his execute ult threatens low HP. Don't fight when silenced (can't cast E); stay above 25% HP to avoid Villain execute. Post-Warmog's his spin is irrelevant — run him down with Phase Rush when silence expires.
+Q max with Grasp, not Stormraider's Surge. Start W during his uncancellable Q auto to win trades; shove from level 2 and poke him under tower. Respect Conqueror Garen more. Full send your split so he must respond. If he saves ult for you, ult around 1/3 HP instead of 1/8 at rank 3.
+
+### Gragas
+Q max. Stormraider's Surge + Resolve to play safe, or Grasp if you can dodge most barrels. If he E's into you with passive up, all-in. Respect his ult near his turret; it can stun-lock you under tower.
 
 ### Graves
-Short-range ADC — his smokescreen blocks vision and his shotgun range punishes melee approach. Don't fight in his smokescreen zone; Q poke and Phase Rush to close. He can't duel max-HP Mundo at any point after first item.
+Top Graves: Q max. You win the 1v1 unless he's far ahead; a very fed or late Graves stat-checks you.
 
 ### Hecarim
-His E fear and ramping MS make him a strong early duelist. Don't stand near walls — his E fear pushes you away from terrain and into bad positions. Post-Warmog's you both have MS tools but your regen outlasts his burst damage.
+Top Hecarim: Q max. He must be very far ahead to 1v1 you. If he's fed, perma split so he has to help match you; if he's behind, force teamfights.
 
 ### Heimerdinger
-His turrets deal consistent poke damage while his E grenade stuns — never stand still in turret range. Phase Rush to reposition out of turret zone; destroy turrets before trading (they're his primary damage source). Post-Warmog's you absorb turret poke without losing healing threshold.
+E max; poking him does nothing. Farm safely under tower and cleaver his turrets; don't run into his turrets. If he sets up at your tower, get your jungler or mid to gank. Stormraider's Surge + Resolve.
 
 ### Janna
-Support top — she has zero kill threat and her shield blocks one burst. Farm freely; she genuinely cannot kill you. Use her weak 1v1 to pressure tower and roam with TP.
+Keep picking up your canister since her CC is low cooldown; she can't enchant her ADC well.
 
 ### Jarvan IV
-His EQ flag-and-drag plus ult arena can trap you in a 1v1 you didn't want. Stay away from his flag when it lands; Phase Rush through his ult arena wall if you need to exit. Post-Warmog's his burst is irrelevant — fight freely.
+Top Jarvan: Q max. He isn't a problem, but respect his ult terrain or he traps you for his team.
 
 ### Jayce
-His long-range cannon stance poke shoves you under tower and denies trading patterns. Phase Rush to reach him in cannon stance; respect his hammer stance E slow. He falls off against tanks after 2 items — sustain through his early pressure.
+E max. Respect Conqueror Jayce's all-in. Eat poke, dodge half his Q's and scale; he's gank-vulnerable since you eat the knockback. Tank his Q's for your team late. Past level 11, land a cleaver and run him down.
 
 ### Jinx
-ADC top — she kites forever and rockets shred at range. Phase Rush is your only gap-close tool; her chompers slow your chase. Post-Warmog's she can't kill you once you're in melee — find an angle and run her down.
+Like Caitlyn but easier to run down. She kills you if unchecked, but you kill her faster unless she has an enchanter support.
 
 ### Kalista
-Her passive hop makes catching her nearly impossible but she's squishy in melee. Q poke and let her come to you; she's weak when her team isn't present to proc spear kills. Post-Warmog's she can't duel you once you're in melee range.
+Full on-hit BotRK Kalista is a bit harder but still fine; full lethality Kalista is one of your easiest ADCs. Either way, run her down.
 
 ### Katarina
-Her dagger resets and ult are deadly but canceled by any CC — your E cleaver applies slow. Don't let her get three daggers positioned before trading; Q poke to interrupt dagger pick-up animation. Post-Warmog's her reset burst can't kill you; she's dangerous when teammates have no CC.
+You have no CC to stop her ult, but you can just kill her. The side lane is hopeless for her; in teamfights she might still wipe the rest of your team.
 
 ### Kayn
-His form matters — Rhaast (red) out-sustains you, Shadow Assassin (blue) bursts then falls off. If blue Kayn, you win sustained fights post-Warmog's easily. If Rhaast, respect his W regen — trade short with Phase Rush escape and build Bramble.
+Red Kayn is bad for you, but you can usually run away. Blue Kayn, which most players pick, is easy for you.
 
 ### Milio
-Support top — he has zero dueling capability and his bubble is his only CC threat. Farm freely and push him out; his enchanter identity means he can't kill you solo at any point. Ignore him and make TP plays.
+Eat his CC and run his ADC down. His enchants are strong, so preferably wait until his circle runs out.
 
 ### Morgana
-Her Q root plus W black shield make landing your own CC follow-up irrelevant. Dodge her Q (long skillshot travel time); she shields herself from CC so your cleaver slow must land before shield activates. Post-Warmog's her burst is minimal — she loses lane and wins teamfights only.
+Her spellshield denying your cleaver slow is the worst part. If her ADC mispositions she can't save them.
 
 ### Nidalee
-Her Q spear poke at max range is her main threat; she falls apart in melee range. Phase Rush to chase when her spear misses; she can't trade melee. Post-Warmog's you absorb spear poke without losing healing threshold.
+Top Nidalee: farm with cleavers and stay in XP range. Don't sit in lane bushes, she traps them for vision. You outscale quickly even with missed CS as long as you get XP. Jungle Nidalee: run her down.
+
+### Nunu & Willump
+Neither of you can kill the other. Watch for Nunu ganks; if the enemy top has hard CC you die even near tower, and snowball can't be dodged on Mundo.
 
 ### Pantheon
-His W stun setup and level 6 all-in are dangerous early, but he falls off hard against tanks. Respect his W-Q combo early pre-3 items; post-Warmog's his burst is a fraction of your HP. He has no ult escape — fight him post-6 when you're stronger.
+Q or E max (preference). Don't eat free spears or let his W land; then he can't kill you and you hard outscale. An unlucky death or gank makes it a nightmare. Grasp to trade back when he W's you; Stormraider's Surge is redundant vs his short trades.
 
 ### Rek'Sai
-Jungle pick — if top, her burrow Q engage and knock-up make her deceptively dangerous early. Respect tunnel engage angles; she has no answer for sustained regen fights. Post-Warmog's fight freely.
+Jungle: strong early ganks and a level 6 tower dive, but nothing against you late. Top: her sustain is strong, but you outpoke it by landing most cleavers, which is easy since she burrows to heal.
+
+### Renata Glasc
+Very annoying paired with Kog'Maw, otherwise mostly useless against you; she is anti-burst.
 
 ### Samira
-Her dashing combo through minions and ult make her lethal at close range but she's squishy. Force her to ult early by engaging aggressively; once ult is spent she's immobile. Post-Warmog's she can't kill you before you reach her.
+Not much of an issue for you, but you can't cancel her ult since you lack CC, so she can wreck your team if not killed quickly.
 
 ### Shyvana
-She scales — her early dragon form is weaker but post-6 she wins extended fights until you complete Warmog's. Q poke in human form; respect her dragon ult power spike window. Post-Warmog's your regen beats her DPS.
+Shyvana rarely ganks top. On-hit Shyvana can be a bit of an issue, but you destroy AP Shyvana.
 
 ### Singed
-Proxy farm lane — he'll proxy and you'll deal with super waves. Don't chase him into his proxy (fling into poison trail). Match his split by taking side objectives; your 1v1 strength means you can fight him directly anytime he's in lane.
+Q max if he lanes, E max if he proxies. Grasp to bully. Free farm lane that you outscale. Either perma-shove or freeze; don't let him push the wave or he'll proxy. Respect his late game.
 
 ### Sivir
-Typically bot ADC — if top, bait her spell shield before committing to all-in. Walk in after she pops shield on a poke ability; she's immobile once shield is baited. Post-Warmog's her damage is irrelevant against max HP.
+She is harder to run down, but she doesn't really damage you if you went the teamfight build.
 
 ### Sona
-Support top — no dueling threat whatsoever. Farm freely and rotate with TP. Her Q poke is annoying but can't prevent Warmog's spike timing.
+Focus her, not her ADC. She keeps people alive well but is very squishy herself.
 
 ### Soraka
-Support top — her self-heal sustains her HP but Grievous Wounds counters it. Rush an early Executioner's Calling if she's committed to top Soraka. She can't kill you; farm and roam.
+A more extreme Sona: focus her most of the time.
 
 ### Sylas
-His chain lash damage and stolen ult can surprise — check which ultimates are on your team. Don't fight when he has a strong stolen ult (Amumu, Malphite, Sion); fight freely otherwise. Post-Warmog's his burst damage is negligible.
+Many Sylas players take your ult, though it's weak on him. If he's fed he can kill you; if not, you hard stat check him.
 
 ### Syndra
-Her ball-throw poke and level 6 all-in ult are the danger windows. Phase Rush to dodge her E ball-pull combo; she's immobile during ult cast. Post-Warmog's her ult does at most 30% of your HP — regen it back.
+Low-range burst mage you destroy. Late game her ult executes, so if she ults you while low, ult immediately. Your passive eats her E, but if you're also hit by the orb you still get knocked back and stunned.
 
 ### Thresh
-Support top — his hook plus lantern is his primary tool; dodge the Q hook. He can't kill you solo; play aggressively once his hook misses (1.5s cooldown window). Use his low kill threat to tower-dive and make aggressive TP plays.
+Prevent easy lantern escapes.
 
 ### Viego
-His possession passive and W regen make extended fights tricky when he has a soul available. Don't fight when his passive is ready to proc reset; short trade and disengage. Post-Warmog's your regen beats his sustained damage.
+You beat him at a base level, but you have no CC, so a fed Viego can 1v9. Focus him first in teamfights.
 
 ### Viktor
-His laser plus E augment slow makes him a safe poke mage that's hard to catch. Phase Rush to reach him; he's immobile during laser cast. Post-Spirit Visage his magic damage becomes negligible.
+A mage who is a little harder to kill than most, but still free.
 
 ### Xerath
-Pure artillery mage — pokes from max screen range with no melee threat. Phase Rush to close gap when he's animation-locked on W channel; his range is his only defense. Post-Warmog's you absorb his poke without losing healing threshold.
+He outranges your cleaver so he's hard to approach, but his poke is meaningless against you.
 
 ### Yone
-His E soul split and ult make trading risky, but post-Warmog's he can't kill you. Respect his soul form during E — he takes increased damage but deals his combo simultaneously. Post-Warmog's trade through his E soul; your regen means his burst barely registers.
+Q max. Grasp. Dodge Q3 and Q whenever he Q3s; your passive eats Q3, so make an effort to dodge his ult too. Rush Randuin's 3rd. Don't play passive and let him free farm to BotRK; aim to hit Warmog's plus Giant's Belt when he does. He has no sustain, so punish him.
 
 ### Zac
-Tank battle — his E grab and R bounce make him a better initiator than duelist. Don't fight near his extended E range; Q poke safely. Post-Warmog's you both do minimal damage; macro decisions decide the lane.
+Q max. His lane sustain and CC mean you won't win early fights, so just farm; you outscale hard. He can jump from out of vision and CC you for 4+ seconds, so stay away from his tower unless you know he backed. Don't give him even a slight lead.
 
 ### Zilean
-His time-warp slow and time bomb make chasing nightmare territory. Don't commit to all-in when his ult is available (revives him); fight when ult is on cooldown (120s). Post-Warmog's his bomb damage is small — slow doesn't prevent your regen.
+Build Swifties. Don't kill whoever he puts revive on unless they're nearly dead.
 
 ### Zyra
-Her seeds plus E snare create zone-control poke you can't easily dodge in lane. Walk diagonally to dodge her E straight-line snare; don't stand on her seeds (Q grows them). Post-Warmog's her plant damage is irrelevant to your HP pool.
 
 ## Tiny
 
 ### Ahri
-Her charm plus ult dash make trading awkward but she's squishy in extended fights. Dodge the charm skillshot; after charm misses she has no CC. Post-Warmog's she can't touch you.
+Her damage is negligible once you have any MR. Ignore her and take turrets in a side lane or chase her ADC in teamfights. In a side lane, chase until she ults without using yours, then back off; if she stays, run her down once her ult expires.
 
 ### Alistar
-Support top — his headbutt-pulverize combo is dangerous but his 1v1 is weak without follow-up. Respect combo range; post-Warmog's he can't kill you and you outtank him easily.
+Peel falls apart against you. Ignore him and run at his ADC; spam cleavers at him while he frontlines before fights.
 
 ### Amumu
-His bandage toss plus ult make him a teamfight threat, not a duelist. Dodge his Q skillshot; post-Warmog's his damage is minimal. Neither of you has strong lane kill threat — roam and make plays.
+You counter everything he does. Liandry's does some damage, but you kill him faster; ignore him and run at someone else.
 
 ### Annie
-Her stun burst at 4 stacks is her only threat window; watch her stun count. Move when she has 4 stacks ready; post-Warmog's her burst does around 20% of your HP. Walk her down post-stun — no ult escape.
+You fundamentally counter her; she's a low-range burst mage.
 
 ### Blitzcrank
-Support top — hook grab is the only threat. Dodge the hook and he has zero kill threat. Post-Warmog's you body him in any melee exchange.
+Eat his hook for your team when a fight is about to start.
 
 ### Corki
-Package missile poke damage but he's ADC stats — tank him down. Phase Rush to close gap after package missile lands; once in melee he can't escape. Post-Warmog's he's irrelevant.
+E max. Respect his strong levels 1-3 and farm with cleaver; you outscale even down on farm. His all-in leaves him gankable. Past 6 + Heartsteel you can run him down if you land a cleaver; at level 11 just run at him for the rest of the game.
 
 ### Darius
-He wins levels 1-5 very hard with bleed plus pull; play Phase Rush and respect his bleed stacks. Post-Warmog's you heal through his bleed faster than he re-stacks it. Belle19 rates Tiny because Mundo's regen makes this more even at 2 items than it looks — but the early laning is genuinely dangerous.
+Q max. Farm with Q; poke sticks since his sustain relies on abilities he struggles to land. Don't let him proc your passive off cooldown. If he misses Q while your passive is up or his E is down, Q, W, auto, E, W, walk away. All-ins possible from level 3. Stormraider's Surge + Inspiration recommended (Grasp fine). Eventually build Bramble.
 
 ### Diana
-Her shield and burst make trading annoying but she falls off against tanks. Don't fight into her E shield; trade when shield expires. Post-Warmog's she can't kill you.
-
-### Dr. Mundo
-Mirror farm lane — whoever completes first has a slight edge. Q poke each other. Post-Warmog's it's a coin flip based on who has more HP.
+If she's tank Dante's build, ignore her and kill her ADC. If full AP, kill her when she jumps on someone, or run at her first so she combos you.
 
 ### Draven
-His spinning axe damage is high early but he has no tank-shredding mechanics. Respect his axe catch pattern (he prioritizes catching axes over fighting); interrupt his catch with Q poke. Post-Warmog's he can't duel you.
+Low range, easy to run down. Throw cleavers where his axes drop. With decent armor you can run down any Draven regardless of how fed.
+
+### Dr. Mundo
+Mirror. Q max.
 
 ### Fiddlesticks
-His fear channel plus drain can be exited by walking out of range. Don't stand in his drain range; Q poke when he's animation-locked. Post-Warmog's he can't kill you even with a full fear-drain-ult combo.
+Get vision where he'll likely ult from; his ult only fears when it lands from out of vision. Easy for you, but he can wipe your team.
 
 ### Fizz
-His Q gap close plus E dodge make him slippery but he's squishy. Respect his E invincibility window (brief); after E he's committed and vulnerable. Post-Warmog's his burst is a fraction of your HP.
+Eat his ult for your team.
 
 ### Hwei
-Long-range mage — all skillshots. Dodge his Q brush painting pattern and W slow zone. He has no melee threat; Phase Rush closes gap easily. Post-Warmog's irrelevant.
+E max. Don't stand in the lava pit. Easy to run down; pick up canisters since his CC is low cooldown.
 
 ### Ivern
-Support top — he doesn't fight, he farms brush and shields. Farm freely and roam. No kill threat whatsoever.
+As jungler, consider early Q points to cleaver Daisy, unless you're ahead. If he ults before a teamfight, kill Daisy.
 
 ### Jax
-His Counter-strike dodge makes his early trade pattern strong, but Mundo's regen wins sustain fights. Don't auto-attack him during Counter-strike (he dodges all autos); Q poke is fine (it's a spell). Post-Warmog's trade freely — your regen beats his burst.
+Q max. If unconfident, farm and scale; if he Q's onto you, cleaver and walk away. With good spacing it's a bully lane from level 1. One death to Jax is game-ending. Stormraider's Surge + Resolve if unconfident, Grasp to bully.
 
 ### Jhin
-ADC with no escape — his 4th shot crits but he reloads after. Trade during his reload window (4 autos then 2.5s reload); Phase Rush closes gap. Post-Warmog's he can't burst you.
+He fails against most tanks.
 
 ### Karma
-Shield-poke mage — her mantra Q poke plus shield makes trading annoying but not lethal. Phase Rush to close gap; her shield protects one burst. Post-Warmog's her damage is nothing.
+Top Karma: you will never kill her, and trying to poke her out just gets you poked out. Farm and outscale her hard in a side lane.
 
 ### Karthus
-No escape — he stands still and casts. Q poke freely; Phase Rush to walk into melee range. His passive death-cast means don't stand next to him at low HP. Post-Warmog's his E wall DPS doesn't matter.
+You can easily tank his ult. If you eat every Q he kills you in teamfights, but they are easy to dodge, especially with your ult movement speed and Swifties.
 
 ### Kassadin
-Punish him hard levels 1-5 before his ult unlocks — he's nearly helpless pre-6. Post-6 he has rift walk escape but his melee damage doesn't threaten Mundo's regen. Scale normally; his late-game mage power doesn't translate to 1v1 dueling against tanks.
+He will never 1v1 you. Don't pop ult early; only ult when he can't escape or you are actually about to die. In a side lane ignore him and take tower; he must hard respect you.
 
 ### Kennen
-Respect his stun-ult early and don't get caught in his ult zone. Phase Rush to exit his ult zone immediately when he ults. Post-Warmog's sustain through his full combo — his damage doesn't keep up with your regen at 2 items.
+E max. Eat his poke and farm; late game you run him down easily. Take Stormraider's Surge with Resolve if unconfident, Grasp if you want to kill him.
 
 ### Kha'Zix
-Jungle assassin — if top, his isolation damage and E jump make him dangerous pre-items. Don't stand isolated from minions (reduces his isolation damage bonus); Q poke through minions. Post-Warmog's his burst is negligible.
+After laning, run him down and keep him in auto range rather than worrying about isolation. Before you scale, hug minions if he ganks you.
 
 ### Kindred
-Ranged jungle ADC — if top, she kites with Q dash and marked targets get temporary immunity. Phase Rush to close gap on her Q dash. Post-Warmog's her DPS can't keep up with your regen.
+Ult after her ult. Ulting before she ults is much worse.
 
 ### LeBlanc
-Her double-W blink makes her uncatchable but she can't kill tanks. Q poke freely; her burst is burst, not sustained. Post-Warmog's her chains do minimal percentage of your HP.
+Ignore her and take tower or run down her ADC. She only wins if you engage with her.
 
 ### Lee Sin
-His Q-W-E combo is high damage early but he falls off hard against tanks. Respect his Q kick — stay away from walls so he can't kick you into them. Post-Warmog's he can't kill you; just walk at him and regen through his poke.
+Stat check him.
 
 ### Leona
-Support top — her engage combo is strong but she has no ranged threat. Respect her Q-W passive armor proc window; don't fight when her ult sunbeam is available. She can't kill you solo post-Warmog's.
+Her peel isn't strong enough against you. Ignore her and kill her ADC.
 
 ### Lissandra
-Her Q frost plus E blink combo freeze windows are dangerous but her damage is low against tanks. Move to avoid her Q chain (it travels in a line); her ult is self-cast if she's low HP. Post-Warmog's irrelevant.
+Run her down.
 
 ### Lucian
-His dash plus double-shot passive make trading punishing early but he's an ADC with no escape past E cooldown. Respect his 2-shot passive on E; after E is used (5s cd) he has no defensive tool. Post-Warmog's run him down.
+High DPS but very easy to run down, and his pen/flat burst build struggles against health stackers. Don't tank his entire ult.
 
 ### Lux
-Pure ranged mage — her Q snare plus R laser are long-range threats only. Dodge Q (it's a straight line); Phase Rush to close gap. Post-Warmog's her burst is negligible.
+Run her down.
 
 ### Malphite
-Rock vs rock tank — his ult is the only global threat. Q poke each other; the lane goes nowhere. Track his ult cooldown for roam opportunities. Post-Warmog's you both do minimal damage.
+Q max. Auto-oriented tank fight that you win; poke with cleavers. Take Second Wind, not Conditioning, since his poke is high with Comet. Stormraider's Surge with Resolve.
 
 ### Malzahar
-His voidling pool plus E silence make trading annoying, but Quicksilver Sash exists for his ult suppression. Build QSS or Silvermere Dawn if his ult suppression is repeatedly deciding fights; his voidlings deal damage but you regen through it. Post-Warmog's his damage is nothing.
+Run him down. Stay away from minions he has hit with Malefic Visions.
 
 ### Maokai
-Tank lane — his saplings poke but his kill threat is zero. Q poke each other, neither dies. His sap magic passive reduces magic damage taken (your Q is magic); Q through minions when possible. Post-Warmog's farm lane.
+Q max. You outscale and he has no kill pressure. Prioritize perfect farm over trying to kill him; he is a pure tank you can ignore while hitting tower. Grasp.
 
 ### Miss Fortune
-ADC with no gap-close — she Double Ups through minions and gains MS when no one's nearby. Stay near minions to block Double Up bounce; Phase Rush to close gap. Post-Warmog's she can't fight you.
+Run her down. Don't stand in her ult, it isn't tankable.
 
 ### Naafiri
-Assassin — her pack leaping combo plus empowered Q are dangerous pre-items but fall off against tanks. Don't stand near her packmates (they increase her damage); kill the dogs when possible. Post-Warmog's her burst is irrelevant.
+Unless she is very fed, stat check her; she has no disengage.
 
 ### Nami
-Support top — her Q bubble is her only CC and she has no kill threat. Farm freely. Post-Warmog's you body her in any melee interaction.
+Strong burst enchanter, but you can tank through her. An easier version of Lulu.
 
 ### Nautilus
-Support top — his hook engage and ult CC are teamfight tools, not 1v1 threats. Dodge the hook (it's slow); post-Warmog's he can't kill you even chaining full CC.
+Eat his hook for your team if a fight is about to start.
 
 ### Neeko
-Her passive copy confuses target selection and her Q clone splash damages nearby units. Ignore the illusions and focus real Neeko — she takes damage when hit. Post-Warmog's her burst is nothing.
+Eat her stuff. In a side lane ignore her and take tower; she is hard to run down but can't damage you.
 
 ### Nocturne
-His shroud plus ult make global diving a threat, but his 1v1 against tanks is weak. Don't fight in his darkness shroud; post-Warmog's sustain through his burst. Track his ult (180s cd) to predict dives on you.
+With CC shield up you can beat him when he ults you. Top Nocturne will poke, but his mana costs are high, so bait and dodge abilities to force him to back. Poke does little since his passive heals a lot.
 
 ### Orianna
-Poke mage — her ball placement plus Q-W rotation. Dodge her W clockwork wind-up (clear animation); Phase Rush to reach her before she repositions ball. Post-Warmog's negligible.
+Run her down. Try not to step on the orb.
 
 ### Pyke
-Assassin support with execute — his execute ult doesn't work on targets who survive the threshold. His hook and ult are wasted on max-HP Mundo. Trade freely; his damage falls off completely against tanks.
+Hard to kill him. Unless he E's into you, ignore him.
 
 ### Qiyana
-Assassin with element-based abilities — her R river wall stun is dangerous near terrain. Don't fight near river or walls (activates her ult stun); Q poke from open terrain. Post-Warmog's irrelevant.
+Generally easy. In a side lane, ignore her and take tower if she starts grass spamming.
 
 ### Quinn
-Her blind plus vault makes short trades annoying but she's an ADC with no tank-shredding. Respect her vault (she can cage you against terrain); post-Warmog's run her down when blind expires.
+E max. Strong champ but you outscale hard and her lethality build is poor into you. Instantly shove and take plates if she shows elsewhere on the map.
 
 ### Rakan
-Support top — his W-E dash combo is flashy but he can't kill tanks. Dodge his W engagement; post-Warmog's you bodycheck him in any melee exchange.
+His peel isn't enough against you.
 
 ### Rammus
-Tank mirror — both scale on armor, neither deals real damage. His taunt makes him taunt you into melee but you're already trying to get in melee. Post-Warmog's farm lane; whoever makes more roam plays wins.
+Top Rammus: he never beats you and your cleaver spam pokes him out. Don't auto him in W; otherwise go all in. Treat him like Garen without the sword. He usually proxies until Thornmail, but you still win past that spike. Farm under tower; proxy yourself if their jungler is weak early or playing bot. Don't chase him around.
 
 ### Renekton
-He wins early levels 2-6 hard with empowered W stun and Q sustain; respect that window then scale. Post-Warmog's you completely heal through his combo — trade short early and wait for Warmog's timing. Doran's Shield absorbs his early burst patterns.
+Q max. If he dashes on you: Cleaver, auto, E, walk away. When he activates W in auto range, reactivate your W and walk into him; it nullifies about 90% of his combo damage. Respect his double-dash threat when low. Grasp; trade when he dashes in and turtle confidently. Mid/late you can 2v1 him and his jungler.
 
 ### Sejuani
-Tank lane — her E frost stacks make her a setup-CC tank but she deals minimal damage. Q poke and scale; neither of you has meaningful kill threat. Post-Warmog's farm and make roam plays.
+You can ignore her.
 
 ### Senna
-Her Q healing plus range makes her a sustain marksman who outranges your Q. Phase Rush to close gap when she uses Q (long cooldown window); she has no escape. Post-Warmog's she can't deal meaningful damage to max-HP Mundo.
+Run her down like her ADC.
 
 ### Shaco
-His deceive blink plus jack-in-box make him a tricky early matchup but he falls off hard against tanks. Don't walk into unwarded brush (his boxes fear and root); pink ward common brushes. Post-Warmog's his burst is negligible.
+Top Shaco: ignore his tricks and just farm; you hard outscale. Jungle Shaco: watch for ganks, but late game he does nothing to you.
 
 ### Sion
-Tank mirror with zombie passive mode — his Q charge deals massive damage. Interrupt his Q charge by walking out of the AoE; don't fight when he's near low HP (passive activates). Post-Warmog's his Q charge is the only real threat in the matchup.
+Q max. Grasp. Poke with cleaver, focus your own farm, and deny him plates. If he proxies, wait for a non-cannon wave, clear it fast, then chase him into the jungle so he isn't farming during his death passive.
 
 ### Skarner
-His ult impale CC is his main threat — impale into team is his job, not 1v1. Be near teammates to make his impale risky; post-Warmog's his damage is irrelevant. His terrain-scorpion form (post-rework) has changed his pattern — respect scorpion zone control.
+Q max. You fundamentally counter top Skarner; in the current state it's a free win for you.
 
 ### Smolder
-ADC dragon — his Q stacking deals more damage the longer the game goes. Punish him early before Q stacks accumulate (low stacks = low damage); post-Warmog's even stacked Q doesn't kill you. Phase Rush to reach him.
+Top Smolder: 3 points Q, then E max. Hard to punish early, but past 6 run him down whenever you land a cleaver; he can't match your split. You're on a timer to kill him because his burn hurts you. A fed Smolder ADC is harder to get onto.
 
 ### Tahm Kench
-His devour W can eat you and his passive mark makes trades punishing. Don't trade when marked (increased damage); he's slow and you can walk away at any time. Post-Warmog's he can't kill you and you outtank him.
+Q max. Stand behind the minion wave to deny his Qs. Stay off his half of the lane from 6 to 10. At 11 you can survive his ult dive under 2-3 turret shots, but not with rank 1 R. You hard outscale.
 
 ### Taliyah
-Poke mage — her Q rock shards plus worked ground zone control make certain lane positions unsafe. Don't stand in her worked ground zone; Phase Rush to close gap when she's casting. Post-Warmog's negligible.
+Run her down. You can walk through her wall with passive up while it forms. Don't stay at range; her main damage ability is on a 2-second cooldown.
 
 ### Talon
-Assassin with wall-jumping escape — he roams globally with ult. Respect his level 6 ult damage burst; after ult he's commit-or-flee. Post-Warmog's he can't kill you; track his roam and match with TP.
+Ignore him and hit tower. In teamfights don't try to peel him off your backline; kill his backline yourself at the same time.
 
 ### Tristana
-Her jump plus ult knockback create reliable escape tools but she's squishy. Q poke and bait her jump; after she jumps in to trade her escape is on cooldown. Post-Warmog's she can't kill you.
+Easy to run down in a sidelane. Her jump resets if her bomb reaches full charges and explodes early, so wait for the bomb to go off before you initiate.
 
 ### Twisted Fate
-His pick-a-card gold card stun is his main dueling tool. Move when he's channeling gold card (visible animation); post-Warmog's his damage is negligible. His value is global ult, not 1v1 strength.
+Top TF: Stormraider's Surge with Resolve. He's easy to run down now. Champs without dashes can't catch him once he builds Swifties, so outside of lane split and take towers around Demolish cooldown.
 
 ### Veigar
-His E cage plus execute ult — never stand in the cage ring when his ult is up. Step out of cage AoE before the walls fully form; post-Warmog's his burst does at most 25% of your HP. Walk it off.
+Walk through his cage with passive and kill him. Dodge his W; it nukes you regardless of MR.
 
 ### Vel'Koz
-Long-range artillery mage — all skillshots. Dodge his Q split (it splits at mid-range); Phase Rush to close gap. No melee threat whatsoever; post-Warmog's farm lane.
 
 ### Vex
-Her Q fear wave plus passive shield on dash make her a safe mage, but she's immobile. Dodge her Q (travels slowly); after her shield pops she's vulnerable to all-in. Post-Warmog's negligible.
 
 ### Vladimir
-His pool W makes him unkillable during cast and he sustains with Crimson Rush empowered Q. Punish when his W is on cooldown (he always pools at low HP); Phase Rush to re-close after pool. Post-Warmog's his transfusion healing keeps him alive but can't kill you either.
+Skill max: preference. One of your easiest matchups; he has no kill pressure. After lane, split push and ignore him to take towers, and run him down in teamfights. He'll be a problem for your teammates, so be ready to carry.
 
 ### Volibear
-His Q dash plus passive regeneration make him a strong early duelist but Mundo's regen wins at 2 items. Respect his level 2 Q bite; Q poke and disengage. Post-Warmog's you both regen fast — completing Warmog's first gives a slight sustained edge.
+Q max. Farm with cleaver; ranged farming nullifies his early pressure. At 6 if he dives with ult, don't fight; circle around until his ult wears off on your tower. You outscale him hard in teamfights and split pushing, though you rarely kill him unless he's full AP.
 
 ### Wukong
-His W clone confuses targeting; his E armor reduction makes him deal bonus physical damage. Don't attack the clone (interrupts your auto for 0.5s); Q poke through minions. Post-Warmog's his burst is irrelevant.
+Q max. Long Q poke, strong lane sustain, and a very strong level 6 all-in. Still, ignore him and scale; past 2 items he falls apart in 1v1s and you outdo him in teamfights unless he lands a 5-man knockup. Bramble isn't necessary.
 
 ### Xayah
-ADC with feathers — her E pull-back regroups feathers for damage but has a wind-up. Phase Rush to close gap when she's repositioning feathers; she has no escape with ult spent. Post-Warmog's she can't kill you.
 
 ### Xin Zhao
-His E three-talon strike knock-up plus W regen makes short trades difficult early. Respect his level 2-3 all-in (E stacks fast on autos); Q poke and disengage before knock-up. Post-Warmog's sustain through his damage; he falls off hard against tanks.
+Ignore him and run down his backline unless he's out of position; he's tanky late. The 1v1 is extremely easy unless he's very fed. Get a Bramble; he heals a lot.
 
 ### Zoe
-Long-range skillshot mage — her bubble sleep is her only CC and portal jump is her escape. Dodge the bubble (obvious animation wind-up); after bubble misses she's briefly immobile. Post-Warmog's negligible.
+Eat the slow for your teammates.

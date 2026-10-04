@@ -1,6 +1,6 @@
 # Dr. Mundo (top)
 
-Source: [Belle19's "Too Big to Fail" guide on Mobafire](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) — NA Challenger Mundo main, updated April 2026.
+Source: [Belle19's "Too Big to Fail" guide on Mobafire](https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678) — NA Challenger Mundo main, updated September 25, 2026.
 
 ## Quick reference
 

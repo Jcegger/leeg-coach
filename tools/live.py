@@ -1199,6 +1199,31 @@ def _drop_conflicting_items(live_build):
     return lb
 
 
+def _guard_frozen_heart_ap(live_build, committed_items, ap_count):
+    """Reject newly-added Frozen Heart when AP threats are significant (ap_count >= 2).
+    Frozen Heart has zero MR and its mana stat is wasted on most champs; the LLM
+    over-triggers on attack-speed signals even when the comp has real AP coverage needs.
+    If Frozen Heart was already in the committed path, leave it alone."""
+    if ap_count < 2:
+        return list(live_build or [])
+    fh_norm = normalize('Frozen Heart')
+    lb = list(live_build or [])
+    lb_norms = [normalize(x) for x in lb]
+    if fh_norm not in lb_norms:
+        return lb
+    committed_norms = {normalize(x) for x in (committed_items or [])}
+    if fh_norm in committed_norms:
+        return lb  # already committed — don't override
+    # Newly added; restore the committed item at the same position
+    fh_idx = lb_norms.index(fh_norm)
+    committed_list = list(committed_items or [])
+    if fh_idx < len(committed_list):
+        lb[fh_idx] = committed_list[fh_idx]
+    else:
+        lb.pop(fh_idx)
+    return lb
+
+
 def _parse_situational_swaps(text):
     """Parse '## Situational item swaps' lines into (new_item, old_item, condition) triples."""
     swaps, in_swaps = [], False
@@ -1363,15 +1388,27 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
         tag_norm = normalize(preferred_tag)
         for heading, body in variants:
             if tag_norm in normalize(heading):
+                # Don't let a laner AD tag override a comp with 3+ AP enemies
+                if classify_variant(heading) == 'AD' and ap_count >= 3:
+                    break
                 return heading, body
     if profile_kind == 'Standard' and no_warmogs:
+        if ap_count >= 3:
+            # AP-heavy + Warmog's-bad laner: prefer a Standard variant with MR and no Warmog's
+            for heading, body in variants:
+                b_norm = normalize(body)
+                if (classify_variant(heading) == 'Standard'
+                        and 'warmog' not in b_norm
+                        and any(n in b_norm for n in _MR_PIVOT_NORMS)):
+                    return heading, body
         for heading, body in variants:
             if classify_variant(heading) == 'Standard' and 'warmog' not in normalize(body):
                 return heading, body
-    if profile_kind == 'Standard' and ap_count >= 3:
+    if profile_kind == 'Standard' and ap_count >= 3 and ad_count <= 2:
         # Two-pass: prefer explicitly AP-classified paths first, then fall back to
         # unclassified paths. This stops "Warmog's mixed AP + Thornmail" from winning
         # over "Full AP" / "Heavy magic damage" when there are 3 AP sources but no healer.
+        # Trigger when AD ≤ 2 (covers 3 AP + 2 AD comps, not just full-AP ones).
         for ap_only in (True, False):
             for heading, body in variants:
                 cv = classify_variant(heading)
@@ -1380,6 +1417,9 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
                 if not ap_only and cv in ('AD', 'Standard', 'AP'):
                     continue
                 b_norm = normalize(body)
+                # Hollow Radiance is build.md "full-AP team only" — skip for Standard comps
+                if ap_only and 'hollowradiance' in b_norm:
+                    continue
                 has_mr = any(n in b_norm for n in _MR_PIVOT_NORMS)
                 has_gw = any(n in b_norm for n in _GRIEVOUS_NORMS)
                 if has_mr and (has_gw or not has_healer):
@@ -1708,13 +1748,12 @@ _CRIT_ITEM_NORMS = {normalize(n) for n in [
 ]}
 # Champs whose kit punishes HP stacking via % max-HP damage. Warmog's big HP spike
 # is weaker against these — prefer Standard meat (no Warmog's) path.
-_ANTI_WARMOGS_CHAMPS = set("camille fiora gwen kogmaw urgot vayne".split())
+_ANTI_WARMOGS_CHAMPS = set("camille fiora gwen irelia kogmaw urgot vayne".split())
 # Champs whose CC commits you to a fight you cannot leave — even one is enough to
 # make Warmog's regen unreliable. Distinct from HARD-CC (which includes Brand, Heimer
 # etc. with skillshot/setup CCs that don't prevent disengaging).
 _LOCKDOWN_CC_CHAMPS = set(
-    "alistar amumu blitzcrank jarvaniv leona lissandra "
-    "malphite malzahar morgana nautilus sejuani skarner zac".split()
+    "lissandra sejuani skarner zac".split()
 )
 _REFUSAL_PHRASES = {
     "i don't have", "i do not have", "i cannot", "i can't",
@@ -2419,7 +2458,7 @@ COACH_SCHEMA = {
         "live_build": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Your recommended 6-item build path for this game, in build order. Always exactly 6 items — never fewer. Owned core items appear first in their built positions; planned core items follow. Stable across calls — only change when game state materially shifts (enemy pivots damage profile, fed carry, new objective threat).",
+            "description": "Your recommended build path for this game, in build order. Always exactly 6 items (7 for ADC/marksman — boots count as one slot) — never fewer. Owned core items appear first in their built positions; planned core items follow. Stable across calls — only change when game state materially shifts (enemy pivots damage profile, fed carry, new objective threat).",
         },
         "build_change_reason": {
             "type": "string",
@@ -2639,7 +2678,7 @@ class MatchupDB:
                         f'- spike: when {enemy_display} first item-spikes; is it a danger window or punish window for {player_display}?\n'
                         f'- window: when {player_display} has a power edge or punish window in this matchup\n'
                         f'- wave: push, freeze, or slow-push — which and why in this specific matchup\n'
-                        f'- rune: Grasp, Phase Rush, or other — which fits this matchup and the one-line reason\n'
+                        f'- rune: Grasp, Stormraider\'s Surge, or other — which fits this matchup and the one-line reason\n'
                         f'- item: one counter-item {player_display} might add (do NOT reorder core build)\n'
                         f'No emojis. Imperative tone.'
                     ),
@@ -2740,6 +2779,8 @@ class Coach:
         cached_for, cached_prompt = self._system_cache
         if cached_for == champ_folder and cached_prompt:
             return cached_prompt
+        _pc = _player_class(champ_folder)
+        n_items = 7 if _pc == 'marksman' else 6
         # Synthetic class-template fallback: when no per-champ folder exists,
         # `champ_folder` is `_default_<class>` and content comes from in-code
         # CLASS_TEMPLATES. The cache key is per-class — 5 max across sessions.
@@ -2783,7 +2824,7 @@ class Coach:
             f"- Do NOT reorder live_build items. The build guide's order is intentional — item 1 is item 1 all game. Only change WHICH items are in the path, never their sequence.\n"
             f"- Buy in order — item 1 before item 2. Only rush a later item if a named enemy is actively SNOWBALLING and their damage type directly threatens the player right now.\n"
             f"- When recommending a purchase, name only the next un-owned item in live_build order.\n"
-            f"- LIVE_BUILD STABILITY: (1) owned items must always appear — never remove them. (2) min 4 items. (3) counter-items extend the path, never replace owned items. (4) once committed, a counter-item stays all game.\n"
+            f"- LIVE_BUILD STABILITY: (1) owned items must always appear — never remove them. (2) exactly {n_items} items, always — never fewer. (3) situational swaps (from YOUR SWAP OPTIONS) may replace un-owned items when warranted — if your bullets recommend a swap, live_build must reflect it immediately; counter-items (extensions) are added to the path and stay all game. (4) never remove an already-owned item for any reason.\n"
             f"- PANEL HINT in the user message shows what the rule-based panel already displays on screen. DO NOT repeat it verbatim — the player can see it. Say something more useful (a pivot decision, a matchup read, a positioning note) or skip the next-item line entirely.\n\n"
             f"Output format:\n"
             f"- `bullets`: 1-2 tactical lines for RIGHT NOW.\n"
@@ -2794,8 +2835,8 @@ class Coach:
             f"- PREFER `(swap-rule)` counters first — those match {champ_folder}'s hand-written `## Situational item swaps` and are pre-vetted for build coherence.\n"
             f"- `(extension)` counters are fallback when no swap rule applies. Use only when an enemy threat genuinely demands a counter the build guide didn't anticipate.\n"
             f"- When you add a counter to live_build, CITE THE PRIORITY ENEMY BY NAME in bullets or build_change_reason (e.g. 'swap Heartsteel for Spirit Visage vs Mordekaiser's heal'). Ungrounded counter additions get rejected server-side.\n"
-            f"- The final 6-item build must still be a coherent {champ_folder} build — keep damage threat and core stats. Counter-items are situational adjustments, not a defensive smorgasbord.\n"
-            f"- LAST-ITEM BIAS: prefer to keep slot 6 (the final core item) as defaulted. Counter-pivots should land in slots 3-4 where they have the most impact. Only swap the last item if a SPECIFIC late-game threat is named.\n"
+            f"- The final {n_items}-item build must still be a coherent {champ_folder} build — keep damage threat and core stats. Counter-items are situational adjustments, not a defensive smorgasbord.\n"
+            f"- LAST-ITEM BIAS: prefer to keep slot {n_items} (the final core item) as defaulted. Counter-pivots should land in slots 3-4 where they have the most impact. Only swap the last item if a SPECIFIC late-game threat is named.\n"
             f"- Pivot when warranted, then COMMIT to the adjusted path (don't yo-yo).\n\n"
             f"=== MATCHUP + MACRO CONTEXT (per-game data lives in the user message) ===\n"
             f"- MATCHUP DATA (in user message) is the primary per-pair matchup reference — what the enemy threatens against {champ_folder} specifically, with timing/exploit/item guidance. Treat as authoritative for the lane/role matchup. Cite when advising on trading patterns or pivots.\n"
@@ -2910,7 +2951,7 @@ class Coach:
 
     def request_async(self, trigger, champ_folder, user_message, game_time,
                       build_pick=None, my_items=None, item_index=None, current_gold=0,
-                      priority_enemy_names=None, player_class=None):
+                      priority_enemy_names=None, player_class=None, ap_count=0):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -2923,12 +2964,12 @@ class Coach:
             target=self._call,
             args=(self.build_system(champ_folder), user_message,
                   build_pick, list(my_items or []), item_index, current_gold,
-                  list(priority_enemy_names or []), player_class),
+                  list(priority_enemy_names or []), player_class, ap_count),
             daemon=True,
         ).start()
 
     def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
-              priority_enemy_names=None, player_class=None):
+              priority_enemy_names=None, player_class=None, ap_count=0):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -2972,11 +3013,13 @@ class Coach:
             # path when it fires.
             with self.lock:
                 committed_snapshot = list((self.committed_build or {}).get('items') or [])
+            live_build = _guard_frozen_heart_ap(live_build, committed_snapshot, ap_count)
             raw_reason = (parsed.get('build_change_reason') or '').strip()
             live_build, citation_reject = validate_counter_citation(
                 live_build, committed_snapshot, bullets, raw_reason, priority_enemy_names,
                 player_class=player_class,
             )
+            seen = set(); live_build = [x for x in live_build if not (normalize(x) in seen or seen.add(normalize(x)))]
             diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
             reason = raw_reason if diverged else ''
             if citation_reject:
@@ -3646,6 +3689,13 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         build_summary = build_path_summary(body)
         lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_summary}')
         build_names = [n.strip() for n in build_summary.split('·') if n.strip()]
+        if profile and profile[1] >= 3:
+            _ap_w, _ad_w = profile[1], profile[2]
+            lines.append(
+                f'COMP WARNING: {_ap_w:.0f} AP / {_ad_w:.0f} AD enemies — build toward the MR path above. '
+                'Any "Full AD" in personal matchup notes below is laning-phase item priority '
+                '(e.g., early Thornmail), NOT the overall build path.'
+            )
         if committed_build:
             pick_has_mr = any(normalize(w) in _MR_PIVOT_NORMS for w in body.split())
             committed_has_mr = any(normalize(i) in _MR_PIVOT_NORMS for i in committed_build)
@@ -4494,6 +4544,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 current_gold=int((data.get('activePlayer') or {}).get('currentGold') or 0),
                 priority_enemy_names=priority_names,
                 player_class=_player_class(your_champ or ''),
+                ap_count=_ap,
             )
 
     mode_label = 'ARAM' if is_aram else 'IN GAME'

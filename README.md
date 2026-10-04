@@ -141,12 +141,14 @@ If the champion's Riot API alias differs from your folder name (e.g., `DrMundo` 
 
 ## Updating notes from a Mobafire guide
 
-Mobafire blocks the default user agent (HTTP 403). Use curl with a browser UA:
+Mobafire sits behind a Cloudflare challenge, so curl/WebFetch get HTTP 403. Use `tools/fetch_guide.py` (Playwright via Windows Python) from WSL:
 
 ```bash
-curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-  -o /tmp/guide.html "<mobafire url>"
+cp tools/fetch_guide.py /mnt/c/Temp/ && /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \
+  "C:\\ProgramData\\Anaconda3\\python.exe C:\\Temp\\fetch_guide.py '<mobafire url>' 'C:\\Temp\\guide.html'"
 ```
+
+Result lands at `/mnt/c/Temp/guide.html`. Matchup entries parse cleanly from `<div class="row" level=...>` blocks (`<h4>` = champ, `<label>` = tier).
 
 Then strip HTML/scripts and parse the threats section manually or with Claude.
 

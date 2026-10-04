@@ -152,7 +152,7 @@ Split is viable but more carefully — ADC will start to shred you, and without 
 - Combo: low HP → W (store grey) → R (huge bonus HP) → reactivate W (massive heal) → keep punching.
 
 ### Vision
-- Zero disengage on standard build (no Phase Rush). Ward flanks before grouping at objectives. If caught alone walking up, you die.
+- Zero disengage on standard build (no Stormraider's Surge). Ward flanks before grouping at objectives. If caught alone walking up, you die.
 
 ### Objectives
 - Drake/Baron: be the body that soaks smite-contest damage. Job = "make obj uncontestable without enemy dying first."

@@ -1,10 +1,11 @@
 # Mundo — Build
 
-Source: Belle19's Mobafire guide.
+Source: Belle19's Mobafire guide (reviewed against the Sept 25, 2026 update).
 
 ## Summoner spells
 
 - **Standard:** Ghost + Ignite
+- **Alternate:** Ghost + Teleport
 - **Alternate:** Exhaust + Ghost, OR Flash + Ghost (mirror matchups)
 - **Don't do this:** Flash + Teleport
 
@@ -15,10 +16,11 @@ Source: Belle19's Mobafire guide.
 - **Inspiration (secondary):** Magical Footwear · Approach Velocity
 - **Shards:** +10% Attack Speed · +10–180 HP · +10–180 HP
 
-### Phase Rush (kiteable / heavy slow / chase matchups)
-- **Sorcery (primary):** Phase Rush · Axiom Arcanist · Celerity · Scorch
-- **Resolve (secondary):** Overgrowth · Second Wind
+### Stormraider's Surge (counter lanes / heavy slow / stick matchups)
+- **Sorcery (primary):** Stormraider's Surge · Axiom Arcanist · Celerity · Scorch
+- **Resolve (secondary):** Second Wind · Overgrowth
 - **Shards:** +10% AS · +HP · +HP
+- Play for an even lane, rush Warmog's (plus two Ruby Crystals for the threshold), then hit-and-run in side lanes. Use it into lanes you weren't going to win anyway (Gwen, Riven, Kled, Olaf, Nasus); not into pure lane bullies (Aatrox, Illaoi). Only playstyle where Titanic 3rd-5th is fine.
 
 ### Conditioning variant
 - **Resolve:** Grasp · Demolish · Conditioning · Overgrowth
@@ -43,11 +45,13 @@ Source: Belle19's Mobafire guide.
 - Resolve: Second Wind · Overgrowth
 - Shards: +8 AH · +HP · +HP
 
-**Notes:** Approach Velocity is the best inspiration minor in almost every case. Last Stand is the best Precision secondary minor (or Cut Down if Precision primary). Conditioning is hypothetically good but Second Wind beats it most games. Biscuit Delivery is only useful as a learning crutch in lanes you desperately need sustain.
+**Notes:** Grasp is the default again (Axiom Arcanist nerfs + base HP buff). Approach Velocity is the best inspiration minor in almost every case. Last Stand is the best Precision secondary minor (or Cut Down if Precision primary). Conditioning is hypothetically good but Second Wind beats it most games. Biscuit Delivery is only useful as a learning crutch in lanes you desperately need sustain.
 
 ## Starting items
 
 Doran's Shield · Health Potion · Stealth Ward
+
+Alt: Doran's Helm (pairs with Ignite for early all-ins).
 
 ## Build paths
 
@@ -75,6 +79,14 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 3. Boots of Swiftness
 4. Titanic Hydra
 5. Overlord's Bloodmail
+
+### Mixed AP, mixed comp (Titanic variant)
+1. Warmog's Armor
+2. Heartsteel
+3. Boots of Swiftness
+4. Titanic Hydra
+5. Spirit Visage
+6. Thornmail
 
 ### Warmog's mixed AP (Spirit Visage + Thornmail)
 1. Warmog's Armor
@@ -138,6 +150,7 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 - Boots of Swiftness (default)
 - Plated Steelcaps (full AD)
 - Crimson Lucidity
+- Mercury's Treads
 
 ## Last items / situational
 
@@ -154,6 +167,8 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 - Abyssal Mask
 
 ## Warmog's: when to take it
+
+Default is Warmog's first every game, Titanic 3rd. The lists below decide when to take the no-Warmog's (Standard meat) path instead.
 
 **GOOD vs:**
 - Lots of poke on enemy team
