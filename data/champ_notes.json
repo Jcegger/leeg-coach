@@ -57,9 +57,9 @@
     },
     "thresh": {
       "display_name": "Thresh",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Damnation): collect souls for permanent AD, stacks infinitely\n- Q (Death Sentence): hook that pulls first enemy hit toward him\n- W (Dark Passage): create lantern allies click for shield and dash\n- E (Flay): knock back nearby enemies, damage and slow them\n- R (The Box): create prison walls that slow enemies passing through\n- spike: level 6 ultimate enables picks and engage pressure\n- tip: stay behind minions and respect hook range constantly"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Damnation): collect souls for permanent AD, stacks infinitely\n- Q (Death Sentence): hook enemy, pull toward you if hits\n- W (Dark Passage): create lantern, allies click to dash to you\n- E (Flay): knock back enemies in direction, damage and slow\n- R (The Box): create prison, slow enemies who cross walls\n- spike: level 6 ultimate; first support item completion\n- tip: stand behind minions, use bushes, build Mikael's or Quicksilver"
     },
     "leona": {
       "display_name": "Leona",
@@ -219,9 +219,9 @@
     },
     "kayn": {
       "display_name": "Kayn",
-      "patch": "16.12",
-      "generated_at": "2026-06-15",
-      "notes": "- Passive (The Darkin Scythe): gain stacks from nearby enemy champions; transform into Shadow or Darkin Assassin at max stacks\n- Q (Reaving Slash): slash in a direction, dealing damage and healing Kayn\n- W (Blade's Reach): fire projectile that damages and slows enemies hit\n- E (Shadow Step): dash through terrain and walls; grants movement speed buff\n- R (Umbral Trespass): dash into enemy champion, dealing damage and becoming untargetable\n- Spike: level 6 ultimate transforms him into lethal assassin\n- Tip: stick with teammates and deny him isolated targets"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- passive (The Darkin Scythe): gain stacks from champion/minion hits; transform into Shadow or Rhaast at 100 stacks\n- Q (Reaping Slash): slash in arc, refunds cooldown on champion hit\n- W (Blade's Reach): fire projectile line that slows enemies hit\n- E (Shadow Step): dash through terrain; grants movement speed and camouflage briefly\n- R (Umbral Trespass): dive into enemy, deal damage, exit as AoE\n- spike: level 6 ultimate unlocked; transforms power significantly based on form\n- tip: group with teammates; avoid isolated positions where Kayn excels most"
     },
     "nami": {
       "display_name": "Nami",
@@ -249,9 +249,9 @@
     },
     "twitch": {
       "display_name": "Twitch",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Ambush): Gain movement speed when stealthed; bonus damage on next attack\n- Q (Contaminate): Become invisible and gain movement speed; leave poison trails\n- W (Plague Grenade): Throw grenade applying poison to enemies in area\n- E (Expunge): Detonate poison on target; damage scales with poison stacks\n- R (Spray and Pray): Gain range and attack speed; auto-attacks fire in cone\n- spike: Level 6 with ultimate; mid-game with attack speed items\n- tip: Maintain distance and buy vision; avoid clustered positioning in teamfights"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Deadly Venom): Twitch's attacks apply stacks; at 6 stacks, they explode for true damage.\n- Q (Ambush): Twitch becomes invisible and gains movement speed; backstab damage amplifies while stealthed.\n- W (Contaminate): Shoots toxic projectiles that apply venom stacks to enemies in area.\n- E (Spray and Pray): Detonates all venom on nearby enemies; damage scales with stack count.\n- R (Spray and Pray): Massive attack speed and range boost; bullets apply venom to all hit.\n- Spike: Level 6 with ultimate; massive teamfight and pick potential unlocked immediately.\n- Tip: Stay grouped and position away from walls; deny his invisible flanks and picks."
     },
     "trundle": {
       "display_name": "Trundle",
@@ -453,9 +453,9 @@
     },
     "viego": {
       "display_name": "Viego",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Sovereign's Domination): Heal on hit; possess enemy champion on kill\n- Q (Blade of the Ruined King): Slash in direction, heals based on missing health\n- W (Harrowed Path): Dash through terrain, leave ghostly path for allies\n- E (Runation): AOE damage around target, applies on-hit effects to enemies\n- R (Heartbreak): Possess strongest enemy, gain their stats and abilities temporarily\n- spike: Level 6 with ultimate; first item powerspike at Trinity\n- tip: Stay grouped and deny him isolated kills whenever possible"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Sovereign's Domination): Heal on champion hit; possess killed enemies briefly\n- Q (Blade of the Ruined King): Slash in direction, scales with missing health\n- W (Harrowing): Dash through wall, leave mist that slows enemies inside\n- E (Telekinesis): Pull nearby enemy toward you, stun if near wall\n- R (Heartbreaker): Leap to target, possess them, gain their stats briefly\n- spike: Level 6 ultimate; three-item power spike with tankiness\n- tip: Group with teammates; avoid isolated positioning near walls"
     },
     "shyvana": {
       "display_name": "Shyvana",
@@ -711,9 +711,9 @@
     },
     "malphite": {
       "display_name": "Malphite",
-      "patch": "16.10",
-      "generated_at": "2026-05-25",
-      "notes": "- Passive (Granite Shield): Gains shield equal to 10% max health, refreshes on ability hit\n- Q (Seismic Shard): Slow projectile that damages and slows enemy hit\n- W (Brutal Strikes): Toggle ability that enhances attacks with AOE damage\n- E (Ground Slam): AOE damage and armor scaling around Malphite\n- R (Unstoppable Force): Charges forward, knocks up all enemies hit in path\n- spike: Level 6 with ultimate; dangerous again at mythic completion\n- tip: Spread out to minimize ultimate knockup impact and damage"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Granite Shield): Gains shield based on armor, refreshes when not damaged\n- Q (Seismic Shard): Slow projectile that reduces enemy movespeed and increases Malphite's\n- W (Devastating Blow): Empowers next attack with bonus damage based on armor\n- E (Ground Slam): AOE damage and armor reduction in cone around Malphite\n- R (Unstoppable Force): Charges forward, knocking up all enemies hit in path\n- spike: Level 6 with ultimate; scaling with armor/AP items mid-game\n- tip: Spread out to minimize ultimate impact; build movespeed to kite"
     },
     "rammus": {
       "display_name": "Rammus",
@@ -795,9 +795,9 @@
     },
     "zyra": {
       "display_name": "Zyra",
-      "patch": "16.11",
-      "generated_at": "2026-05-31",
-      "notes": "- Passive (Dead Flower Growth): Killed enemies spawn plants you can detonate\n- Q (Deadly Spines): Shoot spines in line; plants fire at enemies hit\n- W (Rampant Growth): Summon plant seed; recast to detonate for damage/control\n- E (Grasping Roots): Stun cone of enemies; plants root targets hit\n- R (Stranglethorns): Massive knock-up in area; plants become larger temporarily\n- spike: Level 6 ultimate with plant synergy makes her deadly\n- tip: Stay spread out and behind minions to avoid plant aggro"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Garden): Plants grant vision; attack/ability spawns plants attacking nearby enemies\n- Q (Deadly Spines): Shoots spikes in line; plants attack hit targets too\n- W (Rampant Growth): Places plant that attacks; recharges on enemy hit\n- E (Grasping Roots): Roots enemies in line; plants attack rooted targets\n- R (Stranglethorns): Summons vines erupting; knocks up and damages all hit\n- spike: Level 6 ultimate and Lost Chapter item power spike\n- tip: Destroy plants immediately; avoid clustered positioning near her plants"
     },
     "galio": {
       "display_name": "Galio",

@@ -84,9 +84,9 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 1. Warmog's Armor
 2. Heartsteel
 3. Boots of Swiftness
-4. Titanic Hydra
-5. Spirit Visage
-6. Thornmail
+4. Spirit Visage
+5. Thornmail
+6. Titanic Hydra
 
 ### Warmog's mixed AP (Spirit Visage + Thornmail)
 1. Warmog's Armor

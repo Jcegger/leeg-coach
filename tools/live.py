@@ -809,27 +809,64 @@ def load_champ_data(champ_folder, cache):
 # ─── damage profile + build variant picking ─────────────────────────────────
 
 def classify_enemy(name, items, item_index):
-    """Per-enemy damage type. Items override archetype once ≥2 of one type."""
+    """Per-enemy damage type. Items override archetype once ≥2 of one type.
+    Returns 'Tank' when non-starter tank-item gold reaches TANK_GOLD_MIN and is at
+    least double the damage-item gold — e.g. tank Malphite (Bramble + Steelcaps)
+    stays 'AP' by archetype forever otherwise, inflating the AP count."""
     fallback = CHAMP_DAMAGE.get(normalize(name))
     if not items or not item_index:
         return fallback
     ap_items = ad_items = 0
+    tank_gold = dmg_gold = 0
     for item in items:
         item_id = (item or {}).get('itemID')
         if not item_id:
             continue
-        kind = (item_index.get(item_id) or {}).get('damage')
+        info = item_index.get(item_id) or {}
+        kind = info.get('damage')
         if kind == 'AP':
             ap_items += 1
         elif kind == 'AD':
             ad_items += 1
+        if normalize(info.get('name', '')) in _STARTER_ITEM_NAMES:
+            continue
+        if kind == 'Tank':
+            tank_gold += info.get('cost', 0)
+        elif kind in ('AP', 'AD'):
+            dmg_gold += info.get('cost', 0)
     if ap_items >= 2 and ad_items >= 2:
         return 'Mixed'
     if ap_items >= 2 and ad_items < 2:
         return 'AP'
     if ad_items >= 2 and ap_items < 2:
         return 'AD'
+    if tank_gold >= TANK_GOLD_MIN and tank_gold >= 2 * dmg_gold:
+        return 'Tank'
     return fallback
+
+
+# Non-starter tank-item gold needed before an enemy reads as tank-built.
+# 1500 ~ first back with Bramble/Steelcaps/Chain Vest; one component isn't enough.
+TANK_GOLD_MIN = 1500
+
+
+def has_ap_assassin(enemies, item_index=None):
+    """True if any enemy reads AP (items-aware) and carries the ASSASSIN threat tag."""
+    return any(kind == 'AP' and 'ASSASSIN' in (CHAMP_THREAT_TAGS.get(normalize(name)) or [])
+               for name, kind in enemy_damage_kinds(enemies, item_index).items())
+
+
+def enemy_damage_kinds(enemies, item_index=None):
+    """{display_name: 'AP'|'AD'|'Mixed'|'Tank'} for enemies with a known kind."""
+    kinds = {}
+    for e in enemies:
+        name = e.get('championName', '')
+        if not name:
+            continue
+        kind = classify_enemy(name, e.get('items') or [], item_index) if item_index else CHAMP_DAMAGE.get(normalize(name))
+        if kind:
+            kinds[name] = kind
+    return kinds
 
 
 def compute_damage_profile(enemies, item_index=None):
@@ -855,6 +892,8 @@ def compute_damage_profile(enemies, item_index=None):
             ap += 1
         elif kind == 'AD':
             ad += 1
+        elif kind == 'Tank':
+            pass  # tank-built: deals little damage of either type
         else:  # Mixed
             ap += 0.5
             ad += 0.5
@@ -1375,7 +1414,7 @@ def laner_build_tag(matchup_entry):
     return None
 
 
-def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, ad_count=0, has_healer=False, no_warmogs=False):
+def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, ad_count=0, has_healer=False, no_warmogs=False, ap_assassin=False):
     """Match comp profile to a build.md variant. preferred_tag (from a matchup
     note 'Build:' line) is tried first; falls back to damage profile, then Standard.
 
@@ -1383,7 +1422,9 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
     - no_warmogs (heavy CC or % max-HP damage enemy): prefer a Standard path that
       omits Warmog's — Warmog's regen is unreliable when you can't escape to recover.
     - 3+ AP with significant AD (Standard profile): prefer a non-AD/non-Standard path
-      that provides MR. When a healer is also present, additionally require grievous wounds."""
+      that provides MR. When a healer is also present, additionally require grievous wounds.
+    - 2 AP (tanks not counted) including an AP assassin: prefer a 'mixed' path with MR —
+      the go-to path has no MR until slot 6, too late vs Fizz/Kat/LeBlanc burst."""
     if preferred_tag:
         tag_norm = normalize(preferred_tag)
         for heading, body in variants:
@@ -1403,6 +1444,12 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
                     return heading, body
         for heading, body in variants:
             if classify_variant(heading) == 'Standard' and 'warmog' not in normalize(body):
+                return heading, body
+    if profile_kind == 'Standard' and 2 <= ap_count < 3 and ap_assassin:
+        for heading, body in variants:
+            b_norm = normalize(body)
+            if ('mixed' in heading.lower() and 'hollowradiance' not in b_norm
+                    and any(n in b_norm for n in _MR_PIVOT_NORMS)):
                 return heading, body
     if profile_kind == 'Standard' and ap_count >= 3 and ad_count <= 2:
         # Two-pass: prefer explicitly AP-classified paths first, then fall back to
@@ -2951,7 +2998,7 @@ class Coach:
 
     def request_async(self, trigger, champ_folder, user_message, game_time,
                       build_pick=None, my_items=None, item_index=None, current_gold=0,
-                      priority_enemy_names=None, player_class=None, ap_count=0):
+                      priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -2964,12 +3011,12 @@ class Coach:
             target=self._call,
             args=(self.build_system(champ_folder), user_message,
                   build_pick, list(my_items or []), item_index, current_gold,
-                  list(priority_enemy_names or []), player_class, ap_count),
+                  list(priority_enemy_names or []), player_class, ap_count, dict(comp_kinds or {})),
             daemon=True,
         ).start()
 
     def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
-              priority_enemy_names=None, player_class=None, ap_count=0):
+              priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -3061,7 +3108,12 @@ class Coach:
                             'reason': reason if diverged else 'rule-based default',
                             'items': list(live_build),
                             'diverged': diverged,
+                            'comp': dict(comp_kinds or {}),
                         }
+                    elif comp_kinds:
+                        # Path re-affirmed under the current comp read — refresh
+                        # the snapshot so the COMP CHANGED note fires once per flip.
+                        self.committed_build['comp'] = dict(comp_kinds)
         except Exception as e:
             msg = str(e).lower()
             if 'credit balance is too low' in msg or 'credit balance' in msg:
@@ -3399,6 +3451,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                         matchup_db=None, your_champ=None, emax_champs=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
+    committed_items = list((committed_build or {}).get('items') or [])
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
     if phase:
         lines.append(f'PHASE: {phase}')
@@ -3519,7 +3572,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
     # Suppress counter-item hints for items already committed or owned — avoids
     # the coach repeatedly citing a counter it already told you to build.
-    _committed_norm = {normalize(i) for i in (committed_build or [])}
+    _committed_norm = {normalize(i) for i in committed_items}
     _owned_norm = {normalize(i.get('displayName', '')) for i in (me or {}).get('items', [])}
     _already_have = _committed_norm | _owned_norm
 
@@ -3664,7 +3717,10 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
 
     if profile and profile[3] > 0:
         label, ap, ad, _, _ = profile
-        lines.append(f'COMP: {label} ({ap:g} AP / {ad:g} AD)')
+        current_kinds = enemy_damage_kinds(enemies, item_index)
+        tanks = [n for n, k in current_kinds.items() if k == 'Tank']
+        tank_note = f' — tank-built, not counted: {", ".join(tanks)}' if tanks else ''
+        lines.append(f'COMP: {label} ({ap:g} AP / {ad:g} AD){tank_note}')
 
     threat_lines = format_team_threats(team_threats) if team_threats else []
     if threat_lines:
@@ -3698,7 +3754,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             )
         if committed_build:
             pick_has_mr = any(normalize(w) in _MR_PIVOT_NORMS for w in body.split())
-            committed_has_mr = any(normalize(i) in _MR_PIVOT_NORMS for i in committed_build)
+            committed_has_mr = any(normalize(i) in _MR_PIVOT_NORMS for i in committed_items)
             if pick_has_mr and not committed_has_mr:
                 lines.append(
                     'BUILD PATH SHIFTED: rule-based now recommends an MR-focused path but your '
@@ -3793,7 +3849,14 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             else:
                 annotated.append(f'{item} [LATER]')
         lines.append(f'Path: {" · ".join(annotated)}')
-        lines.append('KEEP THIS PATH. Only recommend the item marked [NEXT]. Never recommend [OWNED] items — the player already has them.')
+        locked_kinds = committed_build.get('comp') or {}
+        now_kinds = enemy_damage_kinds(enemies, item_index)
+        flips = [f'{n} {locked_kinds[n]} -> {k}' for n, k in now_kinds.items()
+                 if n in locked_kinds and locked_kinds[n] != k]
+        if flips:
+            lines.append(f'COMP CHANGED SINCE LOCK-IN: {"; ".join(flips)}. This path was chosen on the old read — '
+                         're-evaluate the un-owned items against the current COMP and change live_build if warranted.')
+        lines.append('KEEP THIS PATH unless COMP CHANGED says otherwise. Only recommend the item marked [NEXT]. Never recommend [OWNED] items — the player already has them.')
         lines.append('If you change the path, explain why in build_change_reason.')
 
     if recent_responses:
@@ -3850,7 +3913,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             )
     elif urgent_counters:
         owned_norm = {normalize(i.get('displayName', '')) for i in (me or {}).get('items', [])}
-        committed_norm = {normalize(i) for i in (committed_build or [])}
+        committed_norm = {normalize(i) for i in committed_items}
         needed = [
             (champ, tc) for champ, tc in urgent_counters
             if normalize(tc['item']) not in owned_norm
@@ -4543,6 +4606,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 item_index=item_index,
                 current_gold=int((data.get('activePlayer') or {}).get('currentGold') or 0),
                 priority_enemy_names=priority_names,
+                comp_kinds=enemy_damage_kinds(enemies, item_index),
                 player_class=_player_class(your_champ or ''),
                 ap_count=_ap,
             )
@@ -4922,7 +4986,7 @@ def main():
             _has_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
             _has_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in enemies)
             no_warmogs = _has_anti_warmogs or _has_lockdown
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag, ap_count=profile[1], ad_count=profile[2], has_healer=has_healer, no_warmogs=no_warmogs) if cdata['build_variants'] else None
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag, ap_count=profile[1], ad_count=profile[2], has_healer=has_healer, no_warmogs=no_warmogs, ap_assassin=has_ap_assassin(enemies, item_index)) if cdata['build_variants'] else None
 
             sig = json.dumps({
                 'mode': 'game',
@@ -4972,7 +5036,7 @@ def main():
             _cs_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in cs_enemies)
             _cs_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in cs_enemies)
             cs_no_warmogs = _cs_anti_warmogs or _cs_lockdown
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0], ap_count=profile[1], ad_count=profile[2], has_healer=cs_has_healer, no_warmogs=cs_no_warmogs) if cdata['build_variants'] and cs_enemies else None
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], ap_count=profile[1], ad_count=profile[2], has_healer=cs_has_healer, no_warmogs=cs_no_warmogs, ap_assassin=has_ap_assassin(cs_enemies, item_index)) if cdata['build_variants'] and cs_enemies else None
 
             sig = json.dumps({
                 'mode': 'cs',
