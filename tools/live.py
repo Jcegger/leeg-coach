@@ -77,7 +77,7 @@ _AD = (
 ).split()
 _AP = (
     "ahri akali alistar amumu anivia annie aurelionsol aurora azir bard "
-    "blitzcrank brand braum cassiopeia chogath diana drmundo ekko elise "
+    "blitzcrank brand braum cassiopeia chogath diana ekko elise "
     "evelynn fiddlesticks fizz galio gragas gwen heimerdinger hwei ivern "
     "janna karma karthus kassadin katarina kayle kennen leblanc leona lillia "
     "lissandra lulu lux malphite malzahar maokai mel milio mordekaiser morgana "
@@ -86,7 +86,7 @@ _AP = (
     "taliyah taric teemo twistedfate veigar velkoz vex viktor vladimir xerath "
     "yuumi zac ziggs zilean zoe zyra"
 ).split()
-_MIXED = "corki kogmaw ornn poppy shaco shen thresh".split()
+_MIXED = "corki drmundo kogmaw ornn poppy shaco shen thresh".split()
 CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed' for c in _MIXED}}
 
 # Comp-aware threat tags. A champ can carry multiple tags (Warwick = HEALING +
@@ -883,6 +883,14 @@ def classify_enemy(name, items, item_index):
     return fallback
 
 
+def _builds_damage(items, item_index):
+    """True once an enemy holds 2+ AP or 2+ AD items (same threshold classify_enemy uses)."""
+    if not items or not item_index:
+        return False
+    kinds = [(item_index.get((i or {}).get('itemID')) or {}).get('damage') for i in items]
+    return kinds.count('AP') >= 2 or kinds.count('AD') >= 2
+
+
 # Non-starter tank-item gold needed before an enemy reads as tank-built.
 # 1500 ~ first back with Bramble/Steelcaps/Chain Vest; one component isn't enough.
 TANK_GOLD_MIN = 1500
@@ -926,15 +934,18 @@ def compute_damage_profile(enemies, item_index=None):
         known += 1
         if archetype is not None and kind != archetype:
             overrides += 1
+        # Tank archetypes (Amumu, Maokai, Mundo) count half until items show a damage build —
+        # otherwise a 3-tank comp reads "full AP" before anyone has finished a tank item.
+        w = 0.5 if normalize(name) in _TANK and not _builds_damage(items, item_index) else 1.0
         if kind == 'AP':
-            ap += 1
+            ap += w
         elif kind == 'AD':
-            ad += 1
+            ad += w
         elif kind == 'Tank':
             pass  # tank-built: deals little damage of either type
         else:  # Mixed
-            ap += 0.5
-            ad += 0.5
+            ap += 0.5 * w
+            ad += 0.5 * w
     if ap >= 3.5:
         label = 'AP'
     elif ad >= 3.5:
@@ -1511,6 +1522,10 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
                     return heading, body
     for heading, body in variants:
         if classify_variant(heading) == profile_kind:
+            # Hollow Radiance paths are full-AP only — skip when a real AD threat exists
+            # (e.g. Akali/Ekko/Neeko + Yone reads 'AP' but Yone still needs armor later).
+            if profile_kind == 'AP' and ad_count >= 1 and 'hollowradiance' in normalize(body):
+                continue
             return heading, body
     if profile_kind != 'Standard':
         for heading, body in variants:
