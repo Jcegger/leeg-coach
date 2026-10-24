@@ -129,9 +129,9 @@
     },
     "jinx": {
       "display_name": "Jinx",
-      "patch": "16.18",
-      "generated_at": "2026-09-11",
-      "notes": "- Passive (Get Excited!): Kill/assist grants attack speed and movement speed for seconds\n- Q (Switcheroo!): Toggle between minigun (attack speed) and cannon (splash damage, slower)\n- W (Zap!): Fires long-range skillshot that stuns if enemy recently took damage\n- E (Flame Chompers): Places traps that root enemies stepping on them briefly\n- R (Super Mega Death Rocket!): Global ultimate that damages all enemies in its path\n- spike: Level 6 with ultimate; critical at two items (attack speed/AD)\n- tip: Stay spread out to minimize cannon splash; dodge W by unpredictable movement"
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Get Excited!): Kill/assist grants movement speed and attack speed for seconds.\n- Q (Switcheroo!): Toggle between minigun (attack speed) and cannon (range, slower).\n- W (Zap!): Shoot slow projectile in line; hits first enemy or wall.\n- E (Flame Chompers): Place traps that explode and slow enemies nearby.\n- R (Super Mega Death Rocket!): Fire global rocket; damage increases with distance traveled.\n- spike: Level 6 with ultimate; mid-game with Runaan's Hurricane.\n- tip: Maintain distance, dodge W with unpredictable movement patterns, build defensively."
     },
     "morgana": {
       "display_name": "Morgana",
@@ -225,9 +225,9 @@
     },
     "nami": {
       "display_name": "Nami",
-      "patch": "16.9",
-      "generated_at": "2026-05-07",
-      "notes": "- passive (Aqua Prison): movement speed toward nearby allies; grants bonus when near them\n- Q (Aqua Prison): stun enemy in targeted area after short delay\n- W (Ebb and Flow): heal ally or damage enemy; bounces between targets\n- E (Tidecaller's Blessing): empower ally's next attack with slow and bonus damage\n- R (Tidal Wave): knock up enemies in line; create slow zone\n- spike: level 6 with ultimate; two-item powerspike around Mythic + support item\n- tip: stay spread out to avoid multi-target Ebb and Flow bounces"
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Aqua Prison): Nami swims faster after casting ability, stacks to 3 for ms boost\n- Q (Aqua Prison): Bubble that stuns first enemy hit; explodes if it travels far enough\n- W (Ebb and Flow): Bouncing heal/damage between allies and enemies; bounces up to 5 times total\n- E (Tidecaller's Blessing): Enchant ally for bonus damage and slow on next attack; lasts until used\n- R (Tidal Wave): Knock up enemies in wide line; carries enemies forward; huge teamfight impact\n- Spike: Level 6 with ultimate; becomes exponentially stronger with support item powerspikes\n- Tip: Stay spread out to avoid chain bounces; dodge bubble by predicting movement patterns early"
     },
     "malzahar": {
       "display_name": "Malzahar",
@@ -813,9 +813,9 @@
     },
     "renekton": {
       "display_name": "Renekton",
-      "patch": "16.11",
-      "generated_at": "2026-06-01",
-      "notes": "- Passive (Reign of Anger): Gains fury on ability use; 50 fury max empowers next ability\n- Q (Cull the Meek): AoE cleave that heals; empowered version heals more\n- W (Ruthless Predator): Stun auto that hits twice; empowered version stuns longer\n- E (Slice and Dice): Dash forward dealing damage; empowered dash goes farther\n- R (Dominus): Transform gaining size, health, and damaging nearby enemies constantly\n- spike: Level 6 with ultimate; mid-game with Divine Sunderer\n- tip: Back away when he builds fury; don't get caught near walls"
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Reign of Anger): gain fury on abilities; at 50 fury, next ability empowered\n- Q (Cull the Meek): slash in cone, heal; empowered heals more and hits wider\n- W (Ruthless Predator): stun target; empowered stuns longer and hits twice\n- E (Dice): dash forward, damaging enemies; empowered dash goes farther and stuns\n- R (Dominus): transform, gain stats and size; fury generation doubled during ultimate\n- spike: level 6 with ultimate and empowered abilities; Titanic Hydra completion\n- tip: kite backward and avoid melee range; build armor and grievous wounds items"
     },
     "karthus": {
       "display_name": "Karthus",

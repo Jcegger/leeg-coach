@@ -130,9 +130,9 @@
     "drmundo__jinx": {
       "player_display": "Dr. Mundo",
       "enemy_display": "Jinx",
-      "patch": "16.18",
-      "generated_at": "2026-09-11",
-      "notes": "- Jinx's long-range rockets and execute damage burst you down before you can close gap\n- Play safe near minions; avoid extended trades where she lands multiple rocket hits on you\n- Bait her rockets by moving unpredictably, then all-in when she's on minigun with short range\n- Her ultimate becomes a zoning tool; respect the damage but don't play passively in lane\n- First Manamune spike makes her waveclear scary; abuse weak early game before she scales up\n- Mid-game teamfights where Jinx lacks peel; run her down with ult and close distance\n- Slow-push and stack waves so she must choose between farming and defending tower\n- Grasp sustains your health pool against her poke and strengthens your all-in potential\n- Adaptive Helm reduces her rocket damage and provides magic resist for her execute threshold"
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Jinx's long-range rockets deal massive damage; respect her attack range and poke\n- Stay behind minions levels 1-3; her early poke chunks you hard without counterplay\n- Never chase her; bait out rocket form then all-in with Infected Cleaver\n- Post-6 her ultimate is global threat; play around fog of war and cover\n- At first item she spikes hard; respect her damage and farm safely under tower\n- You spike when she overextends; all-in immediately if gap-closed before her escape ready\n- Slow-push waves into her to create gank setup; she needs distance to kite\n- Grasp of the Undying sustains through poke and helps you trade efficiently\n- Force of Nature gives magic resistance and movement speed against her rocket spam"
     },
     "drmundo__illaoi": {
       "player_display": "Dr. Mundo",
@@ -270,9 +270,9 @@
     "drmundo__nami": {
       "player_display": "Dr. Mundo",
       "enemy_display": "Nami",
-      "patch": "16.9",
-      "generated_at": "2026-05-07",
-      "notes": "- Nami's bubble stun and poke combo catch you out of position; respect her range always\n- Play safe levels 1-3; her Q bubble outranges your engage, so farm passively under tower\n- Dodge her Q bubble by moving unpredictably; bait it out before committing to trade damage\n- Her ultimate channel creates teamfight pressure; use this to splitpush and take objectives elsewhere\n- Her first item spike (Mythic) increases her poke damage; farm safely and scale into teamfights\n- Dr. Mundo spikes at level 11 with ultimate upgrade; dominate late teamfights with superior tankiness\n- Slow-push waves to stack them; force her into unfavorable positions when minions crash your tower\n- Take Grasp of the Undying for sustain to offset her poke damage in extended trades\n- Build Force of Nature early if she stacks magic damage; reduces her burst and ability haste"
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Nami's bubble stun locks you down; her poke and heal sustain neutralize your tank stats\n- Play safe levels 1-3; respect her bubble range and avoid extended trades near minions\n- Bait her bubble with unpredictable movement, then all-in with Cleaver when it's down\n- Post-6 her ultimate engage threat increases significantly; play further back and respect teamfight positioning\n- First Liandry's or Moonstone spike at 3-4 items; farm safely and scale, don't fight\n- Your power spike comes mid-game when tankiness peaks; leverage mana sustain advantage in extended fights\n- Slow-push waves to deny her roam potential; stack pressure and force her into difficult rotations\n- Take Grasp for guaranteed sustainable poke that scales with tankiness and aids mana management\n- Buy Force of Nature early against her poke; magic resist and movement speed counter her kit"
     },
     "drmundo__xinzhao": {
       "player_display": "Dr. Mundo",
@@ -1117,9 +1117,9 @@
     "drmundo__renekton": {
       "player_display": "Dr. Mundo",
       "enemy_display": "Renekton",
-      "patch": "16.11",
-      "generated_at": "2026-06-01",
-      "notes": "- Renekton's early all-in burst and stun chain will delete your health bar quickly.\n- Play safe and farm at distance; dodge his Dice forward aggression at levels two-three.\n- Bait his Dice cooldown, then trade with Cleaver; never fight his Fury empowered combo.\n- Renekton ult gives him tankiness but you scale better; farm safely and outscale him.\n- His Titanic Hydra spike around ten minutes forces you to respect his all-in threat.\n- Post-fifteen minutes you outdamage and outheal Renekton; extend fights and spam Cleaver spam cooldown.\n- Slow-push waves into him to deny freeze setups and control gank timing for ganks.\n- Use Grasp for sustain and tankiness stacking to survive his early burst trades safely.\n- Buy Force of Nature early if Renekton gets ahead to stack magic resist safety."
+      "patch": "16.21",
+      "generated_at": "2026-10-24",
+      "notes": "- Renekton's all-in burst with Fury empowered abilities chunks you hard before you heal back.\n- Play safe levels 1-3; dodge his W stun and farm at max range with Q.\n- Bait his W cooldown, then trade back with Q; never let him stack Fury freely.\n- Post-6 his ultimate gives him tankiness and damage\u2014respect it, kite back and outlast him.\n- Renekton's Sheen spike around 900g is dangerous; play safer and farm defensively until you scale.\n- Your window comes mid-game when your scaling and healing outpace his burst; abuse cooldowns.\n- Slow-push waves to control spacing and force him to commit; never hard-push into his strength.\n- Take Grasp for sustained trading and healing synergy to outheal his poke over time.\n- Build Adaptive Helm third or fourth to reduce his burst and spike damage significantly."
     },
     "drmundo__karthus": {
       "player_display": "Dr. Mundo",
