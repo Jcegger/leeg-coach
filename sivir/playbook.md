@@ -11,7 +11,6 @@
 - Hard scaling: weak early, monster mid-late with full crit
 - Hard to gank with R + Spell Shield in your pocket
 - Excellent at sieging towers and rotating around the map
-- Cheap mana costs once Manaflow stacks
 
 **Cons**
 - Auto range is only 500 — outranged by Caitlyn, Tristana late, Kog'Maw, Senna, Aphelios Calibrum
@@ -19,7 +18,7 @@
 - Weak in early-game 1v1 trades; needs items to come online
 - No personal CC — can't lock anyone down
 - Spell Shield is a single-charge cooldown; if you waste it, the next CC kills you
-- Q is mana-hungry pre-Manaflow Band
+- Q is mana-hungry on a Yun Tal build (no Essence Reaver, no Manaflow)
 
 ## Ability cheat-sheet
 
@@ -29,7 +28,6 @@
 
 ### Q — Boomerang Blade
 - 1100-range skillshot, returns to her — can hit twice (only second hit on the same target deals reduced damage)
-- Procs Manaflow Band stacks
 - Main poke tool — hold mid-trade for the slow-then-shred combo
 
 ### W — Ricochet
@@ -54,7 +52,7 @@
 
 - **You're not a lane bully.** Farm safely, don't trade unless you have a clear advantage.
 - **Shove or freeze deliberately.** Sivir's W shoves harder than almost anyone — use that to set up dives, recalls, or roams from your support.
-- **Mana management:** without Manaflow Band stacked, Q is expensive. Use it to last-hit cannons or to harass when you'll win the trade.
+- **Mana management:** Q is expensive on a Yun Tal build. Use it to last-hit cannons or to harass when you'll win the trade.
 - **Spell Shield discipline:** don't reflexively pop it on minor pokes. Save it for engages (hooks, Leona E, Naut hook, Morg Q). A blown shield often means a death.
 - **Use the bushes:** standing in tribush forces enemies to either skill-shot blind (you can shield) or walk in (you can W to push them out).
 - **Ricochet (W) in trades:** activate W before an auto trade to multiply damage, especially when minions are nearby. Hard counter to enemies who hide behind their wave.

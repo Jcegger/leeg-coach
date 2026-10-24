@@ -25,11 +25,11 @@ Threat tiers (worst → best for you): **Extreme** > **Major** > **Even** > **Mi
 
 ### Vayne
 
-Vayne is very hard to play against as Sivir, and due to her high presence, she is currently my go-to ban.
+Vayne is very hard to play against as Sivir. As of 26.21 she's the author's second ban option ("if you hate playing against her"); Twitch took over as the go-to ban.
 
 ### Twitch
 
-Twitch is similar to Vayne in terms of matchup difficulty but is slightly less popular, which is why I usually ban Vayne over him. He is another ban option if you hate playing against him.
+Twitch is one of the biggest Sivir counters currently — the author's go-to ban as of 26.21 (was Vayne in April).
 
 ## Major threats
 

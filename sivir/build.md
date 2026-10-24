@@ -1,6 +1,6 @@
 # Sivir — Build
 
-Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305). Notes are the author's; quoted/paraphrased from their tooltips.
+Source: [heeiseenbeerg's "The Ultimate Sivir Build" (26.21, updated Oct 22, 2026)](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305). Build data is from the Oct 22 version; quoted reasoning is from the author's April (16.08) tooltips unless it conflicts, in which case the current build wins.
 
 ## Summoner spells
 
@@ -10,22 +10,18 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 
 **Primary — Precision:** Lethal Tempo · Presence of Mind · Legend: Bloodline · Cut Down
 
-**Secondary — Sorcery:** Manaflow Band · Gathering Storm
+**Secondary — Sorcery:** Absolute Focus · Gathering Storm
+
+**Alt secondary — Inspiration:** Cash Back · Triple Tonic
 
 **Shards:** +10% Attack Speed · +9 Adaptive (5.4 AD) · +65 Base Health
 
-### Why Manaflow Band over Absolute Focus
-
-> Most people go Absolute Focus but I like Manaflow Band because it gives enough mana so you never have to worry about it (especially without Essence Reaver). Absolute Focus only works above 70% health and the extra AD it gives isn't very significant. Only Q procs your Manaflow Band stacks — try to avoid using it without hitting the enemy when you're still stacking it, and wait for it to reset before using Q again.
-
-### Sorcery vs Inspiration secondary
-
-> Inspiration secondary is viable this season thanks to cashback, but it was nerfed earlier this season. The reason I recommend Sorcery over Inspiration: you won't ever have to worry about mana after stacking Manaflow Band, which can be a concern when building Yun Tal over Essence Reaver. Still, if you feel more comfortable with Inspiration second then go for it.
+As of 26.21 the author runs Absolute Focus, not Manaflow Band (April's pick). Absolute Focus only works above 70% health, so it rewards staying healthy in lane; Yun Tal builds have little mana, so space out Q's in long trades. Inspiration (Cash Back + Triple Tonic) is the alternate page for an earlier gold spike.
 
 ## Starting items
 
-**Standard:** Doran's Blade + Health Potion
-> Doran's Blade is the standard starting item. It gives good early pressure potential and some sustain (the vamp also works on your Q and W ricochets, unlike life steal).
+**Standard:** Doran's Bow + Health Potion
+> Doran's Bow (400g: 8 AD, 15% attack speed, 1.5% omnivamp) replaced Doran's Blade as the start. Omnivamp also works on your Q and W ricochets, unlike life steal.
 
 **Alternative (losing matchups):** Cull + Health Potion
 > A good start into losing matchups where you're looking to not fall far behind, helped by the gold refund from Cull.
@@ -45,12 +41,13 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 3. **Infinity Edge** *or* **Navori Flickerblade** (2nd item — depends on boots)
 4. **Lord Dominik's Regards** *or* **Mortal Reminder** (3rd or 4th)
 5. **Stormrazor** (3rd or 4th, completes 100% crit)
-6. **Guardian Angel** (5th, ~90% of games) *or* Mercurial Scimitar / Maw (heavy AP)
-7. **Bloodthirster** *or* the remaining MR item (Maw if you took Scimitar, Scimitar if you took Maw)
+6-7. **Pick two:** Guardian Angel · Bloodthirster · Mercurial Scimitar · Maw of Malmortius (GA is in all three example builds)
 
 ### Yun Tal first
 
-> I find Yun Tal is a more well-rounded item than Essence Reaver, which is why I always build it first. We don't have to worry about mana thanks to Manaflow Band.
+> I find Yun Tal is a more well-rounded item than Essence Reaver, which is why I always build it first.
+
+Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on Yun Tal — don't spam Q into minions you aren't last-hitting.
 
 ### Boots
 
@@ -109,9 +106,9 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (16.08, April 2026)](https:/
 4. Infinity Edge
 5. Lord Dominik's Regards
 6. Mercurial Scimitar
-7. Maw of Malmortius
+7. Guardian Angel
 
-> Great tankiness against AP burst with good damage. Swap Scimitar for Maw if the enemy team doesn't have much CC. Vs all-AP, the 7th slot lets you fit both Scimitar and Maw.
+> 26.21 ends this path on Guardian Angel (April's ended on Maw). Swap Scimitar for Maw if the enemy team doesn't have much CC; vs all-AP, Maw over GA in the last slot.
 
 ### vs Heavy AD
 1. Yun Tal Wildarrows
