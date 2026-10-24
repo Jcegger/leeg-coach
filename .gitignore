@@ -25,3 +25,5 @@ Thumbs.db
 # Local scratch
 *.log
 /tmp/
+*.log.*
+data/.live.lock
