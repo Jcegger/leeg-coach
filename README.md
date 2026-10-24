@@ -100,6 +100,8 @@ New-NetFirewallRule -DisplayName "WSL LeagueLiveAPI" -Direction Inbound -Protoco
 
 Use your WSL gateway IP as `listenaddress`, **not** `0.0.0.0`. Using `0.0.0.0` causes the proxy to intercept Windows-side `127.0.0.1:2999` and loop, silently breaking both WSL access and the Windows browser.
 
+After a Windows reboot the rule persists but stops listening. `live.py` detects this at startup and re-applies it via `tools/portproxy_fix.ps1` — accept the UAC prompt.
+
 Champ select notes require Win11 mirrored networking or running the script natively on Windows (pass `--lockfile "C:\Riot Games\League of Legends\lockfile"`).
 
 To remove later:

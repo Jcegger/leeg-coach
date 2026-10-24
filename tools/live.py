@@ -554,6 +554,44 @@ def candidate_hosts(explicit=None):
     return hosts
 
 
+_PORTPROXY_PS1_SRC = Path(__file__).with_name('portproxy_fix.ps1')
+_PORTPROXY_PS1_WSL = '/mnt/c/Windows/Temp/leeg_portproxy_fix.ps1'
+_PORTPROXY_PS1_WIN = r'C:\Windows\Temp\leeg_portproxy_fix.ps1'
+
+
+def portproxy_listening(gateway):
+    """True/False whether Windows has a listener on <gateway>:2999; None if netstat can't run."""
+    try:
+        out = subprocess.run(['netstat.exe', '-ano', '-p', 'TCP'], capture_output=True,
+                             text=True, timeout=10, cwd='/mnt/c').stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return bool(re.search(rf'\s{re.escape(gateway)}:2999\s+\S+\s+LISTENING', out))
+
+
+def ensure_portproxy(gateway):
+    """Win10 WSL: after a reboot the netsh portproxy rule persists but isn't bound.
+    If nothing listens on <gateway>:2999, launch portproxy_fix.ps1 elevated (UAC prompt).
+    Returns a status string for display, or None if the proxy is fine / not applicable."""
+    if not gateway or gateway.startswith('127.') or not _PORTPROXY_PS1_SRC.exists():
+        return None
+    state = portproxy_listening(gateway)
+    if state is not False:
+        return None
+    try:
+        shutil.copyfile(_PORTPROXY_PS1_SRC, _PORTPROXY_PS1_WSL)
+        subprocess.run(
+            ['powershell.exe', '-NoProfile', '-Command',
+             f"Start-Process powershell.exe -Verb RunAs -Wait -WindowStyle Hidden "
+             f"-ArgumentList '-NoProfile -ExecutionPolicy Bypass -File {_PORTPROXY_PS1_WIN}'"],
+            capture_output=True, timeout=120, cwd='/mnt/c')
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f'portproxy re-bind failed: {type(exc).__name__}'
+    if portproxy_listening(gateway):
+        return f'portproxy re-bound on {gateway}:2999'
+    return f'portproxy still not listening on {gateway}:2999 (UAC declined?) — see C:\\Windows\\Temp\\leeg_portproxy.log'
+
+
 # ─── matchup parsing ────────────────────────────────────────────────────────
 
 def parse_matchups(md_path):
@@ -4878,6 +4916,11 @@ def main():
         load_champ_data(override, champ_cache)
 
     hosts = candidate_hosts(args.host)
+    if not args.host:
+        print('leeg live · checking WSL portproxy...', flush=True)
+        pp_status = ensure_portproxy(windows_host_ip())
+        if pp_status:
+            print(f'  {pp_status}', flush=True)
     print(f'leeg live · loading champion + item indices...', flush=True)
     champ_index, champ_aliases = fetch_champion_index()
     if not champ_index:
