@@ -1465,7 +1465,8 @@ def _parse_build_variants_text(text):
     current_body = []
 
     def flush():
-        if current_heading:
+        # Prose subsections under a "build" header (Sivir's "Yun Tal first") aren't paths.
+        if current_heading and any(re.match(r'\s*(\d+\.|-)\s+\S', l) for l in current_body):
             variants.append((current_heading, '\n'.join(current_body).strip()))
 
     for line in text.splitlines():
