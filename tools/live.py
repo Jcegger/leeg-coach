@@ -85,7 +85,7 @@ _AP = (
     "nami nautilus neeko nunu nunuwillump orianna rakan rell renata renataglasc rumble "
     "ryze sejuani seraphine singed sona soraka swain sylas syndra tahmkench "
     "taliyah taric teemo twistedfate veigar velkoz vex viktor vladimir xerath "
-    "yuumi zac ziggs zilean zoe zyra"
+    "locke yuumi zac ziggs zilean zoe zyra"
 ).split()
 _MIXED = "corki drmundo kogmaw ornn poppy shaco shen thresh".split()
 CHAMP_DAMAGE = {**{c: 'AD' for c in _AD}, **{c: 'AP' for c in _AP}, **{c: 'Mixed' for c in _MIXED}}
@@ -99,7 +99,7 @@ _HEALING = (
     "aatrox briar camille darius drmundo fiora gwen illaoi "
     "irelia janna karma masteryi milio mordekaiser nami nasus "
     "senna seraphine sett sona soraka swain sylas trundle tryndamere "
-    "udyr vladimir volibear warwick xinzhao yorick yuumi"
+    "udyr vladimir volibear warwick xinzhao yorick yuumi zaahen"
 ).split()
 _HARD_CC = (
     "ahri alistar amumu anivia annie ashe aurelionsol azir bard blitzcrank brand braum camille "
@@ -110,11 +110,12 @@ _HARD_CC = (
     "sejuani seraphine sett singed sion skarner sona "
     "syndra tahmkench taliyah thresh twistedfate urgot "
     "varus veigar velkoz vex vi viktor warwick wukong "
-    "monkeyking xerath xinzhao zac zilean zoe zyra"
+    "monkeyking xerath xinzhao zac zilean zoe zyra hwei mel zaahen"
 ).split()
 _ATTACK_SPEED = (
     "aphelios belveth jax jinx kaisa kalista kayle kindred kogmaw masteryi "
-    "olaf quinn samira shyvana tristana tryndamere twitch vayne xayah yasuo yone"
+    "olaf quinn samira shyvana tristana tryndamere twitch vayne xayah yasuo yone "
+    "locke teemo yunara"
 ).split()
 _TANK = (
     "alistar amumu chogath drmundo galio garen ksante malphite maokai "
@@ -123,11 +124,11 @@ _TANK = (
 ).split()
 _ASSASSIN = (
     "akali ambessa aurora ekko evelynn fizz kassadin katarina kayn khazix leblanc naafiri nocturne "
-    "pyke qiyana rengar shaco talon viego zed"
+    "pyke qiyana rengar shaco talon viego zed locke"
 ).split()
 _CRIT = (
     "aphelios ashe caitlyn draven jhin jinx kaisa kindred missfortune "
-    "samira sivir smolder tristana twitch vayne xayah yasuo yone zeri"
+    "samira sivir smolder tristana twitch vayne xayah yasuo yone zeri nilah yunara"
 ).split()
 CHAMP_THREAT_TAGS = {}
 for _tag, _list in (('HEALING', _HEALING), ('HARD-CC', _HARD_CC),
@@ -152,7 +153,7 @@ ALIAS_PAIRS = (
 # trips stacked_healing. Conservative on purpose — self-amp-only items
 # (Spirit Visage, Death's Dance) do NOT promote since they don't change the
 # team's healing output. Resolved against item_index by display name at runtime.
-HEALING_AMP_ITEMS = {"Bloodthirster", "Ravenous Hydra", "Riftmaker", "Bloodmail"}
+HEALING_AMP_ITEMS = {"Bloodthirster", "Ravenous Hydra", "Riftmaker", "Overlord's Bloodmail"}
 
 # Items commonly cited as power spikes per role. Drives the SPIKES IN PLAY
 # annotation in the coach user message — when an enemy holds one of these,
@@ -164,7 +165,7 @@ POWER_SPIKE_ITEMS = {
     "Infinity Edge", "The Collector", "Yun Tal Wildarrows", "Phantom Dancer",
     "Bloodthirster", "Lord Dominik's Regards", "Mortal Reminder",
     # Mage
-    "Luden's Companion", "Stormsurge", "Liandry's Torment", "Shadowflame",
+    "Luden's Echo", "Stormsurge", "Liandry's Torment", "Shadowflame",
     "Rabadon's Deathcap",
     # Bruiser / fighter
     "Eclipse", "Stridebreaker", "Hullbreaker", "Sundered Sky",
@@ -197,7 +198,7 @@ COUNTER_ITEMS_BY_TAG = {
         ("Mercury's Treads", 'all', 'tenacity boots'),
         ("Sterak's Gage", 'bruiser', 'shield + tenacity passive'),
         ('Quicksilver Sash', 'marksman', 'cleanse hard CC'),
-        ('Silvermere Dawn', 'marksman', 'cleanse + bonus stats'),
+        ('Mercurial Scimitar', 'marksman', 'cleanse + lifesteal'),
     ],
     'ATTACK-SPEED': [
         ('Frozen Heart', 'tank', 'AS aura + mana/CDR'),
@@ -213,7 +214,6 @@ COUNTER_ITEMS_BY_TAG = {
     'ASSASSIN': [
         ('Guardian Angel', 'marksman', 'revive vs burst combo'),
         ("Zhonya's Hourglass", 'mage', 'stasis vs burst'),
-        ('Gargoyle Stoneplate', 'tank', 'active vs burst windows'),
     ],
     'CRIT': [
         ("Randuin's Omen", 'tank', 'crit dmg reduction'),
@@ -280,7 +280,7 @@ _TANK_BUILD_MD = """# Generic tank build
 - Spirit Visage
 - Kaenic Rookern
 - Thornmail
-- Gargoyle Stoneplate
+- Jak'Sho, The Protean
 
 Boots: Plated Steelcaps vs heavy AD; Mercury's Treads vs heavy AP / hard CC.
 
@@ -366,7 +366,7 @@ _MAGE_BUILD_MD = """# Generic mage build
 ## Build
 
 ### Standard
-- Luden's Companion
+- Luden's Echo
 - Shadowflame
 - Rabadon's Deathcap
 - Zhonya's Hourglass
@@ -1658,13 +1658,14 @@ def _cdragon_get(url):
 
 def fetch_champion_index():
     """Returns ({id: display_name}, [alias, ...]). Empty pair on failure.
-    Filters out Doom Bot event entries so they never surface in champ select."""
+    Filters out Doom Bot event entries and mode copies (Jade_Annie etc., id >= 60000)
+    so they never surface in champ select or the unclassified-champ audit."""
     try:
         data = _cdragon_get(CHAMPION_INDEX_URL)
         names, aliases = {}, []
         for c in data:
             cid = c.get('id', -1)
-            if cid <= 0:
+            if cid <= 0 or cid >= 60000:
                 continue
             name = c.get('name', f'#{cid}')
             if name.startswith('Doom Bot'):
@@ -1714,6 +1715,10 @@ _STARTER_ITEM_NAMES = {
     "healthpotion", "refillablepotion", "corruptingpotion",
     "stealthward", "oraclelens", "controlward", "wardingtotem",
     "slightlymagicalfootwear", "boots",
+    # support quest line before the final upgrade, jungle pets, consumables
+    "worldatlas", "runiccompass", "bountyofworlds",
+    "scorchclawpup", "gustwalkerhatchling", "mosstomperseedling",
+    "totalbiscuitofeverlastingwill", "elixirofiron", "elixirofsorcery", "elixirofwrath",
 }
 
 
@@ -1909,7 +1914,10 @@ _BOOTS_NORMS = {
     normalize(n) for n in [
         'Boots of Swiftness', 'Plated Steelcaps', "Mercury's Treads",
         'Ionian Boots of Lucidity', "Sorcerer's Shoes", "Berserker's Greaves",
-        'Mobility Boots', 'Crimson Lucidity',
+        'Ghostcrawlers', 'Gluttonous Greaves',
+        # tier-3 upgrades
+        'Armored Advance', 'Chainlaced Crushers', 'Crimson Lucidity', 'Gunmetal Greaves',
+        'Immortal Path', "Spellslinger's Shoes", 'Swiftmarch',
     ]
 }
 
@@ -1925,9 +1933,11 @@ _GRIEVOUS_NORMS = {normalize(n) for n in [
 # building crit rather than on-hit. Randuin's only fires when at least one
 # CRIT-tagged enemy has one of these in their inventory.
 _CRIT_ITEM_NORMS = {normalize(n) for n in [
-    'Infinity Edge', 'Galeforce', 'Kraken Slayer', 'Navori Quickblades',
-    'Navori Flickerblade', 'Phantom Dancer', 'Rapid Firecannon', 'Statikk Shiv',
-    'Stormrazor', 'Kircheis Shard', 'Cloak of Agility', 'Zeal',
+    # Kraken Slayer / Statikk Shiv are on-hit, not crit, since 2025.
+    'Infinity Edge', 'Navori Flickerblade', 'Phantom Dancer', 'Rapid Firecannon',
+    'Stormrazor', 'The Collector', 'Yun Tal Wildarrows', 'Essence Reaver',
+    "Runaan's Hurricane", 'Immortal Shieldbow', 'Fiendhunter Bolts', 'Hexoptics C44',
+    "Lord Dominik's Regards", 'Mortal Reminder', 'Cloak of Agility', 'Zeal',
 ]}
 # Champs whose kit punishes HP stacking via % max-HP damage. Warmog's big HP spike
 # is weaker against these — prefer Standard meat (no Warmog's) path.
@@ -2045,7 +2055,7 @@ COACH_REFERENCE_ITEMS = [
     "Lord Dominik's Regards",
     "Frozen Heart",
     "Randuin's Omen",
-    "Quicksilver Sash", "Silvermere Dawn",
+    "Quicksilver Sash", "Mercurial Scimitar",
 ]
 
 
@@ -2229,13 +2239,15 @@ def fetch_item_index():
 # ─── patch detection + per-champ metadata ───────────────────────────────────
 
 def parse_patch(version_str):
-    """'16.8.1' -> (16, 8). Returns None if unparseable."""
+    """'16.8.1' -> (16, 8). Year-style names (Mobafire's '26.09') map to the
+    API's numbering: 26.9 == 16.9. Returns None if unparseable."""
     if not version_str:
         return None
     m = re.match(r'^(\d+)\.(\d+)', version_str)
     if not m:
         return None
-    return int(m.group(1)), int(m.group(2))
+    major = int(m.group(1))
+    return (major - 10 if major >= 25 else major), int(m.group(2))
 
 
 def fmt_patch(tup):
@@ -4591,8 +4603,18 @@ def sync_champ_constants():
     print(f'── Missing from CHAMP_DAMAGE ({len(unclassified)}) ──')
     if unclassified:
         print('  Add each to _AD, _AP, or _MIXED in live.py (~L68):')
+        kinds = {'kMagic': 'AP', 'kPhysical': 'AD', 'kMixed': 'Mixed'}
+        try:
+            ids = {normalize(c.get('alias')): c.get('id') for c in _cdragon_get(CHAMPION_INDEX_URL)}
+        except Exception:
+            ids = {}
         for c in unclassified:
-            print(f'    {c}  # TODO: AD / AP / Mixed?')
+            try:
+                info = _cdragon_get(CHAMPION_INDEX_URL.replace('champion-summary.json', f'champions/{ids[c]}.json'))
+                hint = f"CDragon says {kinds.get((info.get('tacticalInfo') or {}).get('damageType'), '?')} · {'/'.join(info.get('roles') or [])}"
+            except Exception:
+                hint = 'TODO: AD / AP / Mixed?'
+            print(f'    {c}  # {hint}')
     else:
         print('  (up to date)')
 
