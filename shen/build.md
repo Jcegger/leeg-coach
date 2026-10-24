@@ -1,6 +1,6 @@
 # Shen — Build
 
-Source: BaLoRi's "My IMMORTAL Shen Build" (Mobafire, updated 2026-10-07). Lane build; same items in jungle (Mosstomper Seedling start).
+Source: BaLoRi's "My IMMORTAL Shen Build" (Mobafire, updated 2026-10-22). Lane build; same items in jungle (Mosstomper Seedling start).
 
 ## Summoner spells
 
@@ -30,6 +30,8 @@ Source: BaLoRi's "My IMMORTAL Shen Build" (Mobafire, updated 2026-10-07). Lane b
 Doran's Shield · Health Potion
 
 First back (1050–1350g): Bami's Cinder + Refillable Potion (+ Cloth Armor if gold allows). Then Bramble Vest before finishing Sunfire Aegis.
+
+Elixir of Iron is listed in every full build — buy it once you're at full items, before a decisive fight.
 
 ## Build paths
 
