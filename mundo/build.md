@@ -147,10 +147,9 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 
 ## Boots options
 
-- Boots of Swiftness (default)
+- Boots of Swiftness (default — the author keeps them even into full AP)
 - Plated Steelcaps (full AD)
 - Crimson Lucidity
-- Mercury's Treads
 
 ## Last items / situational
 
@@ -162,7 +161,6 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 - Thornmail
 - Experimental Hexplate
 - Iceborn Gauntlet
-- Frozen Heart (attack-speed stacked enemy, no healer warranting Thornmail)
 - Force of Nature
 - Abyssal Mask
 
@@ -192,6 +190,8 @@ Default is Warmog's first every game, Titanic 3rd. The lists below decide when t
 - Sunfire Aegis (bad on Mundo)
 - Hollow Radiance (only vs full-AP team)
 - Sterak's Gage (graveyard tier)
+- Mercury's Treads — your passive already shrugs off the first immobilize every fight, so tenacity is mostly wasted; Swiftness' slow resist + move speed does more for chasing and kiting
+- Frozen Heart — Mundo has no mana, so most of its gold is wasted; vs attack speed take Thornmail (or Randuin's vs crit)
 - Overlord's Bloodmail with Titanic + Warmog's together (no AD scalings)
 
 ## Skill order

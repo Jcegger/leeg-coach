@@ -838,6 +838,7 @@ def load_champ_data(champ_folder, cache):
         'matchups': parse_matchups(matchups_path) if matchups_path.exists() else {},
         'build_variants': parse_build_variants(build_path) if build_path.exists() else [],
         'swaps': parse_swap_rules(build_path),
+        'item_pool': _parse_build_item_pool(build_path.read_text()) if build_path.exists() else set(),
         'win_conditions': parse_playbook_section(playbook_path, 'Win conditions'),
         'side_selection': parse_playbook_section(playbook_path, 'Side selection'),
     }
@@ -1121,7 +1122,7 @@ def _role_label(enemy, my_pos, is_laner):
     return f'{pos_word} carry'
 
 
-def compute_build_council(priority_enemies, item_index, swap_rules, player_class):
+def compute_build_council(priority_enemies, item_index, swap_rules, player_class, item_pool=None):
     """For each priority enemy, return structured threat + counter-item picks.
     `swap_rules` is the list of (new_item, old_item, condition) from
     _parse_situational_swaps. `player_class` is from _player_class(player_champ).
@@ -1132,10 +1133,13 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
     (pre-vetted for build coherence by the player), else 'extension'.
 
     Up to 2 counters per enemy. Swap-rule counters always rank first.
+    Counters outside `item_pool` (the champ's build.md pool) are skipped, so
+    "Do NOT buy" items like Frozen Heart / Mercury's on Mundo never get offered.
     Returns [] when item_index is unavailable."""
     if not priority_enemies or not item_index:
         return []
     name_to_id = _build_name_to_id(item_index)
+    pool_ids = {resolve_item_id(n, name_to_id) for n in (item_pool or ())} - {None}
     swap_item_norms = set()
     for new_item, _old, _cond in (swap_rules or []):
         swap_item_norms.add(normalize(new_item))
@@ -1157,7 +1161,7 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
                     continue
                 seen_norms.add(norm)
                 iid = resolve_item_id(item_name, name_to_id)
-                if iid is None:
+                if iid is None or (pool_ids and iid not in pool_ids):
                     continue
                 info = item_index.get(iid) or {}
                 resolved_name = info.get('name', item_name)
@@ -1310,6 +1314,27 @@ def _guard_frozen_heart_ap(live_build, committed_items, ap_count):
     else:
         lb.pop(fh_idx)
     return lb
+
+
+def drop_rejected_item_bullets(bullets, proposed, final_build, my_items, item_index):
+    """Drop bullets that name an item the validators removed from live_build.
+    Otherwise the coach keeps saying (and TTS keeps speaking) "Frozen Heart is
+    locked in" while the build panel never shows it."""
+    if not bullets or not item_index:
+        return list(bullets or [])
+    name_to_id = _build_name_to_id(item_index)
+    kept_ids = {resolve_item_id(n, name_to_id) for n in final_build}
+    kept_ids |= {(i or {}).get('itemID') for i in (my_items or [])}
+    rejected = set()
+    for n in proposed:
+        iid = resolve_item_id(n, name_to_id)
+        if iid is not None and iid not in kept_ids:
+            rejected.add(normalize(n))
+            rejected.add(normalize((item_index.get(iid) or {}).get('name')))
+    rejected.discard('')
+    if not rejected:
+        return list(bullets)
+    return [b for b in bullets if not any(r in normalize(b) for r in rejected)]
 
 
 def _parse_situational_swaps(text):
@@ -3105,6 +3130,7 @@ class Coach:
             live_build = strip_duplicate_boots(live_build)
             live_build = strip_components(live_build, item_index)
             live_build = validate_item_names(live_build, item_index)
+            proposed = list(live_build)
             live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
             live_build = _drop_conflicting_items(live_build)
             # Counter-citation validator: reject ungrounded counter-item adds
@@ -3120,6 +3146,7 @@ class Coach:
                 player_class=player_class,
             )
             seen = set(); live_build = [x for x in live_build if not (normalize(x) in seen or seen.add(normalize(x)))]
+            bullets = drop_rejected_item_bullets(bullets, proposed, live_build, my_items, item_index)
             diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
             reason = raw_reason if diverged else ''
             if citation_reject:
@@ -3501,7 +3528,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                         champ_db=None, is_aram=False, team_threats=None, swaps=None,
                         matchups=None, phase=None, gold_lead=None,
                         win_condition=None, side_selection=None,
-                        matchup_db=None, your_champ=None, emax_champs=None):
+                        matchup_db=None, your_champ=None, emax_champs=None, item_pool=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     committed_items = list((committed_build or {}).get('items') or [])
@@ -3619,7 +3646,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     # the coach structurally cannot cite a counter without naming the enemy.
     priority = compute_priority_enemies(me, enemies, item_index) if me else []
     council = compute_build_council(
-        priority, item_index, swaps or [], _player_class(your_champ or '')
+        priority, item_index, swaps or [], _player_class(your_champ or ''), item_pool
     ) if (priority and item_index) else []
     council_by_name = {normalize(entry['enemy']): entry for entry in council}
 
@@ -4590,7 +4617,7 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
     return ''.join(out)
 
 
-def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None, swaps=None, win_condition=None, side_selection=None, matchup_db=None):
+def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None, swaps=None, win_condition=None, side_selection=None, matchup_db=None, item_pool=None):
     your_champ, enemies, me = find_active_team(data)
     ev = parse_events(data)
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
@@ -4643,6 +4670,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 win_condition=win_condition,
                 side_selection=side_selection,
                 matchup_db=matchup_db,
+                item_pool=item_pool,
                 your_champ=your_champ,
                 emax_champs=coach._emax_champs,
             )
@@ -5058,7 +5086,7 @@ def main():
                 ],
             }, sort_keys=True)
             if sig != last_sig:
-                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db, swaps=cdata.get('swaps') or [], win_condition=cdata.get('win_conditions') or '', side_selection=cdata.get('side_selection') or '', matchup_db=matchup_db))
+                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db, swaps=cdata.get('swaps') or [], win_condition=cdata.get('win_conditions') or '', side_selection=cdata.get('side_selection') or '', matchup_db=matchup_db, item_pool=cdata.get('item_pool')))
                 sys.stdout.flush()
                 last_sig, last_state = sig, 'game'
             time.sleep(args.poll)
