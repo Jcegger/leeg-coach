@@ -135,6 +135,7 @@ Grounded in the go-to Warmog's path (slot 6 = Jak'Sho). Use full alternate paths
 Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. Dead Man's Plate (slot 5) stays regardless; do not drop it to accommodate a second slot-6 swap.
 
 - Plated Steelcaps over Boots of Swiftness — heavy AD team
+- Mercury's Treads over Boots of Swiftness — rare: heavy AP comp that also chains 3+ hard CC (e.g. Lissandra + Leona + Syndra); your passive only blocks the first immobilize, so chained lockdown is the one case tenacity earns the slot over Swiftness
 - Thornmail over Jak'Sho, The Protean — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth, Xin Zhao); highest priority slot-6 swap
 - Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere); only if Thornmail not needed
 - Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
@@ -150,6 +151,7 @@ Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — f
 - Boots of Swiftness (default — the author keeps them even into full AP)
 - Plated Steelcaps (full AD)
 - Crimson Lucidity
+- Mercury's Treads (rare — heavy AP plus chained hard CC only; see swap rule)
 
 ## Last items / situational
 
@@ -190,7 +192,6 @@ Default is Warmog's first every game, Titanic 3rd. The lists below decide when t
 - Sunfire Aegis (bad on Mundo)
 - Hollow Radiance (only vs full-AP team)
 - Sterak's Gage (graveyard tier)
-- Mercury's Treads — your passive already shrugs off the first immobilize every fight, so tenacity is mostly wasted; Swiftness' slow resist + move speed does more for chasing and kiting
 - Frozen Heart — Mundo has no mana, so most of its gold is wasted; vs attack speed take Thornmail (or Randuin's vs crit)
 - Overlord's Bloodmail with Titanic + Warmog's together (no AD scalings)
 

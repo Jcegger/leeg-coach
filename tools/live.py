@@ -18,6 +18,7 @@ Quit with Ctrl-C.
 
 import argparse
 import base64
+import fcntl
 import json
 import logging
 import logging.handlers
@@ -916,6 +917,30 @@ def enemy_damage_kinds(enemies, item_index=None):
     return kinds
 
 
+# In _TANK for counter-items, but their kits are damage from level 1 — never discounted.
+_DAMAGE_TANKS = {'garen', 'volibear'}
+
+
+def _unbuilt_tank(name, items, item_index):
+    """Tank archetype that hasn't shown a damage build yet (counts half in the profile)."""
+    n = normalize(name)
+    return n in _TANK and n not in _DAMAGE_TANKS and not _builds_damage(items, item_index)
+
+
+def comp_breakdown(enemies, item_index=None):
+    """'AD Briar, Yone, Ashe · AP Mel · tank Ornn' — names per damage kind. The
+    profile's ap/ad are build-picker weights (Mixed = 0.5, unbuilt tank = half),
+    which read like nonsense headcounts on screen. Unbuilt tank archetypes show as tank."""
+    groups = {}
+    for name, kind in enemy_damage_kinds(enemies, item_index).items():
+        e = next((x for x in enemies if x.get('championName') == name), {})
+        if kind != 'Tank' and _unbuilt_tank(name, e.get('items'), item_index):
+            kind = 'Tank'
+        groups.setdefault(kind, []).append(name)
+    return ' · '.join(f'{k if k in ("AD", "AP") else k.lower()} {", ".join(groups[k])}'
+                      for k in ('AD', 'AP', 'Mixed', 'Tank') if k in groups)
+
+
 def compute_damage_profile(enemies, item_index=None):
     """enemies: list of dicts each with 'championName' and optional 'items'.
     Returns ('AP'|'AD'|'Standard', ap_count, ad_count, n_known, n_items_overrides).
@@ -937,7 +962,7 @@ def compute_damage_profile(enemies, item_index=None):
             overrides += 1
         # Tank archetypes (Amumu, Maokai, Mundo) count half until items show a damage build —
         # otherwise a 3-tank comp reads "full AP" before anyone has finished a tank item.
-        w = 0.5 if normalize(name) in _TANK and not _builds_damage(items, item_index) else 1.0
+        w = 0.5 if _unbuilt_tank(name, items, item_index) else 1.0
         if kind == 'AP':
             ap += w
         elif kind == 'AD':
@@ -1122,7 +1147,8 @@ def _role_label(enemy, my_pos, is_laner):
     return f'{pos_word} carry'
 
 
-def compute_build_council(priority_enemies, item_index, swap_rules, player_class, item_pool=None):
+def compute_build_council(priority_enemies, item_index, swap_rules, player_class, item_pool=None,
+                          gated_items=None):
     """For each priority enemy, return structured threat + counter-item picks.
     `swap_rules` is the list of (new_item, old_item, condition) from
     _parse_situational_swaps. `player_class` is from _player_class(player_champ).
@@ -1134,7 +1160,9 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
 
     Up to 2 counters per enemy. Swap-rule counters always rank first.
     Counters outside `item_pool` (the champ's build.md pool) are skipped, so
-    "Do NOT buy" items like Frozen Heart / Mercury's on Mundo never get offered.
+    "Do NOT buy" items like Frozen Heart on Mundo never get offered. `gated_items`
+    (normalized) are swap-rule items whose comp condition filter_swaps rejected —
+    skipped too, or Mercury's comes back as a generic HARD-CC counter.
     Returns [] when item_index is unavailable."""
     if not priority_enemies or not item_index:
         return []
@@ -1157,7 +1185,7 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
                 if applies_to != 'all' and applies_to != player_class:
                     continue
                 norm = normalize(item_name)
-                if norm in seen_norms:
+                if norm in seen_norms or norm in (gated_items or ()):
                     continue
                 seen_norms.add(norm)
                 iid = resolve_item_id(item_name, name_to_id)
@@ -1313,6 +1341,36 @@ def _guard_frozen_heart_ap(live_build, committed_items, ap_count):
         lb[fh_idx] = committed_list[fh_idx]
     else:
         lb.pop(fh_idx)
+    return lb
+
+
+def enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index):
+    """Swap-rule items whose comp condition filter_swaps rejected can't enter
+    live_build — the coach put Mercury's into a full-AD build off a prose rule.
+    Reverts to the item the rule replaces. Exempt: owned, or in the picked path."""
+    lb = list(live_build or [])
+    if not gated_swaps or not item_index:
+        return lb
+    name_to_id = _build_name_to_id(item_index)
+    rid = lambda n: resolve_item_id(n, name_to_id)
+    keep = {(i or {}).get('itemID') for i in (my_items or [])}
+    path = build_path_summary(build_pick[1]).split(' · ') if build_pick else []
+    keep |= {rid(n) for n in path}
+    path_boots = next((n for n in path if normalize(n) in _BOOTS_NORMS), None)
+    for new_item, old_item in gated_swaps:
+        nid = rid(new_item)
+        if nid is None or nid in keep:
+            continue
+        ids = [rid(n) for n in lb]
+        if nid not in ids:
+            continue
+        i = ids.index(nid)
+        if path_boots and normalize(old_item) in _BOOTS_NORMS:
+            old_item = path_boots  # full-AD path's Steelcaps, not the rule's Swiftness
+        if rid(old_item) in ids:
+            lb.pop(i)
+        else:
+            lb[i] = old_item
     return lb
 
 
@@ -2075,8 +2133,9 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
     """Drop swap options whose comp condition isn't met by the current enemy team.
 
     player_pos: raw Live API position string ('TOP', 'BOTTOM', 'UTILITY', etc.).
-    ADC/SUPPORT face the enemy support every fight, so the CC threshold for
-    Mercury's Treads / Scimitar is 1; other roles use 2.
+    ADC/SUPPORT face the enemy support every fight, so Mercury's Treads / Scimitar
+    fires on heavy AP or 1+ hard CC. Other roles need heavy AP AND 3+ hard CC —
+    2 CC fired every game on Mundo, whose passive already blocks the first one.
 
     Performance-based build adjustments (fed carry mid-game) are left to the coach's
     own reasoning via THREAT ASSESSMENT and enemy KDA — not the filter's job.
@@ -2095,7 +2154,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
         if 'HARD-CC' in tags:
             hard_cc_count += 1
 
-    cc_threshold = 1 if player_pos in ('BOTTOM', 'UTILITY') else 2
+    bot_role = player_pos in ('BOTTOM', 'UTILITY')
 
     # Randuin's threshold drops to 1 crit carrier if they have Kraken Slayer
     # (max-HP true damage makes even a single fed ADC warrant crit reduction).
@@ -2124,7 +2183,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
         elif 'unending despair' in item_l:
             result.append((new_item, old_item, condition))
         elif "mercury's treads" in item_l or 'mercurial scimitar' in item_l:
-            if ap >= 3 or hard_cc_count >= cc_threshold:
+            if (ap >= 3 or hard_cc_count >= 1) if bot_role else (ap >= 3.5 and hard_cc_count >= 3):
                 result.append((new_item, old_item, condition))
         elif 'maw of malmortius' in item_l:
             if ap >= 3:
@@ -3076,7 +3135,8 @@ class Coach:
 
     def request_async(self, trigger, champ_folder, user_message, game_time,
                       build_pick=None, my_items=None, item_index=None, current_gold=0,
-                      priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None):
+                      priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
+                      gated_swaps=None):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -3089,12 +3149,14 @@ class Coach:
             target=self._call,
             args=(self.build_system(champ_folder), user_message,
                   build_pick, list(my_items or []), item_index, current_gold,
-                  list(priority_enemy_names or []), player_class, ap_count, dict(comp_kinds or {})),
+                  list(priority_enemy_names or []), player_class, ap_count, dict(comp_kinds or {}),
+                  list(gated_swaps or [])),
             daemon=True,
         ).start()
 
     def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
-              priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None):
+              priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
+              gated_swaps=None):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -3133,6 +3195,7 @@ class Coach:
             proposed = list(live_build)
             live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
             live_build = _drop_conflicting_items(live_build)
+            live_build = enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
@@ -3528,7 +3591,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                         champ_db=None, is_aram=False, team_threats=None, swaps=None,
                         matchups=None, phase=None, gold_lead=None,
                         win_condition=None, side_selection=None,
-                        matchup_db=None, your_champ=None, emax_champs=None, item_pool=None):
+                        matchup_db=None, your_champ=None, emax_champs=None, item_pool=None, gated_items=None):
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
     mins, secs = divmod(game_time, 60)
     committed_items = list((committed_build or {}).get('items') or [])
@@ -3646,7 +3709,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     # the coach structurally cannot cite a counter without naming the enemy.
     priority = compute_priority_enemies(me, enemies, item_index) if me else []
     council = compute_build_council(
-        priority, item_index, swaps or [], _player_class(your_champ or ''), item_pool
+        priority, item_index, swaps or [], _player_class(your_champ or ''), item_pool, gated_items
     ) if (priority and item_index) else []
     council_by_name = {normalize(entry['enemy']): entry for entry in council}
 
@@ -3800,7 +3863,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         current_kinds = enemy_damage_kinds(enemies, item_index)
         tanks = [n for n, k in current_kinds.items() if k == 'Tank']
         tank_note = f' — tank-built, not counted: {", ".join(tanks)}' if tanks else ''
-        lines.append(f'COMP: {label} ({ap:g} AP / {ad:g} AD){tank_note}')
+        lines.append(f'COMP: {label} ({comp_breakdown(enemies, item_index)}){tank_note}')
 
     threat_lines = format_team_threats(team_threats) if team_threats else []
     if threat_lines:
@@ -3826,9 +3889,8 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         lines.append(f'RULE-BASED BUILD DEFAULT (reference only — feel free to override): {heading} — {build_summary}')
         build_names = [n.strip() for n in build_summary.split('·') if n.strip()]
         if profile and profile[1] >= 3:
-            _ap_w, _ad_w = profile[1], profile[2]
             lines.append(
-                f'COMP WARNING: {_ap_w:.0f} AP / {_ad_w:.0f} AD enemies — build toward the MR path above. '
+                f'COMP WARNING: magic-heavy ({comp_breakdown(enemies, item_index)}) — build toward the MR path above. '
                 'Any "Full AD" in personal matchup notes below is laning-phase item priority '
                 '(e.g., early Thornmail), NOT the overall build path.'
             )
@@ -4569,7 +4631,7 @@ def header_line(title):
     return f'{BOLD}{title}{RESET}\n' + '━' * min(72, len(title) + 8) + '\n\n'
 
 
-def format_build_line(profile, build_pick):
+def format_build_line(profile, build_pick, breakdown=''):
     """One-line build/comp summary. Empty string if not enough info."""
     if not profile or profile[3] == 0:
         return ''
@@ -4581,7 +4643,7 @@ def format_build_line(profile, build_pick):
         quals.append(f'{overrides} from items')
     qualifier = f' · {" · ".join(quals)}' if quals else ''
     label_color = TIER_COLOR['Major'] if label != 'Standard' else DIM
-    line = f'{DIM}comp:{RESET} {label_color}{label}{RESET} ({ap:g} AP / {ad:g} AD{qualifier})'
+    line = f'{DIM}comp:{RESET} {label_color}{label}{RESET} ({breakdown or f"{ap:g} AP / {ad:g} AD"}{qualifier})'
     if build_pick:
         heading, body = build_pick
         path = build_path_summary(body)
@@ -4655,6 +4717,9 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
             active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper())
+            # A swap item is gated only if no active rule also offers it (Unending Despair has two).
+            _active_norms = {normalize(s[0]) for s in active_swaps}
+            gated_swaps = [(n, o) for n, o, _c in (swaps or []) if normalize(n) not in _active_norms]
             user_msg = build_coach_message(
                 data, me, enemies, ev, timers, profile, build_pick, trigger,
                 recent_responses=recent_snapshot,
@@ -4664,6 +4729,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 is_aram=is_aram,
                 team_threats=team_threats,
                 swaps=active_swaps,
+                gated_items={normalize(n) for n, _o in gated_swaps},
                 matchups=matchups,
                 phase=phase,
                 gold_lead=gold_lead,
@@ -4690,6 +4756,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 comp_kinds=enemy_damage_kinds(enemies, item_index),
                 player_class=_player_class(your_champ or ''),
                 ap_count=_ap,
+                gated_swaps=gated_swaps,
             )
 
     mode_label = 'ARAM' if is_aram else 'IN GAME'
@@ -4730,7 +4797,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             out.append(f'{color}▶ {msg}{RESET}\n')
         out.append('\n')
 
-    out.append(format_build_line(profile, build_pick))
+    out.append(format_build_line(profile, build_pick, comp_breakdown(enemies, item_index)))
 
     if coach_build_line:
         out.append(coach_build_line)
@@ -4911,6 +4978,25 @@ def render_idle(hosts, lockfile, lockfile_size, available, override):
 
 # ─── main loop ──────────────────────────────────────────────────────────────
 
+_INSTANCE_LOCK = DATA_DIR / '.live.lock'
+
+
+def acquire_instance_lock():
+    """flock a pidfile so only one live loop runs. A forgotten second instance
+    double-fires every coach trigger and runs stale build.md / code (it ran for
+    3 days once, recommending Mercury's off an old swap rule). Returns the open
+    file (keep it referenced) or the other instance's pid string."""
+    DATA_DIR.mkdir(exist_ok=True)
+    f = open(_INSTANCE_LOCK, 'a+')
+    try:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.seek(0)
+        return f.read().strip() or '?'
+    f.seek(0); f.truncate(); f.write(str(os.getpid())); f.flush()
+    return f
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--champ', default=None, help='force a specific champion folder (default: auto-detect)')
@@ -4940,6 +5026,12 @@ def main():
 
     if args.sync_champ_constants:
         sync_champ_constants()
+        return
+
+    instance_lock = acquire_instance_lock()
+    if isinstance(instance_lock, str):
+        print(f'leeg live is already running (pid {instance_lock}) — close that one first, '
+              f'or two coaches fire on every trigger.', file=sys.stderr)
         return
 
     available = available_champs()
