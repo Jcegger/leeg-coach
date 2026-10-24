@@ -9,9 +9,9 @@
     },
     "mordekaiser": {
       "display_name": "Mordekaiser",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Darkness Rise): Gains shield and damage per nearby enemy, max five stacks\n- Q (Obliterate): Slash forward, heal if hits enemy, recast to dash\n- W (Indestructible): Shield self, recast to swing and damage nearby enemies\n- E (Death's Grasp): Pull enemy toward you, apply passive stack\n- R (Realm of Death): Isolate enemy in realm, steal their stats temporarily\n- spike: Level six with ultimate, first major item power spike\n- tip: Keep distance; dodge E pull; don't group when isolated"
+      "patch": "16.20",
+      "generated_at": "2026-10-17",
+      "notes": "- Passive (Mordekaiser's Might): bonus damage per nearby enemy, stacks infinitely, converts to shield\n- Q (Obliterate): AOE hammer swing, deals damage in cone, resets on champion hit\n- W (Indestructible): shield that grows over time, reactivate to heal based on shield value\n- E (Death's Grasp): pull enemies toward you, damage and slow those caught\n- R (Realm of Death): isolate enemy champion in realm, steal their stats temporarily\n- spike: level six ultimate unlocked; mythic item completion amplifies tankiness dramatically\n- tip: stay spread out, avoid grouping; dodge E pull or kite backward relentlessly"
     },
     "jarvaniv": {
       "display_name": "Jarvan IV",
@@ -27,27 +27,27 @@
     },
     "lux": {
       "display_name": "Lux",
-      "patch": "16.17",
-      "generated_at": "2026-09-08",
-      "notes": "- Passive (Illumination): Autoattack marks enemy; next spell detonates for bonus damage\n- Q (Light Binding): Shoots skillshot that roots first/second enemy hit\n- W (Prismatic Barrier): Shields self, ally, or bounces between targets twice\n- E (Lucent Singularity): Places AoE that slows; reactivate to detonate\n- R (Final Spark): Long-range laser that deals massive damage in line\n- spike: Level 6 with ultimate; becomes lethal at two items\n- tip: Stay behind minions to block Q root and avoid laser"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Illumination): enemies hit by abilities gain mark, next attack detonates it for damage\n- Q (Light Binding): shoots linear skillshot that roots first two enemies hit\n- W (Prismatic Barrier): shield on self or ally, returns and shields again on way back\n- E (Lucent Singularity): places AoE zone that slows; reactivate to detonate for damage\n- R (Final Spark): long-range laser dealing massive damage, executes low-health enemies\n- spike: level 6 with ultimate, especially with early item advantage\n- tip: stay behind minions to block Q root, respect laser range always"
     },
     "briar": {
       "display_name": "Briar",
-      "patch": "16.12",
-      "generated_at": "2026-06-10",
-      "notes": "- Passive (Wound Cutter): Gain stacking attack speed per hit; max stacks grant lifesteal\n- Q (Head Charge): Dash forward; recast to lunge at enemy, dealing damage\n- W (Snack Attack): Execute low-health minions; restore health and gain movement speed\n- E (Acid Trail): Leave damaging acid trail; slow enemies who walk through it\n- R (Chomp Chomp): Leap onto enemy, feast for damage and heal percentage\n- spike: Level 6 with ultimate; item spike at Goredrinker completion\n- tip: Kite away from her; group to prevent isolated targets getting eaten"
+      "patch": "16.20",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Wound Lets Blood): Heal on enemy hit; stacks to 5 for execute damage\n- Q (Head Slam): Dash forward, knock up enemies in area of effect\n- W (Blood Frenzy): Enter frenzy, gain speed and lifesteal; triggers on low health\n- E (I'm Finna Eat): Leap to enemy, deal damage based on missing health\n- R (Execution): Charge forward uncontrollably, execute low-health enemies; recast to stop early\n- Spike: Level 6 with ultimate; devastating with Stridebreaker and Black Cleaver\n- Tip: Group with teammates and kite away; never let her reach low-health targets alone"
     },
     "urgot": {
       "display_name": "Urgot",
-      "patch": "16.13",
-      "generated_at": "2026-06-27",
-      "notes": "- Passive (Echoing Flames): nearby enemies take more damage, stacks on hit up to 3\n- Q (Spike): fires spike in line, slows and damages enemies hit\n- W (Purge): toggles to move slower but gain armor and cleanse slows\n- E (Disdain): dashes forward, knocks back first enemy hit\n- R (Fear Beyond): pulls enemy champion toward Urgot if they're low health\n- spike: level 6 with ultimate; becomes hard engage threat with execute potential\n- tip: respect his ultimate range and avoid low health near him"
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Echoing Flames): Triggers on ability hit, next attack burns enemy for damage\n- Q (Corrosive Charge): Launches slow projectile that explodes, applying armor shred on hit\n- W (Purge): Toggle attack speed and movement speed boost with active reload mechanic\n- E (Disdain): Dash forward, knocking back first enemy hit and reducing cooldowns\n- R (Fear Beyond): Pull enemy toward Urgot if they're in danger zone, execute low health\n- spike: Level 6 ultimate enables kills; Manamune + Black Cleaver mid-game\n- tip: Stay outside his effective range and dodge his Q charge projectiles"
     },
     "caitlyn": {
       "display_name": "Caitlyn",
-      "patch": "16.17",
-      "generated_at": "2026-09-09",
-      "notes": "- Passive (Headshot): Every 4th attack crits; closer range = faster stacks\n- Q (Piltover Peacemaker): Fires a line that damages and slows enemies hit\n- W (Yordle Snap Trap): Places trap; roots enemy stepping on it for seconds\n- E (90 Caliber Net): Dashes backward, slows enemies in cone; self-peel tool\n- R (Ace in the Hole): Channels sniper shot; deals massive damage if uninterrupted\n- Spike: Level 6 ultimate unlocked; mid-game with Manamune and Collector\n- Tip: Stay behind minions to avoid Q poke; dodge trap placement"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Headshot): Every 6 attacks, next attack deals bonus damage\n- Q (Piltover Peacemaker): Fires piercing shot in line, damage decreases per enemy hit\n- W (Yordle Snap Trap): Places trap; ensnares enemy for 1.5 seconds when triggered\n- E (90 Caliber Net): Fires net backward, knocks back enemies, grants movement speed\n- R (Ace in the Hole): Channel to fire long-range shot; enemy can block it\n- spike: Level 6 ultimate and critical strike items; mid-game dominance\n- tip: Stay behind minions to avoid Q; watch trap placement patterns"
     },
     "xerath": {
       "display_name": "Xerath",
@@ -69,21 +69,21 @@
     },
     "tristana": {
       "display_name": "Tristana",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Telescopic Sight): Range increases per level, max 669 range at level 18\n- Q (Rapid Fire): Attack speed boost for several attacks, refreshes on kills/assists\n- W (Rocket Jump): Jump to location, resets on kills/assists, deals damage\n- E (Explosive Charge): Stack bombs on target, detonates for damage and knockback\n- R (Buster Shot): Knockback blast that knocks enemy away, resets on kills/assists\n- spike: Level 6 with ultimate, then power spike at three-item damage\n- tip: Play around her short early range; punish before she scales hard"
+      "patch": "16.20",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Restless Inferno): Range increases per level, stacking up to 661 range\n- Q (Rapid Fire): Attack speed boost for several seconds, scales with attack speed\n- W (Rocket Jump): Dash forward, detonates nearby enemies on landing for damage\n- E (Explosive Charge): Stacks on enemies, explodes at four stacks for damage\n- R (Buster Shot): Knockback enemies away, applies Explosive Charge stack on hit\n- spike: Level 6 with ultimate; stronger at two items (attack speed)\n- tip: Respect her range; maintain distance or abuse early game weakness"
     },
     "masteryi": {
       "display_name": "Master Yi",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Double Strike): Every few attacks, next attack hits twice quickly\n- Q (Alpha Strike): Dash through enemies, dodging damage, striking all hit targets\n- W (Meditate): Channel to heal and reduce incoming damage significantly\n- E (Wuju Style): Passive attack speed; active for true damage on hits\n- R (Highlander): Gain movement speed, attack speed; can't be slowed\n- spike: Level 6 with ultimate; two-item power spike around mid-game\n- tip: Group with team; buy armor; CC him before he resets"
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- passive (Double Strike): Every few attacks, next attack strikes twice for bonus damage.\n- Q (Alpha Strike): Dash through enemies, dealing damage and becoming untargetable briefly.\n- W (Meditate): Channel to restore health and reduce incoming damage temporarily.\n- E (Wuju Style): Passive attack speed; active true damage on next attack.\n- R (Highlander): Gain movement speed, attack speed, and immunity to slows.\n- spike: Level 6 with ultimate; two-item power spike around Trinity Force.\n- tip: Group with teammates; never fight isolated or Yi will duel you."
     },
     "irelia": {
       "display_name": "Irelia",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Ionian Fervor): gain attack speed per nearby enemy, max 5 stacks\n- Q (Bladesurge): dash to target, resets on kill/assist, damages enemies hit\n- W (Defiant Dance): damage reduction stance, then counterattack dealing damage and healing\n- E (Flawless Duet): stun enemies hit twice or in same direction\n- R (Voidward): launch blades in cone, mark enemies, recast to dash through marked\n- spike: level 6 with ultimate and Sheen mythic item spike\n- tip: stay grouped and avoid isolated duels; kite backward when she dashes in"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Ionian Fervor): Gain attack speed per nearby enemy champion, max five stacks\n- Q (Bladesurge): Dash to enemy, refund cooldown if it kills minion or champion\n- W (Defiant Dance): Channel to reduce damage, store it, release for damage back\n- E (Flawless Duet): Launch two blades in directions, stun if both hit same target\n- R (Voidward): Send blades forward, pull enemies hit toward you, recast to explode\n- spike: Level 6 with ultimate; powerspike at Sheen/Trinity Force completion\n- tip: Stay spread to deny passive stacks and dodge E engagement setup"
     },
     "fiora": {
       "display_name": "Fiora",
@@ -105,9 +105,9 @@
     },
     "yone": {
       "display_name": "Yone",
-      "patch": "16.12",
-      "generated_at": "2026-06-16",
-      "notes": "- Passive (Way of the Hunter): Gain AD from crit chance; crits heal you\n- Q (Mortal Steel): Slash forward, stack to fire projectile, resets on hit\n- W (Spirit Cleave): Dash forward, cleave enemies, gain shield from hits\n- E (Soul Unbound): Dash and mark location, reactivate to return there\n- R (Fate Sealed): Knock up nearby enemies, dash and slash marked targets\n- spike: Level 6 with ultimate; strong at two item power spike\n- tip: Space away from his E return path to prevent ganks"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Way of the Hunter): gain attack speed; every other attack fires spirit projectile\n- Q (Mortal Steel): slash in direction, resets on hit, third hit knocks up\n- W (Spirit Cleave): dash forward, cleave enemies, gain shield based on enemies hit\n- E (Soul Unbound): dash away, leave spirit clone, reactivate to return and damage\n- R (Eternal Hunter): dash forward slashing, pull hit enemies toward you, apply mark\n- spike: level 6 with ultimate; powerspikes at Shieldbow and Infinity Edge\n- tip: respect his E escape range; avoid grouping for easy R pulls"
     },
     "lissandra": {
       "display_name": "Lissandra",
@@ -135,15 +135,15 @@
     },
     "morgana": {
       "display_name": "Morgana",
-      "patch": "16.12",
-      "generated_at": "2026-06-13",
-      "notes": "- Passive (Soul Siphon): Restores health when damaging enemies with abilities\n- Q (Dark Binding): Shoots binding projectile; roots first enemy hit\n- W (Tormented Soil): Creates zone dealing damage and slowing enemies\n- E (Black Shield): Shields ally; blocks crowd control and damage\n- R (Soul Shackles): Stuns nearby enemies after 0.5s delay chains\n- spike: Level 6 with ultimate; stronger mid-game teamfights\n- tip: Spread out and move unpredictably to dodge binding"
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Soul Siphon): Restores health when damaging enemies with abilities\n- Q (Dark Binding): Snare enemies in a line; longer range if travels further\n- W (Tormented Soil): Ground zone damages and slows enemies standing in it\n- E (Black Shield): Shields ally and blocks crowd control effects for duration\n- R (Soul Shackles): Stun nearby enemies after delay; pulls them if tethered\n- spike: Level 6 with ultimate; stronger mid-game with Zhonya's Hourglass\n- tip: Dodge Q by moving sideways; stay spread to avoid multi-shackle stun"
     },
     "veigar": {
       "display_name": "Veigar",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Phenomenal Evil Power): gains AP per enemy kill/assist, stacks infinitely\n- Q (Baleful Strike): fires bolt dealing damage, gains AP if it kills\n- W (Dark Matter): meteor strikes area after delay, deals damage\n- E (Event Horizon): creates cage stunning enemies who touch edges\n- R (Primordial Burst): blasts enemy champion, damage scales with their max health\n- spike: level 6 with ultimate and mythic item completion\n- tip: position behind minions to block Q and dodge W delay"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Phenomenal Evil Power): gain AP per enemy elimination, stacks infinitely\n- Q (Baleful Strike): blast deals damage, grants AP if it kills\n- W (Dark Matter): delayed AoE explosion deals damage in target area\n- E (Event Horizon): creates cage stunning enemies who touch the walls\n- R (Primordial Burst): massive damage scales with target's max health\n- spike: level 6 with ultimate and first AP item\n- tip: stay outside cage range and dodge W delay zones"
     },
     "garen": {
       "display_name": "Garen",
@@ -153,9 +153,9 @@
     },
     "ashe": {
       "display_name": "Ashe",
-      "patch": "16.12",
-      "generated_at": "2026-06-13",
-      "notes": "- Passive (Frost Shot): Attacks slow enemies; critical strikes freeze them briefly.\n- Q (Ranger's Focus): Charge up for multi-arrow shots with increased damage.\n- W (Volley): Fire arrows in cone; slows and applies Frost Shot.\n- E (Hawkshot): Send hawk to scout; gain vision and attack speed.\n- R (Enchanted Crystal Arrow): Global skillshot stun; longer range, wider freeze effect.\n- spike: Level 6 with ultimate; three items for consistent damage.\n- tip: Stay behind minions to block Volley; dodge Crystal Arrow predictably."
+      "patch": "16.20",
+      "generated_at": "2026-10-24",
+      "notes": "- Passive (Frost Shot): Attacks slow enemies; critical strikes freeze them briefly\n- Q (Ranger's Focus): Channel to store attacks, release for rapid volleys\n- W (Volley): Fire arrows in cone; applies slow to hit enemies\n- E (Hawkshot): Send hawk scout to reveal map area briefly\n- R (Enchanted Crystal Arrow): Global stun arrow; longer range, longer stun distance\n- spike: Level 6 with ultimate; critical item two-item power spike\n- tip: Stay behind minions to block arrows and ultimate projectile"
     },
     "jax": {
       "display_name": "Jax",
@@ -201,9 +201,9 @@
     },
     "missfortune": {
       "display_name": "Miss Fortune",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Love Tap): bonus damage on first hit to new target\n- Q (Double Up): fires shot that bounces to nearby enemy, applies passive\n- W (Bullet Time): grants attack speed and movement speed, refreshes on hit\n- E (Make It Rain): drops coins that slow enemies and reveal them briefly\n- R (Bullet Time): massive cone of bullets dealing damage, scales with attack damage\n- spike: level 6 with ultimate; Infinity Edge powerspike mid-game\n- tip: stay spread out to avoid grouping; dodge ultimate by moving sideways"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Love Tap): Bonus damage on first hit against each enemy per cooldown\n- Q (Double Up): Shoots bullet that bounces to nearby enemy, applies on-hit effects\n- W (Impure Shots): Attack speed buff; attacks apply slow and grievous wounds stacks\n- E (Make It Rain): AOE slow zone that reveals enemies, damages and slows them\n- R (Bullet Time): Massive cone ultimate that fires many bullets in one direction\n- spike: Level 6 with ultimate; becomes stronger with critical strike items\n- tip: Dodge her ultimate by moving perpendicular; position behind minions early"
     },
     "singed": {
       "display_name": "Singed",
@@ -261,9 +261,9 @@
     },
     "ornn": {
       "display_name": "Ornn",
-      "patch": "16.9",
-      "generated_at": "2026-05-08",
-      "notes": "- Passive (Forge): upgrades items for self and allies at intervals\n- Q (Volcanic Rupture): launches magma in line, creates lava pillar terrain\n- W (Bellows Breath): breathes fire in cone, applies brittle to enemies\n- E (Searing Charge): charges forward, knocks up enemies, can reactivate for slam\n- R (Forgefire Summit): summons volcanic terrain that damages and slows enemies\n- spike: level 6 ultimate and first upgraded mythic item power spike\n- tip: avoid clustering around pillars; position away from terrain walls"
+      "patch": "16.20",
+      "generated_at": "2026-10-15",
+      "notes": "- Passive (Living Forge): upgrades items for gold cost; creates shop anywhere\n- Q (Volcanic Rupture): fires magma line dealing damage, knocks up on hit\n- W (Bellows Breath): breathes fire in cone, slows and damages enemies\n- E (Searing Charge): charges forward, knocks enemies aside, can recast near walls\n- R (Forgefire Summit): summons volcanic terrain, creates lava pillars dealing damage\n- spike: level 6 ultimate unlocked; mythic item completion massively increases tankiness\n- tip: respect his wall knockback; position away from terrain to avoid ganks"
     },
     "naafiri": {
       "display_name": "Naafiri",
@@ -273,9 +273,9 @@
     },
     "seraphine": {
       "display_name": "Seraphine",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Stage Presence): Nearby allies grant note stacks; at 3 stacks, heal and move faster\n- Q (High Note): Fire projectile in target direction; bounces between allies and enemies\n- W (Surround Sound): Heal allies in area; self-heal if cast near allies\n- E (Beat Drop): Stun enemies in line; damage scales with notes collected nearby\n- R (Encore): Long-range charm and damage in line; refunds cooldown if hits\n- spike: Level 6 with ultimate; stronger with support items and ally proximity\n- tip: Spread formation to minimize healing bounces; buy early Adaptive Helm or QSS"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Stage Presence): nearby allies grant note stacks; at 3 stacks, heal and damage nearby enemies\n- Q (High Note): projectile damages enemies in line, heals allies hit\n- W (Surround Sound): shield self and nearby ally; heal if already shielded\n- E (Beat Drop): stun enemies in line after delay, allies gain movespeed\n- R (Encore): long-range beam stuns and damages enemies hit in line\n- spike: level 6 with ultimate; powerspike at Liandry's or Moonstone completion\n- tip: spread out to block her E and R with minions"
     },
     "teemo": {
       "display_name": "Teemo",
@@ -315,21 +315,21 @@
     },
     "nautilus": {
       "display_name": "Nautilus",
-      "patch": "16.12",
-      "generated_at": "2026-06-21",
-      "notes": "- Passive (Contempt for the Weak): Attacks reduce cooldowns, applies slow on next attack\n- Q (Dredge Line): Pulls enemy toward Nautilus, stuns if it hits terrain\n- W (Titan's Wrath): Shields self, empowers next attack to slow enemies nearby\n- E (Riptide): Sends shockwave forward, damages and slows enemies hit\n- R (Depth Charge): Launches charges that knock up enemies, chain to nearby foes\n- Spike: Level 6 with ultimate; mid-game with Sunfire tank items\n- Tip: Maintain distance, dodge Q hook, focus on kiting away from team"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Staggering Blow): Immobilizes next enemy hit after 3 seconds; resets on ability hit\n- Q (Dredge Line): Pulls first enemy hit toward Nautilus; can pull himself to terrain\n- W (Titan's Wrath): Gains shield and makes next attack slow enemies in area\n- E (Riptide): Sends shockwaves in direction; bounces off terrain and enemies, applies slow\n- R (Depth Charge): Launches charges that chase enemies, stunning and damaging on hit\n- Spike: Level 6 with ultimate; devastating with Liandry's or Rylai's\n- Tip: Stay spread out and behind minions to avoid hook engage chains"
     },
     "maokai": {
       "display_name": "Maokai",
-      "patch": "16.9",
-      "generated_at": "2026-05-10",
-      "notes": "- Passive (Sap Magic): Heal on ability hit; stacks grant damage reduction at max\n- Q (Bramble Smash): Knockback skillshot that damages and slows hit enemies\n- W (Twisted Advance): Dash to enemy, root them, gain shield\n- E (Sapling Toss): Place saplings that explode near enemies, slow and damage\n- R (Nature's Wrath): AOE root wave that damages and roots all hit\n- spike: Level 6 with ultimate; becomes strong tank around Sunfire mythic\n- tip: Space away from walls; dodge saplings; don't group without vision"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Sap Magic): Restores health when near enemy abilities; stacks infinitely\n- Q (Bramble Smash): Knock back enemies in cone, reduces their armor\n- W (Twisted Advance): Dash to enemy, root them in place\n- E (Sapling Toss): Launch sapling that explodes, slows and damages enemies\n- R (Nature's Grasp): Sends roots across map, roots all hit enemies\n- spike: Level 6 with ultimate; mid-game with Liandry's purchase\n- tip: Stay spread out to minimize root hits from ultimate"
     },
     "syndra": {
       "display_name": "Syndra",
-      "patch": "16.12",
-      "generated_at": "2026-06-15",
-      "notes": "- Passive (Transcendence): Gain AP per level, max 40 AP at level 18\n- Q (Dark Sphere): Conjure sphere at location, explodes dealing magic damage\n- W (Force of Will): Grab sphere or enemy, hurl it for damage\n- E (Scatter the Weak): Push spheres and enemies away, stun if hit enemy\n- R (Unleashed Power): Hurl all spheres at target for massive damage\n- spike: Level 6 with ultimate; first item completion around 10-12 minutes\n- tip: Stay mobile and respect her range; dodge Dark Spheres early"
+      "patch": "16.20",
+      "generated_at": "2026-10-17",
+      "notes": "- Passive (Transcendence): Gain AP per level; extra AP per ability rank.\n- Q (Dark Sphere): Summon sphere at location; deals damage to enemies.\n- W (Telekinesis): Grab sphere or enemy; hurl it for damage.\n- E (Scatter the Weak): Knock back nearby spheres and enemies in direction.\n- R (Unleashed Power): Hurl all spheres at target; massive damage scaling.\n- spike: Level 6 with ultimate; one-shot potential with full sphere combo.\n- tip: Stay behind minions; dodge Q spheres; respect her kill range."
     },
     "leesin": {
       "display_name": "Lee Sin",
@@ -339,9 +339,9 @@
     },
     "tryndamere": {
       "display_name": "Tryndamere",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Battle Trance): Gain attack speed; stacks per crit, max 5 stacks\n- Q (Bloodlust): Self-heal scaling with AD; refunds cooldown on crit\n- W (Mocking Shout): Slow enemies and reduce their AD temporarily\n- E (Spinning Slash): Dash forward, refunds cooldown on crit kills\n- R (Undying Rage): Become unkillable for 5 seconds, gain AD\n- spike: Level 6 with ultimate; stronger with Infinity Edge\n- tip: Build armor and grievous wounds; stay out of spin range"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Battle Trance): Gain attack speed; stacks infinitely, bonus increases per stack\n- Q (Bloodlust): Self-heal based on missing health; refund cooldown on critical strikes\n- W (Mocking Shout): Slow enemies; reduce their AD; he gains AD from it\n- E (Spinning Slash): Spin forward dealing damage; refund cooldown on critical strikes\n- R (Undying Rage): Become unkillable for seconds; gain massive AD during duration\n- spike: Level 6 with ultimate; powerspikes further with Infinity Edge\n- tip: Build grievous wounds early; kite away from him constantly"
     },
     "pantheon": {
       "display_name": "Pantheon",
@@ -357,9 +357,9 @@
     },
     "ekko": {
       "display_name": "Ekko",
-      "patch": "16.13",
-      "generated_at": "2026-06-24",
-      "notes": "- Passive (Resonance): Hits grant stacks; max stacks trigger burst damage and slow\n- Q (Timewinder): Throw disc that returns, damaging enemies both ways\n- W (Parallel Convergence): Create slow zone; reactivate to stun inside it\n- E (Phase Dive): Dash forward and gain shield, resets on kills/assists\n- R (Ekko's Ultimate): Rewind to earlier position, healing based on damage taken\n- spike: Level 6 with ultimate; two-item power spike devastating\n- tip: Spread out to avoid W stun; dodge Q returns carefully"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Resonance): stacks on hit, explodes at 3 stacks for damage/slow\n- Q (Timewinder): throw disc dealing damage, returns hitting enemies again\n- W (Parallel Convergence): create zones stunning enemies when they overlap\n- E (Phase Dive): dash with shield, resets on takedowns\n- R (Ekko Chronobreak): travel back, heal based on damage taken\n- spike: level 6 with ultimate; first Mythic item powerspike\n- tip: position away from walls to avoid W stun overlap"
     },
     "darius": {
       "display_name": "Darius",
@@ -381,9 +381,9 @@
     },
     "ahri": {
       "display_name": "Ahri",
-      "patch": "16.12",
-      "generated_at": "2026-06-23",
-      "notes": "- Passive (Essence Theft):\u51fb\u6740\u6216\u52a9\u653b\u654c\u4eba\u65f6\u6062\u590d\u751f\u547d\u503c\uff0c\u6700\u591a9\u5c42\n- Q (Orb of Deception): \u6295\u63b7\u9b54\u6cd5\u7403\uff0c\u53bb\u65f6\u4f24\u5bb3\u654c\u4eba\uff0c\u56de\u7a0b\u6cbb\u7597\u81ea\u5df1\n- W (Fox-Fire): \u53ec\u5524\u72d0\u706b\u653b\u51fb\u9644\u8fd1\u654c\u4eba\uff0c\u4f18\u5148\u653b\u51fb\u6700\u8fd1\u76ee\u6807\n- E (Charm): \u6295\u63b7\u9b45\u60d1\u5f39\uff0c\u547d\u4e2d\u654c\u4eba\u4f7f\u5176\u79fb\u52a8\u901f\u5ea6\u51cf\u7f13\u5e76\u7729\u6655\n- R (Spirit Rush): \u51b2\u523a\u4e09\u6b21\uff0c\u6bcf\u6b21\u53ef\u6539\u53d8\u65b9\u5411\uff0c\u9020\u6210\u4f24\u5bb3\n- spike: Level 6 ultimate unlock; two items powerspike\n- tip: Stay spread out to dodge charm; respect her all-in burst"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Essence Theft): Gains stack on hit, heals at 9 stacks\n- Q (Orb of Deception): Throws orb dealing damage, returns dealing more damage\n- W (Fox-Fire): Launches flames at nearby enemies, prioritizes recently hit targets\n- E (Charm): Skillshot that charms enemy, they walk toward you helplessly\n- R (Spirit Rush): Dashes forward three times, can hit enemies with flames\n- spike: Level 6 with ultimate and Lost Chapter mythic completed\n- tip: Respect charm range, position behind minions, buy Mercury's Treads early"
     },
     "olaf": {
       "display_name": "Olaf",
@@ -393,27 +393,27 @@
     },
     "smolder": {
       "display_name": "Smolder",
-      "patch": "16.12",
-      "generated_at": "2026-06-10",
-      "notes": "- Passive (Sneaking Attack): Gain stacking attack speed; max stacks grant attack speed bonus\n- Q (Acey Rotator): Fire projectile that bounces between enemies, dealing damage\n- W (Rocket Grab): Throw hook that pulls enemy champion toward you\n- E (Embersnap Trap): Place trap that explodes, stunning and damaging nearby enemies\n- R (Super Megamorph): Transform into dragon form, gaining area damage and mobility\n- spike: Level 6 with ultimate; Mythic item powerspike around 2-3 items\n- tip: Maintain distance and position behind minions to avoid hook attempts"
+      "patch": "16.20",
+      "generated_at": "2026-10-15",
+      "notes": "- Passive (Fury): Gain stacks on attacks, max 100 stacks grants bonus damage\n- Q (Rocket Slam): Shoots rocket in direction, explodes hitting enemies in area\n- W (Acey Deucey): Flips card for attack speed or movement speed buff\n- E (Supercooldown): Dashes backward, gaining shield and slowing nearby enemies\n- R (Super Mega Death Rocket): Fires huge rocket dealing massive damage in line\n- spike: Level 6 with ultimate or first crit item completion\n- tip: Stay spread out to minimize ultimate hit potential"
     },
     "volibear": {
       "display_name": "Volibear",
-      "patch": "16.12",
-      "generated_at": "2026-06-15",
-      "notes": "- Passive (Bristling Defenses): gains shield when hit, stacks up to 3, explodes at max\n- Q (Rolling Slam): charges forward, knocking up and damaging enemies in path\n- W (Frenzied Maul): bites target, heals Volibear, empowered after Q hit\n- E (Sky Splitters): summons lightning strikes around him, damage increases with missing health\n- R (Stormbringer): transforms into storm form, gains speed, AOE damage, executes low-health enemies\n- spike: level 6 with ultimate transforms him into major teamfight threat\n- tip: maintain distance, kite backwards, build grievous wounds to reduce his healing sustain"
+      "patch": "16.20",
+      "generated_at": "2026-10-19",
+      "notes": "- Passive (Fury of the North): Gains attack speed; transforms into bear form at max fury\n- Q (Thundering Smash): Charges forward, stuns and damages first enemy hit\n- W (Maiming Bite): Bites target, heals based on missing health; resets on takedowns\n- E (Sky Splitter): Calls lightning that damages and slows enemies in area\n- R (Thousand-Pierced Volibear): Transforms into giant bear, gains movespeed and knockup on collision\n- Spike: Level 6 with ultimate; most dangerous mid-game teamfights\n- Tip: Stay away from walls; kite him in open space safely"
     },
     "drmundo": {
       "display_name": "Dr. Mundo",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Adrenaline Rush): Regenerates health each second; increases with missing health\n- Q (Infected Cleaver): Throws cleaver dealing damage, slows, costs health to cast\n- W (Burning Agony): Toggle damage aura around Mundo; costs health per second\n- E (Masochism): Gains AD and takes reduced damage for short duration\n- R (Chemical Excitement): Transforms, gains movement speed, health, and enhanced regeneration massively\n- spike: Level 6 ultimate and first health item (Hollow Radiance)\n- tip: Build Grievous Wounds early; prevent all-in fights where he heals back"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Adrenaline Rush): Regenerates health every second; stacks with missing health percentage\n- Q (Infected Cleaver): Throws axe, damages and slows enemies hit; returns to Mundo\n- W (Burning Agony): Toggle damage aura; costs health per second; reduced damage taken while active\n- E (Masochism): Empowers next attack, deals damage based on missing health; grants movement speed\n- R (Scientist's Syringe): Transforms into giant form, gains health and movement speed; costs percent max health\n- spike: Level 6 ultimate; becomes unkillable tank with mobility and health sustain\n- tip: Build grievous wounds early; kite and avoid extended fights with Mundo"
     },
     "blitzcrank": {
       "display_name": "Blitzcrank",
-      "patch": "16.17",
-      "generated_at": "2026-09-08",
-      "notes": "- Passive (Mana Barrier): Shield scales with mana when health drops low\n- Q (Rocket Grab): Pulls first enemy hit toward Blitzcrank instantly\n- W (Overdrive): Blitzcrank gains movement speed and attack speed temporarily\n- E (Power Fist): Next attack knocks up enemy, scales with mana\n- R (Static Field): Damages nearby enemies, silences them briefly in area\n- spike: Level 6 with ultimate; strong at all levels with items\n- tip: Stay behind minions to block Rocket Grab attempts consistently"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Mana Barrier): Shield based on maximum mana when health drops low\n- Q (Rocket Grab): Grab enemy in line and pull toward Blitzcrank\n- W (Overdrive): Blitzcrank gains movement speed and attack speed temporarily\n- E (Power Fist): Next attack knocks up enemy and deals extra damage\n- R (Static Field): Silence nearby enemies and damage them in area\n- spike: Level 6 with ultimate; early items like Locket\n- tip: Stay behind minions and avoid predictable positioning near walls"
     },
     "varus": {
       "display_name": "Varus",
@@ -459,9 +459,9 @@
     },
     "shyvana": {
       "display_name": "Shyvana",
-      "patch": "16.12",
-      "generated_at": "2026-06-12",
-      "notes": "- Passive (Fury of the Dragonborn): gain fury per attack, transform at 100 fury\n- Q (Twin Bite): enhanced next attack hitting twice, refunds cooldown on hit\n- W (Burnout): AOE damage around you, move faster, lasts several seconds\n- E (Flame Breath): projectile cone damage, marks enemies for bonus damage briefly\n- R (Dragon's Descent): transform into dragon, gain stats, extended range abilities\n- spike: level 6 with ultimate, powerspike continues with Titanic Hydra\n- tip: stay spread out to reduce burnout damage, kite around terrain"
+      "patch": "16.20",
+      "generated_at": "2026-10-19",
+      "notes": "- Passive (Fury of the Dragonborn): gain fury per attack, transform into dragon at 100 fury\n- Q (Twin Bite): next attack hits twice, deals bonus damage, refunds cooldown on hit\n- W (Burnout): AOE damage around Shyvana, grants movement speed, lasts several seconds\n- E (Dragon's Descent): breathe fire in cone, deals damage, applies on-hit effects to enemies hit\n- R (Shyvana's Ascension): transform into dragon, gain size/range/stats, resets fury bar, lasts several seconds\n- spike: level 6 transformation unlocks, trinity force or nashor's tooth amplify damage significantly\n- tip: respect her all-in range when transformed; kite backwards and use cc to interrupt her dives"
     },
     "velkoz": {
       "display_name": "Vel'Koz",
@@ -483,15 +483,15 @@
     },
     "akali": {
       "display_name": "Akali",
-      "patch": "16.13",
-      "generated_at": "2026-06-30",
-      "notes": "- passive (Assassinate): gain movement speed after ability hit, stacks to 3 for burst damage\n- Q (Five Point Strike): throw kunai in cone, deals damage, restores energy on hit\n- W (Twilight Shroud): create smoke cloud, gain invisibility and damage reduction while inside\n- E (Shuriken Flip): flip backward or forward, slash enemies, can recast to kick forward\n- R (Perfect Execution): dash to target, mark them, recast to burst damage on marked target\n- spike: level 6 with ultimate; devastating mid-game with Protobelt and Void Staff\n- tip: group with teammates and deny her isolated targets to neutralize her burst potential"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Assassin's Mark): Gain MS and bonus damage near enemies; refresh on ability hit\n- Q (Five Point Strike): Throw stars in cone; refund CD if it hits enemy champion\n- W (Twilight Shroud): Dash and create smoke; gain invisibility and slow immunity inside cloud\n- E (Shuriken Flip): Dash forward then backward; reactivate to kick enemies into air\n- R (Perfect Execution): Dash to target; recast to blink nearby and deal execute damage\n- spike: Level 6 with ultimate; devastating all-in potential increases significantly\n- tip: Stick near teammates and use vision; avoid isolated positions where she dominates"
     },
     "heimerdinger": {
       "display_name": "Heimerdinger",
-      "patch": "16.13",
-      "generated_at": "2026-07-01",
-      "notes": "- Passive (Hextech Soul): gain stacks when abilities hit; at 5 stacks, next ability upgrades\n- Q (Hextech Turret): place turret that shoots enemies; upgraded version places two turrets\n- W (Hextech Rocket Swarm): fire rockets in cone; upgraded version fires more rockets faster\n- E (CH-2 Electron Storm Grenade): toss grenade that stuns and damages; upgraded version creates larger area\n- R (UPGRADE!!!): supercharge next ability cast, granting enhanced effects and Hextech Soul stack\n- spike: level 6 with ultimate; mid-game teamfights with multiple turrets controlling space\n- tip: destroy turrets immediately or kite around them; stay out of grouped formations"
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Hextech Expertise): Gain attack speed; at 5 stacks, next ability upgrades\n- Q (Hextech Turret): Place turret that shoots enemies; upgraded version places three turrets\n- W (Hextech Rocket Swarm): Fire rockets in cone; upgraded version fires more rockets faster\n- E (CH-2 Electron Storm Grenade): Stun grenade in area; upgraded version stuns larger area longer\n- R (Hextech Upgrade): Upgrade next ability; turrets gain laser, rockets fire faster, grenade stuns larger\n- spike: Level 6 with ultimate and three turrets; mid-game teamfights\n- tip: Stay out of turret range; gank early before he scales"
     },
     "lulu": {
       "display_name": "Lulu",
@@ -501,21 +501,21 @@
     },
     "neeko": {
       "display_name": "Neeko",
-      "patch": "16.10",
-      "generated_at": "2026-05-15",
-      "notes": "- Passive (Inherent Glamour): Neeko gains attack speed after attacking; stacks infinitely, no cap\n- Q (Nimble Counterattack): Fires projectile bouncing between enemies, dealing magic damage per hit\n- W (Shapesplitter): Sends clone forward while becoming invisible; clone explodes on contact\n- E (Tangle-Barbs): Roots first enemy hit, subsequent enemies slowed; roots spread on kill\n- R (Pop Blossom): Neeko leaps up and explodes, damaging and stunning nearby enemies\n- spike: Level 6 ultimate enables all-in burst and gank setup dramatically\n- tip: Respect Neeko's clone positioning and never group too tightly around roots"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Inherent Glamour): Neeko gains AP per nearby ally; mimics ally appearance when near them\n- Q (Blooming Burst): Fires projectile dealing magic damage; explodes on enemy hit or max range\n- W (Shapesplitter): Creates clone moving in direction; Neeko becomes invisible briefly while moving opposite\n- E (Tangle-Barbs): Launches root projectile; roots first enemy hit, bounces to nearby enemies\n- R (Pop Blossom): Charges jump, stunning and damaging enemies in area upon landing\n- spike: Level 6 with ultimate; strong at three items with AP and CDR\n- tip: Watch for clone decoys; stay spread to avoid root bounces; punish her immobility"
     },
     "bluecasterminion": {
       "display_name": "Blue Caster Minion",
-      "patch": "16.10",
-      "generated_at": "2026-05-15",
-      "notes": "I appreciate the question, but I need to clarify: Blue Caster Minions are basic minion units in League of Legends, not champions with abilities. They don't have passive, Q, W, E, or R abilities to list.\n\nThey're simply minions that deal magic damage and have no special mechanics beyond basic attacks and being targetable units worth gold when killed.\n\nI cannot provide the requested format because the premise doesn't match the game's mechanics. Would you like information about an actual League champion instead?"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Hex Core): Gains 10% ability power per nearby allied champion, stacks infinitely\n- Q (Arcane Barrage): Fires three bolts in a line, dealing magic damage\n- W (Mana Shield): Converts mana into a temporary shield, scaling with ability power\n- E (Spell Flux): Bounces between enemies, dealing damage and reducing resistances on hit\n- R (Prismatic Barrier): Creates a wide shield protecting all nearby allied units simultaneously\n- Spike: Level 6 when ultimate unlocks, providing massive team-wide protection instantly\n- Tip: Stay spread out to minimize ultimate shield efficiency and maximize poke damage"
     },
     "sightward": {
       "display_name": "Sight Ward",
-      "patch": "16.10",
-      "generated_at": "2026-05-15",
-      "notes": "I appreciate the detailed request, but I need to clarify: Sight Ward is not a League of Legends champion\u2014it's a trinket item that provides vision control.\n\nSight Wards don't have abilities (passive, Q, W, E, R) or power spikes. They're static vision tools placed on the map.\n\nI can't fulfill your requested format because it's designed for champion abilities, which Sight Wards don't have. \n\nWould you like me to:\n1. Explain how Sight Wards work and counter-play instead?\n2. Provide this formatted breakdown for an actual LoL champion?"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Consecration): Sight Ward provides vision in a small area continuously.\n- Q (N/A): Sight Ward has no Q ability.\n- W (N/A): Sight Ward has no W ability.\n- E (N/A): Sight Ward has no E ability.\n- R (N/A): Sight Ward has no R ability.\n- spike: Immediately upon placement; provides early game vision control advantage.\n- tip: Sweep wards regularly and destroy them before they deny vision."
     },
     "bluemeleeminion": {
       "display_name": "Blue Melee Minion",
@@ -561,9 +561,9 @@
     },
     "zoe": {
       "display_name": "Zoe",
-      "patch": "16.10",
-      "generated_at": "2026-05-16",
-      "notes": "- Passive (More Sparkpack): Gain MS after hitting abilities; stacks refreshable\n- Q (Skillshot): Shoots projectile that returns, dealing damage both ways\n- W (Spell Thief): Picks up enemy summoner spells; grants temporary use\n- E (Bubble): Stun projectile; hit enemies sleep briefly then take extra damage\n- R (Portal Jump): Blink short distance; resets position for repositioning or escaping\n- spike: Level 6 with ultimate; completes first item around minute 10\n- tip: Stay behind minions to block Q; position away from walls for E"
+      "patch": "16.20",
+      "generated_at": "2026-10-15",
+      "notes": "- Passive (More Sparkpack): Gains MS after hitting abilities; refreshes on takedowns\n- Q (Paddle Star): Fires skillshot; damage scales with distance traveled to target\n- W (Spell Thief): Picks up enemy summoner spells and active item effects nearby\n- E (Sleepy Trouble Bubble): Charm projectile; puts enemy to sleep when hit or nearby\n- R (Portal Jump): Blinks short distance; reactivates once before cooldown\n- spike: Level 6 with ultimate; first Luden's completion\n- tip: Respect her range; dodge bubble by moving perpendicular to trajectory"
     },
     "ryze": {
       "display_name": "Ryze",
@@ -591,15 +591,15 @@
     },
     "kayle": {
       "display_name": "Kayle",
-      "patch": "16.17",
-      "generated_at": "2026-09-08",
-      "notes": "- Passive (Ascension): Attack speed increases per level, grants on-hit effects at level 16\n- Q (Radiant Blast): Fire projectile dealing damage, slows if it hits twice\n- W (Celestial Blessing): Heal self or ally, grants movement speed to target\n- E (Starfire Spellblade): Melee attacks deal bonus magic damage in expanding area\n- R (Divine Judgment): Make target invulnerable, deal damage in area around them\n- spike: Level 11 ultimate upgrade and three-item powerspike transforms teamfight presence\n- tip: Respect her range at level 6 and abuse early laning phase"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Holy Fervor): Attacks grant stacks, max 5; bonus damage and attack speed per stack\n- Q (Radiant Blast): Projectile damages and slows enemies hit\n- W (Celestial Blessing): Heals self and nearby ally, grants movement speed\n- E (Starfire Spellblade): Empowers next attack, damages in area around target\n- R (Divine Judgment): Becomes invulnerable and airborne, rains fire on enemies below\n- spike: Level 11 when ultimate becomes huge area denial tool\n- tip: Build grievous wounds early to reduce her sustain and healing output"
     },
     "mel": {
       "display_name": "Mel",
-      "patch": "16.17",
-      "generated_at": "2026-09-06",
-      "notes": "- Passive (Crystallize): Gain armor/magic resist stacks; max 5 stacks grants shield\n- Q (\u7834\u88c2): Fire projectile that explodes, damaging enemies in area\n- W (\u6c34\u6676\u51b2\u51fb): Dash forward, leaving crystal trail that slows enemies\n- E (\u6676\u4f53\u5316): Gain temporary shield and slow nearby enemies on cast\n- R (\u6676\u4f53\u7206\u70b8): Detonate all crystals, dealing damage and stunning enemies\n- spike: Level 6 with ultimate; mid-game with Crystal items\n- tip: Position away from clustered crystals to avoid chain stun damage"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Dark Ascension): Gain stacks from abilities, convert to armor/magic resist at max\n- Q (Spear Slash): Melee cone attack dealing damage, short cooldown\n- W (Blooming Blades): Thrust forward damaging enemies, applies on-hit effects\n- E (Lone Warrior): Grant self shield and bonus damage when isolated\n- R (Apex Turret): Transform into turret form, gain massive stats temporarily\n- spike: Level 6 ultimate transforms her into unkillable turret\n- tip: Kite around terrain; avoid trading when she builds isolation advantage"
     },
     "pyke": {
       "display_name": "Pyke",
@@ -609,15 +609,15 @@
     },
     "kogmaw": {
       "display_name": "Kog'Maw",
-      "patch": "16.10",
-      "generated_at": "2026-05-17",
-      "notes": "- Passive (Icathian Surprise): explodes on death, dealing damage in area\n- Q (Caustic Spittle): projectile that reduces armor/magic resist on hit\n- W (Bio-Arcane Barrage): attacks gain range and deal percent max health damage\n- E (Void Ooze): line skillshot that slows and damages enemies hit\n- R (Living Artillery): long-range artillery strikes with global range at max rank\n- spike: level 6 with ultimate; triforce/nashor tooth powerspike mid-game\n- tip: respect range, dodge E skillshot, build grievous wounds if ahead"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Icathian Surprise): Explodes on death, dealing damage in area.\n- Q (Caustic Spittle): Spits acid, slowing and reducing enemy armor.\n- W (Bio-Arcane Barrage): Auto-attacks deal bonus damage based on target max health.\n- E (Void Ooze): Launches ooze puddle, slowing enemies who touch it.\n- R (Living Artillery): Fires artillery strikes from range, dealing damage and revealing.\n- spike: Level 6 with R; scaled with attack speed items.\n- tip: Stay outside artillery range; buy Abyssal Mask for sustained fights."
     },
     "twistedfate": {
       "display_name": "Twisted Fate",
-      "patch": "16.10",
-      "generated_at": "2026-05-17",
-      "notes": "- Passive (Loaded Dice): Gain bonus gold on kills and minion takedowns\n- Q (Wildcards): Throw three cards in a cone, dealing damage\n- W (Pick a Card): Cycle through red/blue/gold cards; cast to use effect\n- E (Stacked Deck): Gain attack speed; fourth attack deals bonus magic damage\n- R (Destiny): Reveal enemies on map; teleport to any location instantly\n- spike: Level 6 with ultimate; two items for consistent damage\n- tip: Ward map heavily and respect his global pressure constantly"
+      "patch": "16.20",
+      "generated_at": "2026-10-19",
+      "notes": "- Passive (Loaded Dice): gain bonus gold on kills and takedowns\n- Q (Wildcard): throw card in direction, damages enemies hit\n- W (Pick a Card): cycle three cards, select one for bonus effect\n- E (Stacked Deck): attack builds stacks, fourth stack deals bonus damage\n- R (Destiny): reveal all enemies, teleport to any location globally\n- spike: level 6 with ultimate for global map pressure\n- tip: buy control wards and stay grouped to block teleport targets"
     },
     "aurora": {
       "display_name": "Aurora",
@@ -627,33 +627,33 @@
     },
     "gwen": {
       "display_name": "Gwen",
-      "patch": "16.13",
-      "generated_at": "2026-06-30",
-      "notes": "- Passive (Snip Snip!): AOE scissors attacks; mark enemies, third hit detonates for bonus damage\n- Q (Snip Snap!): Throw scissors in line; returns if hits enemy, reduced cooldown on hit\n- W (Hallowed Mist): Create protective mist; gain armor/magic resist, only you benefit inside zone\n- E (Skip 'n Slash): Dash forward with AOE damage; resets on champion/large monster hit\n- R (Needlework): Launch needle storm; missiles home toward marked enemies, gain AS per missile hit\n- spike: Level 6 ultimate; power spike again with Riftmaker or Nashor's Tooth completion\n- tip: Play around her W cooldown; dodge her Q to prevent E resets; kite away"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Thousand Cuts): Auto attacks mark enemies; 5 stacks deal magic damage\n- Q (Snip Snip!): Throw scissors in cone, returns and heals Gwen\n- W (Hallowed Mist): Create protective mist, only Gwen attacks in/out, enemies can't enter\n- E (Skip 'n Slash): Dash forward and gain attack speed, resets on takedowns\n- R (Needlework): Summon giant needle that stuns and damages in target area\n- spike: Level 6 ultimate and Trinity Force powerspike mid-game\n- tip: Stay outside mist zone; kite and avoid her close range"
     },
     "kindred": {
       "display_name": "Kindred",
-      "patch": "16.10",
-      "generated_at": "2026-05-17",
-      "notes": "- Passive (Mark of the Kindred): Slay champions/epic monsters to stack marks, increasing damage permanently\n- Q (Dance of Arrows): Dash and fire arrows in target direction, applies on-hit\n- W (Wolf's Frenzy): Wolf attacks nearby enemies; Lamb gains attack speed when wolf attacks\n- E (Mounting Dread): Mark enemy, dealing damage based on missing health when marked expires\n- R (Lamb's Respite): Create zone preventing all damage; allies/enemies inside cannot die\n- spike: Level 6 with ultimate; one-item power spike around Kraken Slayer\n- tip: Respect their early jungle pressure; group for objective fights to limit mark stacking"
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- passive (Mark of the Kindred): enemy champion/monster marked for execute bonus damage nearby\n- Q (Dance of Arrows): dash in direction, fires arrows in cone for damage\n- W (Wolf's Frenzy): wolf attacks area; Kindred gains attack speed near wolf\n- E (Mounting Dread): leap onto target, deal damage scaling with missing health percentage\n- R (Lamb's Respite): create zone where no one dies for few seconds\n- spike: level 6 with ultimate; becomes relevant with crit/attack speed items\n- tip: stay grouped and avoid isolated picks; gank their jungle early"
     },
     "soraka": {
       "display_name": "Soraka",
-      "patch": "16.10",
-      "generated_at": "2026-05-17",
-      "notes": "- passive (Starfall): gain movement speed toward distant allies; stacks up to 5\n- Q (Starcall): shoot star in line, heals Soraka if hits enemy\n- W (Astral Infusion): heal ally, costs Soraka's health instead of mana\n- E (Equinox): create zone silencing enemies, rooting them if already silenced\n- R (Wish): heal all allies globally, stronger on lower health targets\n- spike: level 6 with ultimate; becomes exponentially stronger mid-game\n- tip: punish her when she uses W; focus her from range safely"
+      "patch": "16.20",
+      "generated_at": "2026-10-19",
+      "notes": "- Passive (Starfall): gain movement speed when moving toward damaged allies\n- Q (Starcall): launch star that damages and slows enemies hit\n- W (Astral Infusion): heal ally, costs health instead of mana\n- E (Equinox): create zone silencing enemies, healing allies inside it\n- R (Wish): heal all allies globally, scales with missing health\n- spike: level 6 with ultimate for map-wide healing pressure\n- tip: focus Soraka early before she stacks healing; ban engage if behind"
     },
     "riven": {
       "display_name": "Riven",
-      "patch": "16.10",
-      "generated_at": "2026-05-18",
-      "notes": "- Passive (Runic Blade): auto-attacks grant stacks, empowered auto at max stacks\n- Q (Broken Wings): three slashes in a direction, third slash knocks up\n- W (Ki Burst): stuns nearby enemies in small radius around Riven\n- E (Valor): dashes in direction, gains shield for short duration\n- R (Blade of the Exile): empowers abilities, extends Q range, dash attack at end\n- spike: level 6 with ultimate; powerspike continues with Black Cleaver\n- tip: maintain distance, dodge her third Q slash knockup, build armor early"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Runic Acuity): Gain attack speed; stacks on ability cast, max five stacks.\n- Q (Broken Wings): Three slashes in a direction, final slash knocks up enemies.\n- W (Ki Burst): Stun nearby enemies in a small area around Riven.\n- E (Valor): Dash in a direction, gain a shield that blocks incoming damage.\n- R (Blade of the Exile): Gain a large sword, extended range, and execute damage boost.\n- spike: Level 6 with ultimate; Essence Reaver/Black Cleaver completion amplifies burst damage.\n- tip: Stay at maximum range and punish her when abilities are down."
     },
     "wukong": {
       "display_name": "Wukong",
-      "patch": "16.10",
-      "generated_at": "2026-05-19",
-      "notes": "- Passive (Stone Skin): Gains armor and magic resist per nearby enemy, max 5 stacks\n- Q (Crushing Blow): Empowered attack dealing extra damage, reduces E cooldown\n- W (Decoy): Creates clone, becomes untargetable and stealthy briefly\n- E (Nimbus Strike): Dashes to enemy, clones attack nearby foes\n- R (Cyclone): Spins rapidly, knocking up enemies, extends with movement\n- spike: Level 6 with ultimate; strong at two items\n- tip: Avoid clumping; kite away from spin radius; buy armor early"
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Stone Skin): Gain armor and magic resist per nearby enemy, max 5 stacks\n- Q (Warrior Trickster): Empowered attack; second cast clones position, third detonates clone\n- W (Decoy): Create decoy, turn invisible, deceive enemies with clone positioning\n- E (Dashing Strike): Dash to enemy, gaining attack speed; resets on takedowns\n- R (Primal Vigor): Spin in place, knock up enemies, gain movement speed\n- spike: Level 6 with ultimate; one-shot potential mid-game with Duskblade\n- tip: Stay spread out to minimize Primal Vigor knockup value and damage"
     },
     "ambessa": {
       "display_name": "Ambessa",
@@ -783,9 +783,9 @@
     },
     "nocturne": {
       "display_name": "Nocturne",
-      "patch": "16.17",
-      "generated_at": "2026-09-09",
-      "notes": "- Passive (Umbra Blades): Auto-attacks refund cooldowns, gain attack speed, cleave damage\n- Q (Duskbringer): Dash forward, damage enemies, leave trail that heals Nocturne\n- W (Shroud of Darkness): Shield that blocks next enemy ability, gain attack speed\n- E (Unspeakable Horror): Fear nearby enemy, damage after delay if tethered\n- R (Paranoia): Nocturne becomes untargetable, dashes to target, blinds all enemies\n- spike: Level 6 when ultimate available for guaranteed gank pressure\n- tip: Ward aggressively and group with teammates when Nocturne ultimate activates"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Umbra Blades): Attacks restore health; cleave damage to nearby enemies\n- Q (Duskbringer): Dash forward dealing damage, leaves darkness trail for MS boost\n- W (Shroud of Darkness): Shield that blocks next enemy ability, grants MS\n- E (Unspeakable Horror): Fear nearby enemy after channeling 2 seconds or on hit\n- R (Paranoia): Ultimate darkness blinds all enemies; dash to target champion anywhere\n- spike: Level 6 ultimate enables map-wide ganks; Duskblade adds burst threat\n- tip: Group with teammates and stay grouped to reduce ult isolation risk"
     },
     "sona": {
       "display_name": "Sona",
@@ -807,9 +807,9 @@
     },
     "quinn": {
       "display_name": "Quinn",
-      "patch": "16.11",
-      "generated_at": "2026-05-31",
-      "notes": "- Passive (Harrier): Valor marks enemies; Quinn gains attack speed on marked targets.\n- Q (Blinding Assault): Projectile that blinds and damages first enemy hit.\n- W (Heightened Senses): Valor scouts area; Quinn gains attack speed if enemy detected.\n- E (Vault): Dash to enemy, knock back, and gain movement speed away.\n- R (Behind Enemy Lines): Transform into Valor for flight, enhanced stats, and mobility.\n- spike: Level 6 with ultimate; gains roaming and dueling power significantly.\n- tip: Stay grouped and respect her roam range after level six."
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Harrier): Valor marks enemies; Quinn's attacks on marked enemies deal bonus damage\n- Q (Blinding Assault): Shoot projectile that blinds and damages first enemy hit\n- W (Valor's Bond): Valor scouts ahead, revealing enemies in large area periodically\n- E (Vault): Dash to enemy, knock them back, gain movement speed after\n- R (Skirmisher's Sabre): Transform into Valor, gain flight, increased range, and movement speed\n- spike: Level 6 with ultimate; transforms into ranged duelist with mobility\n- tip: Stay grouped and avoid isolated fights; kite her in teamfights"
     },
     "renekton": {
       "display_name": "Renekton",
@@ -867,9 +867,9 @@
     },
     "senna": {
       "display_name": "Senna",
-      "patch": "16.11",
-      "generated_at": "2026-06-06",
-      "notes": "- Passive (Absolution): Attacks grant stacks; at 100 stacks, next attack heals allies\n- Q (Piercing Darkness): Shoots a line that damages and heals allies hit\n- W (Last Embrace): Roots target after delay; allies near roots gain movement speed\n- E (Curse of Century): Dash while gaining a shield and attacking speed boost\n- R (Dawning Shadow): Global beam damages enemies, heals allies in large area\n- spike: Level 6 ultimate enables global pressure and teamfight healing\n- tip: Stay grouped and behind minions to block root attempts"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Absolution): Gain AD and range from enemy kills, ally assists, enemy deaths\n- Q (Piercing Darkness): Shoot line dealing damage, heals allies hit, extends with each champion\n- W (Last Respite): Fire slow projectile, blocks damage for allies, reveals enemies in fog\n- E (Curse of Century): Dash away leaving trail, grants move speed and darkness to allies\n- R (Dawning Shadow): Global ultimate line, damage and shield scales with bonus AD and range\n- spike: Level 6 with ultimate; critical when she reaches 2+ items\n- tip: Stay spread and avoid grouping; build Adaptive Helm against her poke damage"
     },
     "udyr": {
       "display_name": "Udyr",
@@ -879,21 +879,21 @@
     },
     "rakan": {
       "display_name": "Rakan",
-      "patch": "16.11",
-      "generated_at": "2026-06-07",
-      "notes": "- Passive (Lover's Leap): Dash to nearby Xayah; she dashes toward you for free\n- Q (Gleam): Heal self and nearby allies in a line\n- W (Grand Entrance): Leap forward and knock up enemies hit\n- E (Battle Dance): Dash to ally; shield them both briefly\n- R (The Quickness): Gain speed and charm enemies hit by abilities\n- spike: Level 6 ultimate enables aggressive engage; support items early\n- tip: Position away from Xayah to deny free positioning advantage"
+      "patch": "16.20",
+      "generated_at": "2026-10-15",
+      "notes": "- Passive (Lover's Leap): gaining MS near Xayah resets dash cooldown\n- Q (Gleam): heals nearby allies in target direction cone\n- W (Grand Entrance): dash forward, knock up enemies on arrival\n- E (Battle Dance): short dash to ally, shield both players\n- R (The Quickness): gain MS and attack speed, charm enemies hit\n- spike: level 6 ultimate enables aggressive engage with charm\n- tip: position away from Xayah to deny dash resets"
     },
     "shaco": {
       "display_name": "Shaco",
-      "patch": "16.17",
-      "generated_at": "2026-09-08",
-      "notes": "- Passive (Ambush): Invisibility after not moving; first attack deals bonus damage\n- Q (Deceive): Blink to target location, become invisible briefly\n- W (Jack in the Box): Place box that fears and shoots enemies nearby\n- E (Two-Shiv Poison): Throw poisoned dagger; slows and deals damage on hit\n- R (Hallucinate): Create clone that explodes; grants brief invisibility to Shaco\n- spike: Level 6 with ultimate; early game jungle ganks dangerous\n- tip: Ward jungle entrances; don't face-check bushes; build control wards"
+      "patch": "16.20",
+      "generated_at": "2026-10-17",
+      "notes": "- Passive (Trait): Shaco deals bonus damage from behind; stacks with crits\n- Q (Deceive): Blink to target location, turn invisible briefly after arrival\n- W (Jack in the Box): Place box that fears enemies, shoots them when triggered\n- E (Two-Shiv Poison): Throw poisoned dagger, slows and poisons target on hit\n- R (Hallucinate): Create clone that explodes; original and clone both deal damage\n- spike: Level 6 with ultimate; mid-game with Duskblade and Eclipse\n- tip: Stay grouped and ward jungle entrances to avoid gank surprise"
     },
     "rengar": {
       "display_name": "Rengar",
-      "patch": "16.11",
-      "generated_at": "2026-06-07",
-      "notes": "- Passive (Ferocity): gain stacks on abilities, enhanced ability at 4 stacks\n- Q (Savagery): melee slash, refund cooldown if it kills\n- W (Battle Roar): damage reduction, cleanse crowd control, heal from enemies hit\n- E (Bola Strike): ranged projectile that slows and reveals enemies hit\n- R (Thrill of the Hunt): leap from brush invisibly, gain movement speed\n- spike: level 6 with ultimate, one-shot potential mid-game\n- tip: stay grouped and maintain vision in river/jungle brushes"
+      "patch": "16.20",
+      "generated_at": "2026-10-11",
+      "notes": "- Passive (Ferocity): Gain stacks on abilities; at 4 stacks, next ability empowers and resets\n- Q (Savagery): Melee slash; empowered: AOE damage and attack speed boost\n- W (Battle Roar): Heal and damage nearby enemies; empowered: larger AOE and shield\n- E (Bola Strike): Ranged projectile that slows; empowered: stun instead of slow\n- R (Thrill of the Hunt): Leap from brush to target; gain movement speed and vision\n- spike: Level 6 ultimate and first Prowler's Claw item completion\n- tip: Stay grouped and maintain vision control to deny brush access"
     },
     "anivia": {
       "display_name": "Anivia",
@@ -927,9 +927,9 @@
     },
     "akshan": {
       "display_name": "Akshan",
-      "patch": "16.12",
-      "generated_at": "2026-06-14",
-      "notes": "- Passive (Duty): Kill scoundrel who killed ally, gain gold and revive them\n- Q (Avengerum): Fire projectile, bounce between enemies, returns if hits none\n- W (Going Rogue): Swing grappling hook, gain shield and move speed\n- E (Comeuppance): Dash backward, gain shield, explode for damage when shield breaks\n- R (Whisper): Fire seeking bullets at scoundrels, apply on-hit effects\n- Spike: Level 6 with ultimate; mid-game with Manamune and Serrated Dirk\n- Tip: Respect grappling hook range; position near walls to limit mobility options"
+      "patch": "16.19",
+      "generated_at": "2026-10-03",
+      "notes": "- Passive (Dependency): Killing enemies or assists restores health and mana; resets on takedowns\n- Q (Avengerang): Boomerang projectile that damages enemies, returns to Akshan\n- W (Going Rogue): Reveals enemy position; gains movement speed when near scoundrels\n- E (Grappling Hook): Swings on terrain to reposition; can chain multiple swings\n- R (Comeuppance): Long-range ultimate that fires bullets; applies on-hit effects to enemies\n- Spike: Power spikes at level 6 ultimate and Trinity Force completion\n- Tip: Camp bush near terrain to deny his grappling hook escape routes"
     },
     "fiddlesticks": {
       "display_name": "Fiddlesticks",
@@ -945,9 +945,9 @@
     },
     "hecarim": {
       "display_name": "Hecarim",
-      "patch": "16.12",
-      "generated_at": "2026-06-16",
-      "notes": "- Passive (Warpath): gain AD from movement speed percentage\n- Q (Rampage): cleave damage in cone, refunds cooldown on hit\n- W (Spirit of Dread): heal from damage dealt in area\n- E (Devastating Charge): dash forward, knock back enemies, gain armor\n- R (Onslaught of Shadows): leap across map, fear enemies hit\n- spike: level 6 with ultimate, then trinity force completion\n- tip: group with teammates and kite backward from his engages"
+      "patch": "16.20",
+      "generated_at": "2026-10-14",
+      "notes": "- Passive (Warpath): bonus AD scaling with movement speed\n- Q (Rampage): melee slash dealing damage in cone, stacks for damage\n- W (Spirit of Dread): heals from nearby enemy damage, drains mana\n- E (Devastating Charge): charges forward gaining speed, knocks back enemies hit\n- R (Onslaught of Shadows): leaps forward spawning phantoms that slow enemies\n- spike: level 6 with ultimate; strong with Trinity Force\n- tip: stay grouped and positioned away from jungle entrances"
     },
     "yorick": {
       "display_name": "Yorick",
@@ -1002,6 +1002,24 @@
       "patch": "16.18",
       "generated_at": "2026-09-30",
       "notes": "- Passive (Crystal Spire): Gain attack speed near spires; stacks infinitely\n- Q (Spiked Whip): Melee attack in cone, applies on-hit effects\n- W (Crystalline Exoskeleton): Shield granted; movement speed increased while shield holds\n- E (Fracture): Skillshot stun, slows enemies hit initially\n- R (Impale): Suppress enemy, drag them toward you and allies\n- Spike: Level 6 with ultimate; mid-game with tank items\n- Tip: Stay away from spires; group to counter ultimate suppression"
+    },
+    "azir": {
+      "display_name": "Azir",
+      "patch": "16.20",
+      "generated_at": "2026-10-12",
+      "notes": "- Passive (Disc of the Sun): gains attack speed per nearby enemy champion, max 5 stacks\n- Q (Conquering Sands): summons sand soldier that attacks in target direction, applies on-hit\n- W (Risen Allies): passive attack speed; active summons soldier at target location near Azir\n- E (Traverse): Azir dashes to soldier, knocking up enemies along the path traveled\n- R (Emperor's Divide): creates wall of soldiers pushing enemies away, blocking projectiles\n- spike: level 6 with ultimate; becomes stronger with attack speed and ability haste\n- tip: stay away from his soldiers; bait E before committing to all-in trades"
+    },
+    "samira": {
+      "display_name": "Samira",
+      "patch": "16.20",
+      "generated_at": "2026-10-15",
+      "notes": "- Passive (Daredevil Impulse): Gain style by hitting attacks/abilities; at S-rank, ult available\n- Q (Flair): Shoot in attack direction; scales with crit chance for extra hits\n- W (Gather Storm): Block projectiles in target direction; dash forward when fully charged\n- E (Swing): Dash toward enemy; applies on-hit effects; resets on takedown\n- R (Inferno Trigger): Fire in all directions at S-rank; scales with crit chance\n- spike: Level 6 with ult; powerspikes harder with crit items like Galeforce\n- tip: Avoid clumping; respect her dash range and ult damage in teamfights"
+    },
+    "kalista": {
+      "display_name": "Kalista",
+      "patch": "16.20",
+      "generated_at": "2026-10-20",
+      "notes": "- Passive (Martial Poise): Kalista dashes on each attack, can't be slowed\n- Q (Pierce): Fires spear in line, pierces enemies, resets on kill\n- W (Sentinel): Summons ghost scout, reveals area, explodes if enemy found\n- E (Rend): Passive spears stack on enemies, active detonates for damage\n- R (Fate's Call): Pulls bound ally to her, they gain temporary invulnerability\n- spike: Level 6 with support coordination, critical items at three items\n- tip: Space away from minions to avoid Q pierce chains"
     }
   }
 }
