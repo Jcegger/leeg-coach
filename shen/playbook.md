@@ -13,7 +13,9 @@ Strong on both sides. Prefer the side where your AD/fed carry is alone — your 
 
 Shen is a short-trade champion. The combo is E → spirit blade Q for empowered AAs + magic damage. Never extended auto trade without W up — save W to block their key ability (Jax Counter Strike, Fiora riposte, Darius bleed stacks). Grasp proc on cooldown when safe to walk up.
 
-Farm to Titanic Hydra first. You don't need to win lane — you need to not lose it and be full HP when your R is up.
+Engage with E while Ki Barrier is up, Q behind the target, then W — the shield procs Shield Bash and soaks the return damage. Doran's Shield + Second Wind lets you trade as long as you want from level 1; Shen runs on energy, so poke freely.
+
+Priority is farm and not dying: 0/0 with full CS beats trading kills. Back at 1050g for Bami's Cinder + Refillable Potion. The build peaks mid-late — you don't need to win lane, you need to not lose it and be full HP when your R is up.
 
 ## Mid game
 

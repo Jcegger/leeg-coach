@@ -1,94 +1,125 @@
 # Shen — Build
 
-Source: xPetu's Challenger Shen Guide (Mobafire, patch 25.23) + skill-capped patch 26.10 meta.
+Source: BaLoRi's "My IMMORTAL Shen Build" (Mobafire, updated 2026-10-07). Lane build; same items in jungle (Mosstomper Seedling start).
 
 ## Summoner spells
 
 - **Standard:** Flash + Ignite
-- **Vs ranged bullies:** Flash + Teleport (Teemo, Quinn, Neeko, Vayne top — you can't reliably kill them, surviving lane matters more than kill pressure)
 
 ## Runes
 
-### Standard (default — melee matchups)
-- **Resolve (primary):** Grasp of the Undying · Shield Bash · Second Wind · Overgrowth
-- **Inspiration (secondary):** Magical Footwear · Approach Velocity
-- **Shards:** +10% Attack Speed · +2.5% MS · +10–180 HP
+### Standard (Grasp + Precision)
+- **Resolve (primary):** Grasp of the Undying · Shield Bash · Second Wind · Revitalize
+- **Precision (secondary):** Triumph · Last Stand
+- **Shards:** +10% Attack Speed · +10–180 HP · +10–180 HP
 
-### Aftershock (ranged lane bullies)
-- **Resolve (primary):** Aftershock · Shield Bash · Second Wind · Overgrowth
-- **Inspiration (secondary):** Magical Footwear · Approach Velocity
-- **Shards:** +10% AS · +2.5% MS · +HP
+### Grasp + Domination
+- **Resolve (primary):** Grasp of the Undying · Shield Bash · Second Wind · Revitalize
+- **Domination (secondary):** Sudden Impact · Ultimate Hunter
+- **Shards:** +10% AS · +HP · +HP
 
-**Notes:** Approach Velocity is the best Inspiration secondary — lets you close range post-E without needing the E dash itself. Conditioning over Second Wind if you don't need early sustain (safe matchup). Cosmic Insight is an option over Approach Velocity if you want CDR on summoners/items.
+### Aftershock
+- **Resolve (primary):** Aftershock · Shield Bash · Conditioning · Revitalize
+- **Precision (secondary):** Triumph · Last Stand
+- **Shards:** +10% AS · +HP · +HP
+
+**Notes:** Revitalize + Spirit Visage is the core of the build — amps Second Wind, Grasp heal, Ki Barrier and R shields. Legend: Alacrity over Last Stand when the enemy has little CC. Domination alternates: Cheap Shot over Sudden Impact, Taste of Blood for more sustain.
 
 ## Starting items
 
-Doran's Shield · Health Potion · Stealth Ward
+Doran's Shield · Health Potion
+
+First back (1050–1350g): Bami's Cinder + Refillable Potion (+ Cloth Armor if gold allows). Then Bramble Vest before finishing Sunfire Aegis.
 
 ## Build paths
 
 ### Current build (go-to)
-1. Titanic Hydra
-2. Plated Steelcaps
-3. Thornmail
+1. Sunfire Aegis
+2. Mercury's Treads
+3. Unending Despair
 4. Spirit Visage
-5. Unending Despair
-6. Protoplasm Harness
+5. Riftmaker
+6. Jak'Sho, The Protean
+
+Guide's recommended set (Version 2). Keep Bramble Vest unfinished in inventory through the early items. Spirit Visage is never skipped.
 
 When the enemy comp matches a specific path below, use that as the base — it takes priority over the go-to. Situational swaps still apply on top.
 
 ### Full AP enemy team
-1. Titanic Hydra
+1. Hollow Radiance
 2. Mercury's Treads
-3. Spirit Visage
-4. Force of Nature
-5. Unending Despair
-6. Protoplasm Harness
+3. Kaenic Rookern
+4. Spirit Visage
+5. Jak'Sho, The Protean
+6. Force of Nature
 
 ### Full AD enemy team
-1. Titanic Hydra
+1. Sunfire Aegis
 2. Plated Steelcaps
 3. Thornmail
-4. Randuin's Omen
-5. Dead Man's Plate
+4. Unending Despair
+5. Spirit Visage
 6. Jak'Sho, The Protean
 
-### Hybrid damage (Dusk and Dawn path)
-1. Titanic Hydra
-2. Plated Steelcaps
-3. Dusk and Dawn
-4. Bandlepipes
-5. Unending Despair
-6. Spirit Visage
+Derived from the guide's item text (Steelcaps vs full AD with little CC, finish Bramble into Thornmail when magic damage is low); not one of its listed sets.
 
-For split push or when you need kill threat in side lane — Dusk and Dawn synergizes with Q so you only need two autos after Q lands to proc it. Only use this path when ahead and confident in the side lane.
+### Mixed damage (Kaenic + Thornmail)
+1. Sunfire Aegis
+2. Mercury's Treads
+3. Kaenic Rookern
+4. Thornmail
+5. Spirit Visage
+6. Jak'Sho, The Protean
+
+Guide Version 3. Early MR from Kaenic covers AP burst while Bramble/Thornmail handles auto-attackers and healing.
+
+### Warmog's (Full Immortal)
+1. Sunfire Aegis
+2. Mercury's Treads
+3. Kaenic Rookern
+4. Unending Despair
+5. Spirit Visage
+6. Warmog's Armor
+
+Guide's original "Full Immortal" set. Warmog's needs room to disengage and regen — skip it against lockdown or % max-HP damage.
+
+## Support (not auto-picked)
+
+Start World Atlas · Health Potion · Stealth Ward.
+
+- **Immortal support:** Sunfire Aegis · Thornmail · Jak'Sho, The Protean · Mercury's Treads · Spirit Visage · Celestial Opposition
+- **CC support:** Iceborn Gauntlet · Thornmail · Redemption · Mercury's Treads · Warmog's Armor · Celestial Opposition
 
 ## Situational item swaps
 
-Grounded in the go-to path (slot 6 = Protoplasm Harness).
+Grounded in the go-to path (slot 6 = Jak'Sho, The Protean).
 
-- Mercury's Treads over Plated Steelcaps — heavy AP or CC-heavy comp
-- Force of Nature over Unending Despair — 3+ AP enemies; stack MR fast
-- Randuin's Omen over Unending Despair — fed crit ADC (2+ crit items built) who is melee or diving (Tryndamere, Yasuo, Yone, Jinx chasing); NOT for backline Caitlyn/Jhin/Ashe who stay far — Protoplasm sustain beats Randuin's aura when they never walk into melee range
-- Dead Man's Plate over Protoplasm Harness — mobile AD comp, need extra chase
-- Jak'Sho, The Protean over Protoplasm Harness — balanced AP/AD sustained teamfights; stacks scale with long fights
+- Hollow Radiance over Sunfire Aegis — AP lane opponent; build Bami's Cinder into Hollow Radiance instead
+- Plated Steelcaps over Mercury's Treads — full AD team with little CC (Tryndamere, Yasuo, Master Yi)
+- Kaenic Rookern over Unending Despair — heavy magic damage; buy it right after the first item
+- Thornmail over Riftmaker — auto-attack reliant carries or healers; finish the Bramble Vest you already hold
+- Warmog's Armor over Riftmaker — few hard-CC enemies and no % max-HP damage; lets you reset fights at full HP
+- Force of Nature over Jak'Sho, The Protean — 3+ AP enemies
 
 ## Boots options
 
-- Plated Steelcaps (default)
-- Mercury's Treads (heavy AP or CC-heavy)
+- Mercury's Treads (default — tenacity + MR to balance a mostly-armor build)
+- Plated Steelcaps (full AD, little CC)
 
 ## Last items / situational
 
-- Kaenic Rookern
-- Gargoyle Stoneplate
-- Frozen Heart
+- Warmog's Armor
+- Riftmaker
+- Thornmail
+- Jak'Sho, The Protean
+- Force of Nature
+- Redemption
 - Abyssal Mask
-- Hollow Radiance
+- Titanic Hydra — only as 4th item or later, never early
 
 ## Do NOT buy
 
-- Heartsteel — zero waveclear; can't push the wave and R a teammate at the same time, which destroys your global ult value. Titanic Hydra gives you the HP synergy without this tradeoff.
+- Tiamat / early Titanic Hydra — poor gold efficiency and Shen doesn't scale with AD. Sunfire / Hollow Radiance burn plus Q already clear waves.
 
 ## Skill order
 
