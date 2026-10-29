@@ -124,16 +124,16 @@ You: Dr. Mundo (top)
 <matchup notes body>
 ```
 
-### Tactical assistant components
+### In-game screen
 
-Layered top → bottom in the in-game view, each adds different signal:
+Kept short on purpose — build and objectives only:
 
-1. **Coach (LLM)** — 1–3 short imperative bullets from Claude Haiku 4.5, fired on significant events (opening, drake/baron taken, your death, laner death, drake spawn windows, kills involving you, ace, periodic). Optional; off if `LEEG_ANTHROPIC_API_KEY` is unset. See "LLM coach setup" below.
-2. **DO panel** — deterministic rule-based advice (red = immediate, yellow = action window, white = macro). Triggers: you/laner dead → push or track minimap, drake/baron <60s, CS/item gap with laner, fed enemies (≥5 kill lead).
-3. **Build/comp line** — same damage-profile build picker as before. Updates as enemies buy items.
-4. **Objectives line** — drake / baron timers (approximate; based on event-driven last-kill + 5-min/6-min respawn). Also shows count of drakes already taken.
-5. **Recent events feed** — last 5 events from the API: kills, drakes, towers, inhibs, first blood, multikills, aces. Each line is `[time] EVENT_TYPE actor → target`.
-6. **Enemies** — extras line now includes KDA, CS, level, item count, and respawn timer if dead. Same threat-tier sort.
+1. **Coach** — the latest call's top bullet, one line (the rest are spoken via TTS).
+2. **Build** — comp label + rule-based build pick, the coach's live build (✓ on owned items), and a next-buy hint (highlighted when it's time to BACK).
+3. **Objectives** — drake / baron timers (approximate; event-driven last-kill + respawn), highlighted inside 60s. Also drakes/barons/grubs taken and team item-gold lead (`gold +1.2k`).
+4. **Enemies dead** — only when someone's down: `Lee Sin 12s, Darius 24s`, soonest respawn first.
+
+Matchup notes, events, tower state and comp signals are still computed and sent to the coach; they just aren't printed. Only the coach's first bullet is shown. Browse matchup notes with `--show-matchups <champ>`.
 
 ### LLM coach setup
 
@@ -192,7 +192,7 @@ Per game (~25–30 minutes, 10–15 coach calls):
 - `LEEG_COACH_MODEL` — default `claude-haiku-4-5`. Try `claude-sonnet-4-6` for sharper analysis at ~3x cost.
 - `LEEG_COACH_COOLDOWN` — default 25 seconds between calls. Lower = more reactive but more cost.
 
-If `LEEG_ANTHROPIC_API_KEY` is unset or `pip install anthropic` hasn't been run, the coach disables silently — the rest of the assistant (DO panel, timers, events, enemy details) still works.
+If `LEEG_ANTHROPIC_API_KEY` is unset or `pip install anthropic` hasn't been run, the coach disables silently — the build line, buy hint and timers still work.
 
 ### Planned: text-to-speech for coach output
 

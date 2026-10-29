@@ -6,10 +6,7 @@ The champion notes in this repo (`mundo/`, `sivir/`) are my own, but the tool wo
 
 ## Features
 
-- **Live enemy panel** — all 5 enemies sorted by threat tier with KDA, CS, gold, items, level. Per enemy: stacked matchup notes (your hand-written + auto-generated + kit fallback) so you can scan during dead time, fountain trips, or slow phases.
-- **Objective timers** — drake and baron spawn countdowns, with lane-open callouts when towers fall
-- **Rule-based DO panel** — deterministic advice: push windows, objective windows, fed-enemy alerts, next buy hint, dead-laner callouts
-- **Event feed** — last 8 events (kills, towers, objectives) with timestamps
+- **Minimal in-game screen** — the coach's top tip, your build (rule-based pick, the coach's live build, next-buy hint), drake/baron timers with team item-gold lead, and who's dead on the enemy team. Matchup notes, events and comp signals are still gathered, but only the coach reads them.
 - **AI coach** (optional) — fires on significant events with 1–2 tactical bullets grounded in structured comp signals (threat tags, item-gold lead, phase, power spikes), per-pair matchup data, and your champion's playbook win-conditions / side-selection framing
 - **Auto-generated matchup notes** — Haiku-generated 4-6 sentence notes per (your champ, enemy champ) pair, cached to disk, refreshed when a patch is 3+ versions stale. Browse with `--show-matchups <champ>`.
 - **Voice output** (optional) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
@@ -33,7 +30,7 @@ pip install anthropic
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Cost: ~$0.05–$0.10/game with Claude Sonnet, thanks to prompt caching. The rule-based DO panel still works without a key.
+Cost: ~$0.05–$0.10/game with Claude Sonnet, thanks to prompt caching. The build line, buy hint and timers still work without a key.
 
 ### Voice output setup (optional)
 
@@ -179,8 +176,7 @@ leeg-coach/
 ## Status
 
 ### Working
-- Live enemy panel with stacked matchup notes per enemy (`[yours]` / `[auto]` / `[kit]`)
-- Rule-based DO panel: push windows, drake/baron timers, buy hint, fed-enemy alerts, dead-laner callouts
+- Minimal in-game screen: coach tip, build + next-buy hint, drake/baron timers, gold lead, enemies dead
 - AI coach: Claude Sonnet 4.6, prompt caching, build commitment, 5-call history, 11+ event triggers
 - Comp-aware threat tags (HEALING / HARD-CC / ATTACK-SPEED / TANK / ASSASSIN / CRIT) with stacking flags
 - Macro signals: game phase, team item-gold lead, power-spike item annotation

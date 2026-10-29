@@ -2571,77 +2571,6 @@ def _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=Non
     return None
 
 
-def tactical_advice(data, me, enemies, ev, timers, build_pick=None, item_index=None, committed_items=None):
-    """Return list of (priority, message). 0=immediate threat, 1=push, 2=objective, 3=macro."""
-    advice = []
-    if not me:
-        return advice
-    game_time = int((data.get('gameData') or {}).get('gameTime', 0))
-    my_pos = (me.get('position') or '').upper()
-    my_scores = me.get('scores') or {}
-    my_items = [i for i in (me.get('items') or []) if (i or {}).get('itemID')]
-
-    laner = None
-    if my_pos:
-        for e in enemies:
-            if (e.get('position') or '').upper() == my_pos:
-                laner = e
-                break
-
-    if me.get('isDead'):
-        rt = int(me.get('respawnTimer') or 0)
-        advice.append((0, f'YOU DEAD ({rt}s) — track minimap, ping objectives'))
-
-    if laner and laner.get('isDead'):
-        rt = int(laner.get('respawnTimer') or 0)
-        advice.append((1, f'PUSH WAVE — {laner.get("championName")} dead ({rt}s)'))
-
-    drake = timers.get('drake')
-    if drake is not None:
-        if 0 < drake <= 60:
-            advice.append((2, f'Drake spawns in {fmt_mmss(drake)} — reset & rotate'))
-        elif drake == 0 and game_time >= 5*60:
-            advice.append((2, 'Drake UP — group / contest'))
-
-    baron = timers.get('baron')
-    if baron is not None and game_time >= 23*60:
-        if 0 < baron <= 60:
-            advice.append((2, f'Baron spawns in {fmt_mmss(baron)} — get vision'))
-        elif baron == 0:
-            advice.append((2, 'Baron UP — vision/contest'))
-
-    if laner and game_time > 8*60:
-        my_cs = my_scores.get('creepScore', 0)
-        their_cs = (laner.get('scores') or {}).get('creepScore', 0)
-        diff = my_cs - their_cs
-        if diff <= -25:
-            advice.append((3, f'CS down {abs(diff)} — focus farm, avoid trades'))
-        elif diff >= 25:
-            advice.append((3, f'CS up {diff} — keep tempo, look for pick'))
-
-    if laner:
-        their_items = [i for i in (laner.get('items') or []) if (i or {}).get('itemID')]
-        gap = len(their_items) - len(my_items)
-        if gap >= 2:
-            advice.append((3, f'Laner ahead {gap} items — play very safe, ward deep'))
-
-    for e in enemies:
-        sc = e.get('scores') or {}
-        k, d, a = sc.get('kills', 0), sc.get('deaths', 0), sc.get('assists', 0)
-        if k - d >= 5 and k >= 5:
-            advice.append((1, f'{e.get("championName")} fed ({k}/{d}/{a}) — peel, no 1v1'))
-
-    if item_index and (build_pick or committed_items):
-        current_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
-        hint = _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=committed_items)
-        if hint:
-            prio = 1 if hint.startswith('BACK') else 3
-            advice.append((prio, hint))
-
-    advice.sort(key=lambda x: x[0])
-    return advice[:5]
-
-
 # ─── LLM coach (Claude) ─────────────────────────────────────────────────────
 
 COACH_SCHEMA = {
@@ -3292,31 +3221,6 @@ class Coach:
         finally:
             with self.lock:
                 self.in_flight = False
-
-    def display_block(self):
-        with self.lock:
-            if self.error_msg and self.client is None:
-                return f'{TIER_COLOR["Major"]}coach disabled: {self.error_msg}{RESET}\n\n'
-            if not self.last_bullets and not self.in_flight and not self.last_response:
-                return ''
-            out = []
-            label = self.last_trigger or '...'
-            if self.in_flight:
-                out.append(f'{DIM}coach ({label}, thinking…){RESET}\n')
-            else:
-                age = int(time.time() - self.last_response_at)
-                out.append(f'{DIM}coach ({label}, {age}s ago):{RESET}\n')
-            if self.last_bullets:
-                color = TIER_COLOR['Even']
-                for line in self.last_bullets:
-                    out.append(f'{color}▶ {line}{RESET}\n')
-            elif self.last_response and not self.last_bullets:
-                # JSON parse failed — surface the raw response as a fallback
-                out.append(f'{DIM}{self.last_response}{RESET}\n')
-            if self.tts and _tts_last_error:
-                out.append(f'{DIM}tts error: {_tts_last_error}{RESET}\n')
-            out.append('\n')
-            return ''.join(out)
 
     def live_build_line(self, my_items):
         """Return a 'build (live):' line if the coach diverged; else empty string."""
@@ -4714,7 +4618,6 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
         with coach.lock:
             if coach.committed_build:
                 committed_items = list(coach.committed_build.get('items') or [])
-    advice = tactical_advice(data, me, enemies, ev, timers, build_pick, item_index, committed_items=committed_items)
 
     if champ_db is not None:
         for e in enemies:
@@ -4807,107 +4710,56 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
     elif your_champ and not champ_folder:
         out.append(f'{TIER_COLOR["Major"]}NOTE: no matchup notes for {your_champ} (add leeg/<champ>/matchups.md){RESET}\n\n')
 
+    # Screen shows build + objectives only. Matchup notes, events and comp
+    # signals still feed the coach via build_coach_message.
     if coach is not None:
-        out.append(coach.display_block())
-        my_items = (me.get('items') if me else None) or []
-        coach_build_line = coach.live_build_line(my_items)
+        with coach.lock:
+            if coach.error_msg and coach.client is None:
+                out.append(f'{TIER_COLOR["Major"]}coach disabled: {coach.error_msg}{RESET}\n\n')
+            elif coach.last_bullets:
+                out.append(f'{DIM}coach:{RESET} {coach.last_bullets[0]}\n\n')
+        coach_build_line = coach.live_build_line((me.get('items') if me else None) or [])
     else:
         coach_build_line = ''
 
-    if advice:
-        for prio, msg in advice:
-            color = TIER_COLOR['Extreme'] if prio == 0 else TIER_COLOR['Major'] if prio == 1 else TIER_COLOR['Even']
-            out.append(f'{color}▶ {msg}{RESET}\n')
-        out.append('\n')
-
     out.append(format_build_line(profile, build_pick, comp_breakdown(enemies, item_index)))
-
     if coach_build_line:
         out.append(coach_build_line)
 
+    if me and item_index and (build_pick or committed_items):
+        current_gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
+        hint = _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=committed_items)
+        if hint:
+            color = TIER_COLOR['Major'] if hint.startswith('BACK') else TIER_COLOR['Even']
+            out.append(f'{color}▶ {hint}{RESET}\n\n')
+
     if not is_aram:
-        drake_t, baron_t = timers.get('drake'), timers.get('baron')
-        drake_str = f'{TIER_COLOR["Major"]}UP{RESET}' if drake_t == 0 else fmt_mmss(drake_t)
-        baron_str = f'{TIER_COLOR["Major"]}UP{RESET}' if baron_t == 0 else fmt_mmss(baron_t)
-        obj_line = f'{DIM}objectives:{RESET} drake {drake_str}  ·  baron {baron_str}'
+        def _obj(t):
+            if t == 0:
+                return f'{TIER_COLOR["Major"]}UP{RESET}'
+            if t is not None and t <= 60:
+                return f'{TIER_COLOR["Major"]}{fmt_mmss(t)}{RESET}'
+            return fmt_mmss(t)
+        obj_line = f'{DIM}objectives:{RESET} drake {_obj(timers.get("drake"))}  ·  baron {_obj(timers.get("baron"))}'
         if ev['drakes']:
             obj_line += f'  ·  drakes: {len(ev["drakes"])}'
         if ev['barons']:
             obj_line += f'  ·  baron taken x{len(ev["barons"])}'
         if ev['grubs']:
             obj_line += f'  ·  grubs: {ev["grubs"]}'
-        out.append(obj_line + '\n\n')
+        your_gold, enemy_gold = compute_gold_lead(me.get('team') if me else None, data.get('allPlayers') or [], item_index)
+        if your_gold or enemy_gold:
+            lead = your_gold - enemy_gold
+            lead_color = TIER_COLOR['Even'] if lead >= 0 else TIER_COLOR['Major']
+            obj_line += f'  ·  gold {lead_color}{lead / 1000:+.1f}k{RESET}'
+        out.append(obj_line + '\n')
 
-    formatted = []
-    your_team = me.get('team') if me else None
-    for e in reversed(ev['raw']):
-        s = format_event(e, your_team=your_team)
-        if s:
-            formatted.append(s)
-        if len(formatted) >= 5:
-            break
-    if formatted:
-        out.append(f'{DIM}recent:{RESET}\n')
-        for s in formatted:
-            out.append(f'  {DIM}{s}{RESET}\n')
-        out.append('\n')
-
-    if not enemies:
-        out.append('No enemy data yet.\n')
-        return ''.join(out)
-
-    def sort_key(p):
-        entry = matchups.get(normalize(p.get('championName', '')))
-        return TIER_ORDER.get(entry[2] if entry else 'Tiny', 99)
-
-    my_pos = (me or {}).get('position') or ''
-    laner_norm = None
-    if my_pos:
-        for _p in enemies:
-            if (_p.get('position') or '') == my_pos:
-                laner_norm = normalize(_p.get('championName') or '')
-                break
-
-    for p in sorted(enemies, key=sort_key):
-        champ = p.get('championName', '?')
-        pos = p.get('position', '') or ''
-        level = p.get('level', '?')
-        items = [i for i in (p.get('items') or []) if (i or {}).get('itemID')]
-        scores = p.get('scores') or {}
-        kda = f'{scores.get("kills",0)}/{scores.get("deaths",0)}/{scores.get("assists",0)}'
-        cs = scores.get('creepScore', 0)
-        extras = f'{kda} · {cs}cs · lvl {level} · {len(items)} items'
-        if p.get('isDead'):
-            rt = int(p.get('respawnTimer') or 0)
-            extras += f' · DEAD {rt}s'
-        entry = matchups.get(normalize(champ))
-        disp = entry[0] if entry else champ
-        tier = entry[2] if entry else None
-        personal = entry[1].strip() if entry else ''
-        auto = matchup_db.get_note(your_champ, champ) if (matchup_db and your_champ) else None
-        is_laner = laner_norm and normalize(champ) == laner_norm
-        is_snowballing = _enemy_threat_state(p, game_time) == 'SNOWBALLING'
-        full_display = is_laner or is_snowballing
-        sections = []
-        if personal:
-            if full_display:
-                personal_text = personal
-            else:
-                sents = re.split(r'(?<=[.!?])\s+', personal.strip())
-                personal_text = ' '.join(sents[:3])
-            sections.append(f'{DIM}[yours]{RESET} {personal_text}')
-        if auto:
-            auto_limits = (8, 5) if full_display else (3, 3)
-            sections.append(f'{DIM}[auto]{RESET} {_clean_db_note(auto, max_bullets=auto_limits[0], max_sentences=auto_limits[1])}')
-        if full_display and champ_db:
-            kit = champ_db.get_note(champ)
-            if kit:
-                sections.append(f'{DIM}[kit]{RESET} {_clean_db_note(kit)}')
-        body = '\n'.join(sections)
-        if body:
-            out.append(render_matchup(disp, pos, tier, body, max_chars, extras=extras))
-        else:
-            out.append(render_matchup(disp, pos, tier, '', max_chars, extras=extras + '  — no notes'))
+    dead = sorted(
+        (int(e.get('respawnTimer') or 0), e.get('championName', '?'))
+        for e in enemies if e.get('isDead')
+    )
+    if dead:
+        out.append(f'{TIER_COLOR["Major"]}enemies dead:{RESET} ' + ', '.join(f'{n} {t}s' for t, n in dead) + '\n')
 
     return ''.join(out)
 
