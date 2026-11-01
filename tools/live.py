@@ -2144,9 +2144,10 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
     """Drop swap options whose comp condition isn't met by the current enemy team.
 
     player_pos: raw Live API position string ('TOP', 'BOTTOM', 'UTILITY', etc.).
-    ADC/SUPPORT face the enemy support every fight, so Mercury's Treads / Scimitar
-    fires on heavy AP or 1+ hard CC. Other roles need heavy AP AND 3+ hard CC —
-    2 CC fired every game on Mundo, whose passive already blocks the first one.
+    ADC/SUPPORT: Mercury's Treads needs heavy AP or 4+ hard CC (half the champ pool
+    is tagged HARD-CC, so 1+ offered it ~97% of games and the coach always took it);
+    Scimitar's QSS still fires on 1+ hard CC. Other roles need heavy AP AND 3+ hard
+    CC for either — 2 CC fired every game on Mundo, whose passive blocks the first one.
 
     Performance-based build adjustments (fed carry mid-game) are left to the coach's
     own reasoning via THREAT ASSESSMENT and enemy KDA — not the filter's job.
@@ -2194,7 +2195,8 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
         elif 'unending despair' in item_l:
             result.append((new_item, old_item, condition))
         elif "mercury's treads" in item_l or 'mercurial scimitar' in item_l:
-            if (ap >= 3 or hard_cc_count >= 1) if bot_role else (ap >= 3.5 and hard_cc_count >= 3):
+            bot_cc_min = 4 if "mercury's treads" in item_l else 1
+            if (ap >= 3 or hard_cc_count >= bot_cc_min) if bot_role else (ap >= 3.5 and hard_cc_count >= 3):
                 result.append((new_item, old_item, condition))
         elif 'maw of malmortius' in item_l:
             if ap >= 3:

@@ -124,7 +124,7 @@ Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on 
 ## Situational item swaps
 
 - Plated Steelcaps over Berserker's Greaves — heavy AD (go Navori over IE)
-- Mercury's Treads over Berserker's Greaves — heavy AP / CC (go Navori over IE)
+- Mercury's Treads over Berserker's Greaves — heavy AP (3+ AP threats) or 4+ hard CC; otherwise Berserker's, even into a CC support (go Navori over IE)
 - Mortal Reminder over Lord Dominik's Regards — enemy has significant healing
 - Mercurial Scimitar over Guardian Angel — heavy AP or hard CC (provides QSS)
 - Maw of Malmortius over Guardian Angel — AP team with low CC
