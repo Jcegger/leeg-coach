@@ -2,6 +2,8 @@
 
 Source: [heeiseenbeerg's "The Ultimate Sivir Build" (26.21, updated Oct 22, 2026)](https://www.mobafire.com/league-of-legends/build/16-08-the-ultimate-sivir-build-648305). Build data is from the Oct 22 version; quoted reasoning is from the author's April (16.08) tooltips unless it conflicts, in which case the current build wins.
 
+Nov 1, 2026: item order, rune secondary and the vs Tanks path adjusted to u.gg 16.21 ranked data (what Sivir players actually build, all ranks and Bronze agree). Stormrazor dropped: it isn't in any slot's top options. Quotes below are the guide author's.
+
 ## Summoner spells
 
 **Barrier + Flash.** "These should almost always be your summoner spells."
@@ -10,13 +12,13 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" (26.21, updated Oct 22, 2026
 
 **Primary — Precision:** Lethal Tempo · Presence of Mind · Legend: Bloodline · Cut Down
 
-**Secondary — Sorcery:** Absolute Focus · Gathering Storm
+**Secondary — Inspiration:** Cash Back · Triple Tonic
 
-**Alt secondary — Inspiration:** Cash Back · Triple Tonic
+**Alt secondary — Sorcery:** Absolute Focus · Gathering Storm
 
 **Shards:** +10% Attack Speed · +9 Adaptive (5.4 AD) · +65 Base Health
 
-As of 26.21 the author runs Absolute Focus, not Manaflow Band (April's pick). Absolute Focus only works above 70% health, so it rewards staying healthy in lane; Yun Tal builds have little mana, so space out Q's in long trades. Inspiration (Cash Back + Triple Tonic) is the alternate page for an earlier gold spike.
+Inspiration is the most-played page on u.gg 16.21 (Cash Back's gold + Triple Tonic's elixirs). The guide author runs Sorcery with Absolute Focus, which only works above 70% health — take it only into lanes where you stay healthy. Yun Tal builds have little mana either way, so space out Q's in long trades.
 
 ## Starting items
 
@@ -39,15 +41,16 @@ As of 26.21 the author runs Absolute Focus, not Manaflow Band (April's pick). Ab
 1. **Yun Tal Wildarrows** (1st item)
 2. **Boots** (tier 2 before 2nd item, definitely before 3rd)
 3. **Infinity Edge** *or* **Navori Flickerblade** (2nd item — depends on boots)
-4. **Lord Dominik's Regards** *or* **Mortal Reminder** (3rd or 4th)
-5. **Stormrazor** (3rd or 4th, completes 100% crit)
-6-7. **Pick two:** Guardian Angel · Bloodthirster · Mercurial Scimitar · Maw of Malmortius (GA is in all three example builds)
+4. **Navori** (or IE, whichever you skipped) — **Lord Dominik's Regards first vs 2+ tanks**
+5. **Lord Dominik's Regards** *or* **Mortal Reminder**
+6. **Bloodthirster**
+7. **Guardian Angel**, or Mercurial Scimitar / Maw of Malmortius vs heavy AP
 
 ### Yun Tal first
 
 > I find Yun Tal is a more well-rounded item than Essence Reaver, which is why I always build it first.
 
-Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on Yun Tal — don't spam Q into minions you aren't last-hitting.
+No mana runes on either page, so mana is tight on Yun Tal — don't spam Q into minions you aren't last-hitting.
 
 ### Boots
 
@@ -62,25 +65,21 @@ Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on 
 > Build IE second if you went/will go with Berserker's as your boots.
 > If you went/will go with Steelcaps/Mercury's, go with Navori second.
 
-### 3rd / 4th — finishing 100% crit
+### 3rd / 4th — Navori, IE, or armor pen
 
-> If you went Navori second, always build IE third into LDR/Mortal Reminder fourth.
->
-> If you went IE second, go LDR/Mortal Reminder third and Stormrazor fourth — unless the enemy team builds no armor / has 5 squishies. In that case, build Stormrazor third and LDR/Mortal Reminder fourth.
+After Yun Tal and your 2nd item, finish the other of IE / Navori, then LDR or Mortal Reminder (u.gg 16.21: Navori 4th, LDR 5th is the most-built order).
+
+**Vs 2+ tanks** (tank champions, or anyone who has built mostly tank items), get armor pen right after your 2nd item: LDR 3rd, Navori 4th. LDR is the tank killer for crit Sivir — 35% armor pen plus up to 15% bonus damage against bonus health. The other anti-tank items don't fit: Kraken Slayer scales with *missing* health, BotRK and Terminus give no crit, Black Cleaver mostly helps your team.
 
 ### LDR vs Mortal Reminder
 
 > Always build LDR if your team has (or will have) 2+ members with grievous wounds (anti-healing) or if the enemy team has close to no healing/life steal. Otherwise build Mortal Reminder. You should be building LDR in about 70% of your games.
 
-### 5th / 6th / 7th item
+### 6th / 7th item
 
-> ADC now has 7 item slots (boots count as one). You get a full extra item.
->
-> GA as 5th is ideal in about 90% of games. 6th: BT for sustain, or Scimitar/Maw if you need MR or QSS. 7th: fill the remaining defensive slot (Maw if you took Scimitar, BT if you took Maw, or Scimitar if you took BT into a heavy AP/CC game).
->
+ADC has 7 item slots (boots count as one). Bloodthirster is the most-built 6th item (u.gg 16.21); Guardian Angel 7th. Vs heavy AP, Scimitar or Maw replace GA — Scimitar (QSS) if they have a key lockdown ult, Maw if they're low CC. All-AP team: Scimitar and Maw in the last two slots.
+
 > Up against heavy AP — Scimitar or Maw 5th/6th. Scimitar is usually better unless enemy has low CC. With the 7th slot, you can fit both Scimitar and Maw.
->
-> All-AP team — build both Scimitar and Maw in the last two slots.
 
 ### Don't forget Elixir of Wrath
 
@@ -92,12 +91,23 @@ Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on 
 1. Yun Tal Wildarrows
 2. Berserker's Greaves
 3. Infinity Edge
-4. Lord Dominik's Regards
-5. Stormrazor
-6. Guardian Angel
-7. Bloodthirster
+4. Navori Flickerblade
+5. Lord Dominik's Regards
+6. Bloodthirster
+7. Guardian Angel
 
-> Very well-rounded with lots of damage and sustain thanks to GA + BT. LDR and Mortal Reminder are interchangeable.
+> Most-built Sivir path on u.gg 16.21. LDR and Mortal Reminder are interchangeable (see LDR vs Mortal Reminder).
+
+### vs Tanks
+1. Yun Tal Wildarrows
+2. Berserker's Greaves
+3. Infinity Edge
+4. Lord Dominik's Regards
+5. Navori Flickerblade
+6. Bloodthirster
+7. Guardian Angel
+
+> Picked automatically vs 2+ tanks. Armor pen one slot earlier; Mortal Reminder replaces LDR only if they also have real healing.
 
 ### vs Heavy AP
 1. Yun Tal Wildarrows
@@ -128,7 +138,6 @@ Without Manaflow Band (dropped for Absolute Focus in 26.21), mana is tighter on 
 - Mortal Reminder over Lord Dominik's Regards — enemy has significant healing
 - Mercurial Scimitar over Guardian Angel — heavy AP or hard CC (provides QSS)
 - Maw of Malmortius over Guardian Angel — AP team with low CC
-- Bloodthirster over Guardian Angel — no burst threat, need more sustain
 
 ## Skill order
 

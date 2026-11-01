@@ -927,6 +927,15 @@ def _unbuilt_tank(name, items, item_index):
     return n in _TANK and n not in _DAMAGE_TANKS and not _builds_damage(items, item_index)
 
 
+def count_tanks(enemies, item_index=None):
+    """Enemies that are tank-built, or tank archetypes not yet building damage."""
+    return sum(
+        1 for e in enemies
+        if classify_enemy(e.get('championName', ''), e.get('items') or [], item_index) == 'Tank'
+        or _unbuilt_tank(e.get('championName', ''), e.get('items') or [], item_index)
+    )
+
+
 def comp_breakdown(enemies, item_index=None):
     """'AD Briar, Yone, Ashe · AP Mel · tank Ornn' — names per damage kind. The
     profile's ap/ad are build-picker weights (Mixed = 0.5, unbuilt tank = half),
@@ -1547,7 +1556,7 @@ def laner_build_tag(matchup_entry):
     return None
 
 
-def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, ad_count=0, has_healer=False, no_warmogs=False, ap_assassin=False):
+def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, ad_count=0, has_healer=False, no_warmogs=False, ap_assassin=False, tank_count=0):
     """Match comp profile to a build.md variant. preferred_tag (from a matchup
     note 'Build:' line) is tried first; falls back to damage profile, then Standard.
 
@@ -1557,7 +1566,8 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
     - 3+ AP with significant AD (Standard profile): prefer a non-AD/non-Standard path
       that provides MR. When a healer is also present, additionally require grievous wounds.
     - 2 AP (tanks not counted) including an AP assassin: prefer a 'mixed' path with MR —
-      the go-to path has no MR until slot 6, too late vs Fizz/Kat/LeBlanc burst."""
+      the go-to path has no MR until slot 6, too late vs Fizz/Kat/LeBlanc burst.
+    - 2+ tanks (unless the comp is heavy AP): prefer a 'vs Tanks' path if the champ has one."""
     if preferred_tag:
         tag_norm = normalize(preferred_tag)
         for heading, body in variants:
@@ -1565,6 +1575,10 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
                 # Don't let a laner AD tag override a comp with 3+ AP enemies
                 if classify_variant(heading) == 'AD' and ap_count >= 3:
                     break
+                return heading, body
+    if tank_count >= 2 and profile_kind != 'AP':
+        for heading, body in variants:
+            if 'tank' in heading.lower():
                 return heading, body
     if profile_kind == 'Standard' and no_warmogs:
         if ap_count >= 3:
@@ -5041,7 +5055,7 @@ def main():
             _has_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
             _has_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in enemies)
             no_warmogs = _has_anti_warmogs or _has_lockdown
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag, ap_count=profile[1], ad_count=profile[2], has_healer=has_healer, no_warmogs=no_warmogs, ap_assassin=has_ap_assassin(enemies, item_index)) if cdata['build_variants'] else None
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], preferred_tag=laner_tag, ap_count=profile[1], ad_count=profile[2], has_healer=has_healer, no_warmogs=no_warmogs, ap_assassin=has_ap_assassin(enemies, item_index), tank_count=count_tanks(enemies, item_index)) if cdata['build_variants'] else None
 
             sig = json.dumps({
                 'mode': 'game',
@@ -5091,7 +5105,7 @@ def main():
             _cs_anti_warmogs = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in cs_enemies)
             _cs_lockdown = any(normalize(e.get('championName', '')) in _LOCKDOWN_CC_CHAMPS for e in cs_enemies)
             cs_no_warmogs = _cs_anti_warmogs or _cs_lockdown
-            build_pick = pick_build_variant(cdata['build_variants'], profile[0], ap_count=profile[1], ad_count=profile[2], has_healer=cs_has_healer, no_warmogs=cs_no_warmogs, ap_assassin=has_ap_assassin(cs_enemies, item_index)) if cdata['build_variants'] and cs_enemies else None
+            build_pick = pick_build_variant(cdata['build_variants'], profile[0], ap_count=profile[1], ad_count=profile[2], has_healer=cs_has_healer, no_warmogs=cs_no_warmogs, ap_assassin=has_ap_assassin(cs_enemies, item_index), tank_count=count_tanks(cs_enemies, item_index)) if cdata['build_variants'] and cs_enemies else None
 
             sig = json.dumps({
                 'mode': 'cs',

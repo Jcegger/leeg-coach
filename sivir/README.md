@@ -12,9 +12,9 @@ Source: [heeiseenbeerg's "The Ultimate Sivir Build" on Mobafire](https://www.mob
 
 ## TL;DR (mid-game-glance summary)
 
-**Standard build:** Doran's Bow → Yun Tal Wildarrows → Berserker's → Infinity Edge → Lord Dominik's → Stormrazor → Guardian Angel → Bloodthirster
+**Standard build:** Doran's Bow → Yun Tal Wildarrows → Berserker's → Infinity Edge → Navori → Lord Dominik's → Bloodthirster → Guardian Angel (vs 2+ tanks: Lord Dominik's before Navori)
 
-**Runes:** Precision (Lethal Tempo / Presence of Mind / Bloodline / Cut Down) + Sorcery (Absolute Focus / Gathering Storm), alt Inspiration (Cash Back / Triple Tonic)
+**Runes:** Precision (Lethal Tempo / Presence of Mind / Bloodline / Cut Down) + Inspiration (Cash Back / Triple Tonic), alt Sorcery (Absolute Focus / Gathering Storm)
 
 **Spells:** Barrier + Flash
 
