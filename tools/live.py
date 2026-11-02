@@ -1383,6 +1383,38 @@ def enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index
     return lb
 
 
+def enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_index):
+    """A swap item must replace the item its rule names. The coach put Randuin's
+    (rule: over Jak'Sho) in Titanic's slot and kept Jak'Sho. If the rule's old item
+    is still in live_build while a picked-path item is missing, the old item gives its
+    slot back to the missing path item. The swap item keeps the coach's position —
+    buying it earlier is fine. Owned items never move."""
+    lb = list(live_build or [])
+    if not swap_pairs or not build_pick or not item_index:
+        return lb
+    name_to_id = _build_name_to_id(item_index)
+    rid = lambda n: resolve_item_id(n, name_to_id)
+    owned = {(i or {}).get('itemID') for i in (my_items or [])}
+    path = build_path_summary(build_pick[1]).split(' · ')
+    path_ids = [rid(n) for n in path]
+    for new_item, old_item in swap_pairs:
+        ids = [rid(n) for n in lb]
+        nid, oid = rid(new_item), rid(old_item)
+        if None in (nid, oid) or nid in path_ids or nid not in ids or oid not in ids or oid in owned:
+            continue
+        if normalize(old_item) in _BOOTS_NORMS:
+            continue  # boots are handled by strip_duplicate_boots
+        # Path items legitimately gone: replaced by another swap item present in lb.
+        swapped_out = {rid(o) for n, o in swap_pairs if rid(n) in ids and (n, o) != (new_item, old_item)}
+        missing = [(pi, n) for pi, (n, i) in enumerate(zip(path, path_ids))
+                   if i is not None and i not in ids and i not in swapped_out and i not in owned]
+        if not missing:
+            continue
+        oi = ids.index(oid)
+        lb[oi] = next((n for pi, n in missing if pi == oi), missing[0][1])
+    return lb
+
+
 def drop_rejected_item_bullets(bullets, proposed, final_build, my_items, item_index):
     """Drop bullets that name an item the validators removed from live_build.
     Otherwise the coach keeps saying (and TTS keeps speaking) "Frozen Heart is
@@ -2148,9 +2180,9 @@ def format_swap_rules(swaps):
     """Render the YOUR SWAP OPTIONS block from parse_swap_rules output."""
     if not swaps:
         return []
-    out = ['YOUR SWAP OPTIONS (from build.md):']
+    out = ['YOUR SWAP OPTIONS (from build.md) — a swap removes the item it names and nothing else; you may buy the swap item earlier than that item\'s slot:']
     for new_item, old_item, condition in swaps:
-        out.append(f'  {new_item} over {old_item} — {condition}')
+        out.append(f'  {new_item} replaces {old_item} — {condition}')
     return out
 
 
@@ -3094,7 +3126,7 @@ class Coach:
     def request_async(self, trigger, champ_folder, user_message, game_time,
                       build_pick=None, my_items=None, item_index=None, current_gold=0,
                       priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
-                      gated_swaps=None):
+                      gated_swaps=None, swap_pairs=None):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -3108,13 +3140,13 @@ class Coach:
             args=(self.build_system(champ_folder), user_message,
                   build_pick, list(my_items or []), item_index, current_gold,
                   list(priority_enemy_names or []), player_class, ap_count, dict(comp_kinds or {}),
-                  list(gated_swaps or [])),
+                  list(gated_swaps or []), list(swap_pairs or [])),
             daemon=True,
         ).start()
 
     def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
               priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
-              gated_swaps=None):
+              gated_swaps=None, swap_pairs=None):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -3154,6 +3186,7 @@ class Coach:
             live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
             live_build = _drop_conflicting_items(live_build)
             live_build = enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index)
+            live_build = enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_index)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
@@ -4699,6 +4732,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 player_class=_player_class(your_champ or ''),
                 ap_count=_ap,
                 gated_swaps=gated_swaps,
+                swap_pairs=[(n, o) for n, o, _c in (swaps or [])],
             )
 
     mode_label = 'ARAM' if is_aram else 'IN GAME'
