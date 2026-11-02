@@ -221,6 +221,27 @@ COUNTER_ITEMS_BY_TAG = {
     ],
 }
 
+# Damage-type counters, keyed by classify_enemy — so a fed Teemo gets an MR
+# counter for a tank, which no archetype tag offered. Kept out of
+# COUNTER_ITEM_NORMS: Spirit Visage / Jak'Sho / GA are ordinary path and swap
+# items, and validate_counter_citation would demand an enemy citation for them.
+COUNTER_ITEMS_BY_DAMAGE = {
+    'AP-DAMAGE': [
+        ('Spirit Visage', 'tank', 'MR + boosts your healing'),
+        ('Force of Nature', 'tank', 'stacking MR + move speed'),
+        ("Jak'Sho, The Protean", 'tank', 'armor + MR, grows in long fights'),
+        ('Spirit Visage', 'bruiser', 'MR + boosts your healing'),
+        ('Maw of Malmortius', 'marksman', 'magic shield + MR'),
+        ('Mercurial Scimitar', 'marksman', 'MR + cleanse'),
+    ],
+    'AD-DAMAGE': [
+        ('Thornmail', 'tank', 'armor + reflect AA dmg'),
+        ("Dead Man's Plate", 'tank', 'armor + move speed'),
+        ("Randuin's Omen", 'tank', 'armor + crit reduction'),
+        ('Guardian Angel', 'marksman', 'revive + armor'),
+    ],
+}
+
 
 # Flat set of normalized counter-item names. Used by validate_counter_citation
 # to detect when the LLM has added a counter to live_build.
@@ -241,6 +262,13 @@ for _entries in COUNTER_ITEMS_BY_TAG.values():
         _norm = re.sub(r'[^a-z0-9]', '', _name.lower())
         COUNTER_ITEM_CLASSES.setdefault(_norm, set()).add(_cls)
 del _entries, _name, _cls, _reason, _norm
+
+# Every item the council can offer (tags + damage types) — enforce_counter_slot.
+_ALL_COUNTER_NORMS = COUNTER_ITEM_NORMS | {
+    re.sub(r'[^a-z0-9]', '', n.lower())
+    for entries in COUNTER_ITEMS_BY_DAMAGE.values()
+    for (n, _cls, _r) in entries
+}
 
 
 def _player_class(champ_name):
@@ -981,9 +1009,12 @@ def compute_damage_profile(enemies, item_index=None):
         else:  # Mixed
             ap += 0.5 * w
             ad += 0.5 * w
+    # AD needs 4: 3 AD + Thresh/Lulu (Mixed 0.5) read "full AD" and skipped
+    # Mundo's Warmog's path with an Ahri on the team. 3-AP comps have their own
+    # branch in pick_build_variant, so AP stays at 3.5.
     if ap >= 3.5:
         label = 'AP'
-    elif ad >= 3.5:
+    elif ad >= 4:
         label = 'AD'
     else:
         label = 'Standard'
@@ -1185,12 +1216,15 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
     for role_label, enemy in priority_enemies:
         cname = enemy.get('championName') or ''
         threats = list(CHAMP_THREAT_TAGS.get(normalize(cname)) or [])
+        kind = classify_enemy(cname, enemy.get('items') or [], item_index)
+        if kind in ('AP', 'AD'):
+            threats.append(f'{kind}-DAMAGE')
         spike_items = has_power_spike_items(enemy.get('items') or [], item_index)
 
         seen_norms = set()
         candidates = []  # list of (priority, source, item_name, cost, reason)
         for tag in threats:
-            for item_name, applies_to, reason in COUNTER_ITEMS_BY_TAG.get(tag, []):
+            for item_name, applies_to, reason in (COUNTER_ITEMS_BY_TAG.get(tag) or COUNTER_ITEMS_BY_DAMAGE.get(tag) or []):
                 if applies_to != 'all' and applies_to != player_class:
                     continue
                 norm = normalize(item_name)
@@ -1412,6 +1446,43 @@ def enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_inde
             continue
         oi = ids.index(oid)
         lb[oi] = next((n for pi, n in missing if pi == oi), missing[0][1])
+    return lb
+
+
+def enforce_counter_slot(live_build, swap_pairs, build_pick, my_items, item_index):
+    """A counter-item the coach adds (fed enemy) displaces the LAST un-owned
+    path item, not a damage item mid-path — it cut Titanic for Randuin's.
+    The counter keeps the coach's position (buying it early is the point);
+    any earlier path item it pushed out comes back in the last slot's place."""
+    lb = list(live_build or [])
+    if not build_pick or not item_index:
+        return lb
+    name_to_id = _build_name_to_id(item_index)
+    rid = lambda n: resolve_item_id(n, name_to_id)
+    owned = {(i or {}).get('itemID') for i in (my_items or [])}
+    path = build_path_summary(build_pick[1]).split(' · ')
+    path_ids = [rid(n) for n in path]
+    swap_new = {rid(n) for n, _o in (swap_pairs or [])}
+    ids = [rid(n) for n in lb]
+    n_counters = sum(
+        1 for n, i in zip(lb, ids)
+        if i is not None and i not in path_ids and i not in owned and i not in swap_new
+        and normalize(n) in _ALL_COUNTER_NORMS
+    )
+    if not n_counters:
+        return lb
+    swapped_out = {rid(o) for n, o in (swap_pairs or []) if rid(n) in ids}
+    missing = [(pi, n) for pi, (n, i) in enumerate(zip(path, path_ids))
+               if i is not None and i not in ids and i not in owned and i not in swapped_out
+               and normalize(n) not in _BOOTS_NORMS]
+    for pi, name in missing[:n_counters]:
+        later = [(pj, i) for pj, i in enumerate(path_ids)
+                 if pj > pi and i in ids and i not in owned]
+        if not later:
+            break
+        _pj, drop_id = max(later)
+        k = ids.index(drop_id)
+        lb[k], ids[k] = name, rid(name)
     return lb
 
 
@@ -3187,6 +3258,7 @@ class Coach:
             live_build = _drop_conflicting_items(live_build)
             live_build = enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index)
             live_build = enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_index)
+            live_build = enforce_counter_slot(live_build, swap_pairs, build_pick, my_items, item_index)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
