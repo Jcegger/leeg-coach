@@ -107,10 +107,12 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 ### Full AD enemy team
 1. Heartsteel
 2. Plated Steelcaps
-3. Thornmail
-4. Dead Man's Plate
-5. Randuin's Omen
-6. Jak'Sho
+3. Titanic Hydra
+4. Unending Despair
+5. Thornmail
+6. Dead Man's Plate
+
+> Damage first, then armor. The old all-armor version (Thornmail · DMP · Randuin's · Jak'Sho) did no damage. Unending Despair is 50 armor plus AoE damage and healing every 4s. Titanic 3rd-4th is the most-built Mundo item after the core on u.gg 16.21.
 
 ### Heavy magic damage (Warmog's variant)
 1. Heartsteel
@@ -138,11 +140,12 @@ Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. De
 - Mercury's Treads over Boots of Swiftness — rare: heavy AP comp that also chains 3+ hard CC (e.g. Lissandra + Leona + Syndra); your passive only blocks the first immobilize, so chained lockdown is the one case tenacity earns the slot over Swiftness
 - Thornmail over Jak'Sho, The Protean — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth, Xin Zhao); highest priority slot-6 swap
 - Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere); only if Thornmail not needed
+- Randuin's Omen over Dead Man's Plate — Full AD path only (it has no Jak'Sho), 2+ crit carries
 - Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
 - Unending Despair over Dead Man's Plate — teamfights where multiple enemies cluster on you; passive procs every 4s dealing 3% bonus HP as AoE magic damage to all nearby enemies and healing 250% of post-mitigation damage dealt per target hit — scales with your HP stack, fires constantly when grouped on; also gives 15 AH (slot 5 swap)
 - Unending Despair over Jak'Sho, The Protean — attack-speed stacked comp (3+ on-hit/AS enemies e.g. Yi + Teemo + Varus Rageblade); when multiple enemies are auto-attacking you every fight, the proc heals you from each attacker every 4s; prefer this over Jak'Sho when you already have 4 armor items and resistance stacking has diminishing returns (slot 6 swap)
-- Spirit Visage over Titanic Hydra — Full AD path only, when one enemy deals hybrid AP/AS damage (Kayle, Kogmaw on-hit, Vayne AP); the MR + healing amp combo pulls double duty against the magic component without leaving the AD path
+- Spirit Visage over Dead Man's Plate — Full AD path only, when one enemy deals hybrid AP/AS damage (Kayle, Kogmaw on-hit, Vayne AP, Teemo); the MR + healing amp combo pulls double duty against the magic component without leaving the AD path — never at the cost of Titanic or Unending Despair
 
 Early buy: Bramble Vest early vs heavy AS tops (Irelia, Urgot, Tryndamere) — finish Thornmail before the next legendary in the Full AD path, or hold it as a component in other paths.
 
