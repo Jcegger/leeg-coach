@@ -109,6 +109,17 @@ ADC has 7 item slots (boots count as one). Bloodthirster is the most-built 6th i
 
 > Picked automatically vs 2+ tanks. Armor pen one slot earlier; Mortal Reminder replaces LDR only if they also have real healing.
 
+### Survival (playstyle — coach's call, never auto-picked)
+1. Yun Tal Wildarrows
+2. Plated Steelcaps
+3. Infinity Edge
+4. Guardian Angel
+5. Navori Flickerblade
+6. Lord Dominik's Regards
+7. Bloodthirster
+
+> Switch to this when an AD assassin or diver (Zed, Talon, Kha'Zix, Rengar, Yone, Irelia) is SNOWBALLING and keeps one-shotting you before you can auto. GA 4th buys a second life in the fight they dive you; Steelcaps cut their autos. Vs a fed AP assassin (Fizz, Kat, LeBlanc, Evelynn) take Maw instead of GA (swap rule). You still need IE for damage — don't take this just because lane is hard. Owned items stay; switch the un-owned tail only.
+
 ### vs Heavy AP
 1. Yun Tal Wildarrows
 2. Mercury's Treads
@@ -137,7 +148,7 @@ ADC has 7 item slots (boots count as one). Bloodthirster is the most-built 6th i
 - Mercury's Treads over Berserker's Greaves — heavy AP (3+ AP threats) or 4+ hard CC; otherwise Berserker's, even into a CC support (go Navori over IE)
 - Mortal Reminder over Lord Dominik's Regards — enemy has significant healing
 - Mercurial Scimitar over Guardian Angel — heavy AP or hard CC (provides QSS)
-- Maw of Malmortius over Guardian Angel — AP team with low CC
+- Maw of Malmortius over Guardian Angel — AP team with low CC, or any AP assassin (Fizz, Katarina, LeBlanc, Evelynn)
 
 ## Skill order
 

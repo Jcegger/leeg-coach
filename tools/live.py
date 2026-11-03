@@ -263,13 +263,6 @@ for _entries in COUNTER_ITEMS_BY_TAG.values():
         COUNTER_ITEM_CLASSES.setdefault(_norm, set()).add(_cls)
 del _entries, _name, _cls, _reason, _norm
 
-# Every item the council can offer (tags + damage types) — enforce_counter_slot.
-_ALL_COUNTER_NORMS = COUNTER_ITEM_NORMS | {
-    re.sub(r'[^a-z0-9]', '', n.lower())
-    for entries in COUNTER_ITEMS_BY_DAMAGE.values()
-    for (n, _cls, _r) in entries
-}
-
 
 def _player_class(champ_name):
     """Derive a coarse class for COUNTER_ITEMS_BY_TAG filtering. Uses the
@@ -1417,6 +1410,45 @@ def enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index
     return lb
 
 
+def allowed_playstyles(variants, enemies, game_time, item_index=None):
+    """Playstyle paths (heading has "coach's call") whose condition holds right now.
+    Pure tank: an AD enemy is SNOWBALLING, or a % max-HP damage champ is in the game.
+    Survival: an AD or assassin enemy is SNOWBALLING. Any other: someone is SNOWBALLING."""
+    fed = [e for e in enemies if _enemy_threat_state(e, game_time) == 'SNOWBALLING']
+    fed_ad = any(classify_enemy(e.get('championName', ''), e.get('items') or [], item_index) == 'AD' for e in fed)
+    fed_assassin = any('ASSASSIN' in CHAMP_THREAT_TAGS.get(normalize(e.get('championName', '')), []) for e in fed)
+    max_hp = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
+    out = []
+    for heading, body in variants or []:
+        h = heading.lower()
+        if "coach's call" not in h:
+            continue
+        if 'pure tank' in h:
+            ok = fed_ad or max_hp
+        elif 'survival' in h:
+            ok = fed_ad or fed_assassin
+        else:
+            ok = bool(fed)
+        if ok:
+            out.append((heading, body))
+    return out
+
+
+def reference_path(live_build, build_pick, playstyles, item_index):
+    """The path the coach's live_build is judged against: build_pick, or an
+    unlocked playstyle path (allowed_playstyles) if live_build follows it more
+    closely. Other build.md paths are not switchable — the coach drifted from
+    Full AD into an all-tank build, and into Warmog's vs Gwen."""
+    if not build_pick or not playstyles or not item_index or not live_build:
+        return build_pick
+    name_to_id = _build_name_to_id(item_index)
+    ids = {resolve_item_id(n, name_to_id) for n in live_build} - {None}
+    def score(v):
+        return len(ids & {resolve_item_id(n, name_to_id) for n in build_path_summary(v[1]).split(' · ')})
+    best = max(playstyles, key=score)
+    return best if score(best) > score(build_pick) else build_pick
+
+
 def enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_index):
     """A swap item must replace the item its rule names. The coach put Randuin's
     (rule: over Jak'Sho) in Titanic's slot and kept Jak'Sho. If the rule's old item
@@ -1438,10 +1470,13 @@ def enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_inde
             continue
         if normalize(old_item) in _BOOTS_NORMS:
             continue  # boots are handled by strip_duplicate_boots
-        # Path items legitimately gone: replaced by another swap item present in lb.
-        swapped_out = {rid(o) for n, o in swap_pairs if rid(n) in ids and (n, o) != (new_item, old_item)}
+        # Path items legitimately gone: replaced by another off-path swap item in lb
+        # (Thornmail is a path item in Standard meat, so it doesn't excuse Jak'Sho).
+        swapped_out = {rid(o) for n, o in swap_pairs
+                       if rid(n) in ids and rid(n) not in path_ids and (n, o) != (new_item, old_item)}
         missing = [(pi, n) for pi, (n, i) in enumerate(zip(path, path_ids))
-                   if i is not None and i not in ids and i not in swapped_out and i not in owned]
+                   if i is not None and i not in ids and i not in swapped_out and i not in owned
+                   and normalize(n) not in _BOOTS_NORMS]
         if not missing:
             continue
         oi = ids.index(oid)
@@ -1449,11 +1484,13 @@ def enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_inde
     return lb
 
 
-def enforce_counter_slot(live_build, swap_pairs, build_pick, my_items, item_index):
-    """A counter-item the coach adds (fed enemy) displaces the LAST un-owned
-    path item, not a damage item mid-path — it cut Titanic for Randuin's.
-    The counter keeps the coach's position (buying it early is the point);
-    any earlier path item it pushed out comes back in the last slot's place."""
+def enforce_path_lock(live_build, swap_pairs, build_pick, my_items, item_index, offered_counters=()):
+    """live_build may only differ from the reference path by owned items, swap
+    rules, and counters this call's council offered for a fed/ahead enemy.
+    - An offered counter displaces the LAST un-owned path item (it cut Titanic for
+      Randuin's); it keeps the coach's position. No later slot left: counter goes.
+    - Anything else off-path (Warmog's vs Gwen when the path skips it) reverts to
+      the path item it pushed out (boots for boots)."""
     lb = list(live_build or [])
     if not build_pick or not item_index:
         return lb
@@ -1463,26 +1500,36 @@ def enforce_counter_slot(live_build, swap_pairs, build_pick, my_items, item_inde
     path = build_path_summary(build_pick[1]).split(' · ')
     path_ids = [rid(n) for n in path]
     swap_new = {rid(n) for n, _o in (swap_pairs or [])}
+    offered = {normalize(n) for n in offered_counters}
     ids = [rid(n) for n in lb]
-    n_counters = sum(
-        1 for n, i in zip(lb, ids)
-        if i is not None and i not in path_ids and i not in owned and i not in swap_new
-        and normalize(n) in _ALL_COUNTER_NORMS
-    )
-    if not n_counters:
-        return lb
-    swapped_out = {rid(o) for n, o in (swap_pairs or []) if rid(n) in ids}
+    swapped_out = {rid(o) for n, o in (swap_pairs or []) if rid(n) in ids and rid(n) not in path_ids}
     missing = [(pi, n) for pi, (n, i) in enumerate(zip(path, path_ids))
-               if i is not None and i not in ids and i not in owned and i not in swapped_out
-               and normalize(n) not in _BOOTS_NORMS]
-    for pi, name in missing[:n_counters]:
-        later = [(pj, i) for pj, i in enumerate(path_ids)
-                 if pj > pi and i in ids and i not in owned]
-        if not later:
+               if i is not None and i not in ids and i not in owned and i not in swapped_out]
+    is_boots = lambda n: normalize(n) in _BOOTS_NORMS
+    for k, (name, iid) in enumerate(zip(list(lb), list(ids))):
+        if iid is None or iid in path_ids or iid in owned or iid in swap_new:
+            continue
+        pool = [m for m in missing if is_boots(m[1]) == is_boots(name)]
+        if normalize(name) in offered and not is_boots(name):
+            if not pool:
+                continue
+            pi, restore = pool[0]
+            later = [(pj, i) for pj, i in enumerate(path_ids) if pj > pi and i in ids and i not in owned]
+            if later:
+                k = ids.index(max(later)[1])  # drop the last path item instead
+            missing.remove((pi, restore))
+            lb[k], ids[k] = restore, rid(restore)
+        elif pool:
+            missing.remove(pool[0])
+            lb[k], ids[k] = pool[0][1], rid(pool[0][1])
+        else:
+            lb[k], ids[k] = None, None
+    lb = [n for n in lb if n]
+    # Refill slots other validators emptied (a gated swap popped with nowhere to go).
+    for pi, name in missing:
+        if len(lb) >= len(path):
             break
-        _pj, drop_id = max(later)
-        k = ids.index(drop_id)
-        lb[k], ids[k] = name, rid(name)
+        lb.insert(min(pi, len(lb)), name)
     return lb
 
 
@@ -1670,7 +1717,8 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
       that provides MR. When a healer is also present, additionally require grievous wounds.
     - 2 AP (tanks not counted) including an AP assassin: prefer a 'mixed' path with MR —
       the go-to path has no MR until slot 6, too late vs Fizz/Kat/LeBlanc burst.
-    - 2+ tanks (unless the comp is heavy AP): prefer a 'vs Tanks' path if the champ has one."""
+    - 2+ tanks (unless the comp is heavy AP): prefer a 'vs Tanks' path if the champ has one.
+      ('Pure tank' on Mundo is a playstyle, never auto-picked — classify_variant returns None.)"""
     if preferred_tag:
         tag_norm = normalize(preferred_tag)
         for heading, body in variants:
@@ -1681,7 +1729,7 @@ def pick_build_variant(variants, profile_kind, preferred_tag=None, ap_count=0, a
                 return heading, body
     if tank_count >= 2 and profile_kind != 'AP':
         for heading, body in variants:
-            if 'tank' in heading.lower():
+            if 'vs tanks' in heading.lower():
                 return heading, body
     if profile_kind == 'Standard' and no_warmogs:
         if ap_count >= 3:
@@ -2316,7 +2364,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
             if (ap >= 3 or hard_cc_count >= bot_cc_min) if bot_role else (ap >= 3.5 and hard_cc_count >= 3):
                 result.append((new_item, old_item, condition))
         elif 'maw of malmortius' in item_l:
-            if ap >= 3:
+            if ap >= 3 or has_ap_assassin(enemies):
                 result.append((new_item, old_item, condition))
         else:
             result.append((new_item, old_item, condition))
@@ -3197,7 +3245,7 @@ class Coach:
     def request_async(self, trigger, champ_folder, user_message, game_time,
                       build_pick=None, my_items=None, item_index=None, current_gold=0,
                       priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
-                      gated_swaps=None, swap_pairs=None):
+                      gated_swaps=None, swap_pairs=None, playstyles=None, offered_counters=None):
         if not self.client or self.in_flight:
             return
         self.in_flight = True
@@ -3211,13 +3259,14 @@ class Coach:
             args=(self.build_system(champ_folder), user_message,
                   build_pick, list(my_items or []), item_index, current_gold,
                   list(priority_enemy_names or []), player_class, ap_count, dict(comp_kinds or {}),
-                  list(gated_swaps or []), list(swap_pairs or [])),
+                  list(gated_swaps or []), list(swap_pairs or []), list(playstyles or []),
+                  list(offered_counters or [])),
             daemon=True,
         ).start()
 
     def _call(self, system, user, build_pick=None, my_items=None, item_index=None, current_gold=0,
               priority_enemy_names=None, player_class=None, ap_count=0, comp_kinds=None,
-              gated_swaps=None, swap_pairs=None):
+              gated_swaps=None, swap_pairs=None, playstyles=None, offered_counters=None):
         try:
             # 20s per-request timeout, no SDK retries — fail fast in real-time
             # use. The watchdog in maybe_trigger() catches any case where this
@@ -3256,9 +3305,10 @@ class Coach:
             proposed = list(live_build)
             live_build = validate_on_build_guide(live_build, self._build_item_pool_names, item_index)
             live_build = _drop_conflicting_items(live_build)
-            live_build = enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index)
-            live_build = enforce_swap_targets(live_build, swap_pairs, build_pick, my_items, item_index)
-            live_build = enforce_counter_slot(live_build, swap_pairs, build_pick, my_items, item_index)
+            ref_pick = reference_path(live_build, build_pick, playstyles, item_index)
+            live_build = enforce_swap_gates(live_build, gated_swaps, ref_pick, my_items, item_index)
+            live_build = enforce_swap_targets(live_build, swap_pairs, ref_pick, my_items, item_index)
+            live_build = enforce_path_lock(live_build, swap_pairs, ref_pick, my_items, item_index, offered_counters)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
@@ -4727,7 +4777,7 @@ def render_matchup(name, pos, tier, body, max_chars, marker='', extras=''):
     return ''.join(out)
 
 
-def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None, swaps=None, win_condition=None, side_selection=None, matchup_db=None, item_pool=None):
+def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, build_pick=None, coach=None, item_index=None, champ_db=None, swaps=None, win_condition=None, side_selection=None, matchup_db=None, item_pool=None, build_variants=None):
     your_champ, enemies, me = find_active_team(data)
     ev = parse_events(data)
     game_time = int((data.get('gameData') or {}).get('gameTime', 0))
@@ -4788,6 +4838,15 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 emax_champs=coach._emax_champs,
             )
             priority_for_validator = compute_priority_enemies(me, enemies, item_index) if me else []
+            _council = compute_build_council(
+                priority_for_validator, item_index, active_swaps, _player_class(your_champ or ''),
+                item_pool, {normalize(n) for n, _o in gated_swaps},
+            ) if (priority_for_validator and item_index) else []
+            _states = {normalize(e.get('championName') or ''): _enemy_threat_state(e, game_time)
+                       for _r, e in priority_for_validator}
+            offered_counters = [c['item'] for entry in _council
+                                if _states.get(normalize(entry['enemy'])) in ('SNOWBALLING', 'AHEAD')
+                                for c in entry['counters']]
             priority_names = [e.get('championName') for _r, e in priority_for_validator if e.get('championName')]
             for _e in enemies:
                 _ename = _e.get('championName', '?')
@@ -4805,6 +4864,8 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 ap_count=_ap,
                 gated_swaps=gated_swaps,
                 swap_pairs=[(n, o) for n, o, _c in (swaps or [])],
+                playstyles=allowed_playstyles(build_variants, enemies, game_time, item_index),
+                offered_counters=offered_counters,
             )
 
     mode_label = 'ARAM' if is_aram else 'IN GAME'
@@ -5175,7 +5236,7 @@ def main():
                 ],
             }, sort_keys=True)
             if sig != last_sig:
-                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db, swaps=cdata.get('swaps') or [], win_condition=cdata.get('win_conditions') or '', side_selection=cdata.get('side_selection') or '', matchup_db=matchup_db, item_pool=cdata.get('item_pool')))
+                sys.stdout.write(render_in_game(data, cdata['matchups'], host, args.max_chars, champ_folder, profile, build_pick, coach, item_index, champ_db, swaps=cdata.get('swaps') or [], win_condition=cdata.get('win_conditions') or '', side_selection=cdata.get('side_selection') or '', matchup_db=matchup_db, item_pool=cdata.get('item_pool'), build_variants=cdata.get('build_variants')))
                 sys.stdout.flush()
                 last_sig, last_state = sig, 'game'
             time.sleep(args.poll)

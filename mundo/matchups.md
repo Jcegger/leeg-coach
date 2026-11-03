@@ -28,7 +28,7 @@ Q max. Rush Bramble Vest (or Bramble + Cloth Armor); without it you lose. Grasp:
 E max (preference). Even late, he can chase and kill you if you step too far; mini Gnar is the threat, not mega. Post-6, all-in if you land a cleaver and he has no rage, juking the boomerang. Otherwise it's a scale lane.
 
 ### Gwen
-Q max with Stormraider's Surge (E max if Grasp). Use Stormraider's Surge + Scorch to poke with Q, landing cleavers on her predictive E's; aim to leave lane even. Once even, Warmog's makes sidelanes easy: combo, Stormraider's away, heal up, then all-in. Options: Grasp if you can hard outplay and stack MR, Deathfire Touch to win lane, Stormraider's Surge to not die.
+Q max with Stormraider's Surge (E max if Grasp). Use Stormraider's Surge + Scorch to poke with Q, landing cleavers on her predictive E's; aim to leave lane even. Once even, Warmog's makes sidelanes easy: combo, Stormraider's away, heal up, then all-in. Warmog's ONLY on the Stormraider's page — on Grasp, no Warmog's: her passive deals % max-HP damage and heals off it, so HP stacking feeds her; build MR (Spirit Visage, Jak'Sho) and Thornmail. Options: Grasp if you can hard outplay and stack MR, Deathfire Touch to win lane, Stormraider's Surge to not die.
 
 ### Illaoi
 Q max. You can't fight in your wave to deny her E, so stay behind it, take safe Q trades, and break tentacles. You can kill her pre-6 with consistent poke. Post-6, thin the wave so she can't slow push and kill you under tower. With a poke team turtle; if melee-heavy, leave lane even.

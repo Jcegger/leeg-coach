@@ -107,12 +107,22 @@ When the enemy comp matches a specific path below (Full AD, Full AP, Heavy magic
 ### Full AD enemy team
 1. Heartsteel
 2. Plated Steelcaps
-3. Titanic Hydra
-4. Unending Despair
-5. Thornmail
+3. Unending Despair
+4. Thornmail
+5. Titanic Hydra
 6. Dead Man's Plate
 
-> Damage first, then armor. The old all-armor version (Thornmail · DMP · Randuin's · Jak'Sho) did no damage. Unending Despair is 50 armor plus AoE damage and healing every 4s. Titanic 3rd-4th is the most-built Mundo item after the core on u.gg 16.21.
+> Armor that still does damage first: Unending Despair (50 armor + AoE damage/heal every 4s) and Thornmail (75 armor + reflect + anti-heal). Titanic 5th — 600 HP and damage, but no armor, so it waits until you're tanky enough vs 4-5 AD. The old all-armor version (Thornmail · DMP · Randuin's · Jak'Sho) did no damage.
+
+### Pure tank (playstyle — coach's call, never auto-picked)
+1. Heartsteel
+2. Plated Steelcaps
+3. Unending Despair
+4. Thornmail
+5. Randuin's Omen
+6. Jak'Sho, The Protean
+
+> Switch to this only when your team already has the damage and needs a wall: one enemy AD carry is SNOWBALLING and deleting your team, or enemies deal % max-HP damage (Vayne, Fiora, Gwen, Kog'Maw) so stacking HP feeds them. Trades Titanic/Warmog's HP for armor + MR. Mundo is a juggernaut — his E scales with bonus HP — so this deals less damage; don't take it just because the game is going badly. Unending Despair stays: armor that still hits. Owned items stay; switch the un-owned tail only.
 
 ### Heavy magic damage (Warmog's variant)
 1. Heartsteel
