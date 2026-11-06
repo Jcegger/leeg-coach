@@ -3561,7 +3561,8 @@ def _enemy_threat_state(enemy, game_time):
     diff = k - d
     kp = k + a
     minutes = max(1, game_time // 60)
-    if k >= 6 or diff >= 4 or (kp >= 8 and minutes <= 20):
+    # KP rule needs low deaths: a 3/8/7 jungler isn't snowballing.
+    if k >= 6 or diff >= 4 or (kp >= 8 and d * 3 <= kp and minutes <= 20):
         return 'SNOWBALLING'
     if diff >= 2 or (k >= 3 and d == 0):
         return 'AHEAD'
