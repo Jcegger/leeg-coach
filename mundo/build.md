@@ -146,11 +146,11 @@ Grounded in the go-to Warmog's path (slot 6 = Jak'Sho). Use full alternate paths
 
 Slot 6 swaps are mutually exclusive — pick ONE based on the highest threat. Dead Man's Plate (slot 5) stays regardless; do not drop it to accommodate a second slot-6 swap.
 
-- Plated Steelcaps over Boots of Swiftness — heavy AD team
+- Plated Steelcaps over Boots of Swiftness — heavy AD team, or one SNOWBALLING auto-attacker (crit or attack-speed build)
 - Mercury's Treads over Boots of Swiftness — rare: heavy AP comp that also chains 3+ hard CC (e.g. Lissandra + Leona + Syndra); your passive only blocks the first immobilize, so chained lockdown is the one case tenacity earns the slot over Swiftness
 - Thornmail over Jak'Sho, The Protean — heavy healing/on-hit (Fiora, Warwick, Yi, Bel'Veth, Xin Zhao); highest priority slot-6 swap
-- Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere); only if Thornmail not needed
-- Randuin's Omen over Dead Man's Plate — Full AD path only (it has no Jak'Sho), 2+ crit carries
+- Randuin's Omen over Jak'Sho, The Protean — 2+ crit carries (ADC + Yone/Yasuo/Tryndamere), or one SNOWBALLING crit carry; anyone with 2+ crit items counts (crit Garen); only if Thornmail not needed, unless the fed crit carry is the bigger threat
+- Randuin's Omen over Dead Man's Plate — Full AD path only (it has no Jak'Sho), 2+ crit carries or one SNOWBALLING crit carry
 - Force of Nature over Jak'Sho, The Protean — full AP team; only if Thornmail not needed
 - Hullbreaker over Jak'Sho, The Protean — hard split push, side lane dominant
 - Unending Despair over Dead Man's Plate — teamfights where multiple enemies cluster on you; passive procs every 4s dealing 3% bonus HP as AoE magic damage to all nearby enemies and healing 250% of post-mitigation damage dealt per target hit — scales with your HP stack, fires constantly when grouped on; also gives 15 AH (slot 5 swap)

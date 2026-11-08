@@ -97,7 +97,7 @@ Start World Atlas · Health Potion · Stealth Ward.
 Grounded in the go-to path (slot 6 = Jak'Sho, The Protean).
 
 - Hollow Radiance over Sunfire Aegis — AP lane opponent; build Bami's Cinder into Hollow Radiance instead
-- Plated Steelcaps over Mercury's Treads — full AD team with little CC (Tryndamere, Yasuo, Master Yi)
+- Plated Steelcaps over Mercury's Treads — full AD team with little CC (Tryndamere, Yasuo, Master Yi), or one SNOWBALLING auto-attacker (crit or attack-speed build)
 - Kaenic Rookern over Unending Despair — heavy magic damage; buy it right after the first item
 - Thornmail over Riftmaker — auto-attack reliant carries or healers; finish the Bramble Vest you already hold
 - Warmog's Armor over Riftmaker — few hard-CC enemies and no % max-HP damage; lets you reset fights at full HP

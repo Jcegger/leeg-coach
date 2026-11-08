@@ -1036,7 +1036,7 @@ def compute_team_threats(enemies, item_index=None):
         if not name:
             continue
         norm = normalize(name)
-        threat_tags = CHAMP_THREAT_TAGS.get(norm) or []
+        threat_tags = enemy_threat_tags(e)
         if 'HEALING' in threat_tags and healing_amp_ids:
             for it in (e.get('items') or []):
                 iid = (it or {}).get('itemID')
@@ -1054,7 +1054,7 @@ def compute_team_threats(enemies, item_index=None):
         'heavy_hard_cc': counts.get('HARD-CC', 0) >= 2,
         'has_tank': counts.get('TANK', 0) >= 1,
         'has_assassin': counts.get('ASSASSIN', 0) >= 1,
-        'fed_crit': counts.get('CRIT', 0) >= 1,
+        'crit_carry': counts.get('CRIT', 0) >= 1,  # any crit builder, fed or not
     }
     return {'tags': tags, 'counts': counts, 'flags': flags, 'item_promotions': item_promotions}
 
@@ -1208,7 +1208,7 @@ def compute_build_council(priority_enemies, item_index, swap_rules, player_class
     council = []
     for role_label, enemy in priority_enemies:
         cname = enemy.get('championName') or ''
-        threats = list(CHAMP_THREAT_TAGS.get(normalize(cname)) or [])
+        threats = enemy_threat_tags(enemy)
         kind = classify_enemy(cname, enemy.get('items') or [], item_index)
         if kind in ('AP', 'AD'):
             threats.append(f'{kind}-DAMAGE')
@@ -1414,9 +1414,9 @@ def allowed_playstyles(variants, enemies, game_time, item_index=None):
     """Playstyle paths (heading has "coach's call") whose condition holds right now.
     Pure tank: an AD enemy is SNOWBALLING, or a % max-HP damage champ is in the game.
     Survival: an AD or assassin enemy is SNOWBALLING. Any other: someone is SNOWBALLING."""
-    fed = [e for e in enemies if _enemy_threat_state(e, game_time) == 'SNOWBALLING']
+    fed = [e for e in enemies if _enemy_threat_state(e, game_time, enemies, item_index) == 'SNOWBALLING']
     fed_ad = any(classify_enemy(e.get('championName', ''), e.get('items') or [], item_index) == 'AD' for e in fed)
-    fed_assassin = any('ASSASSIN' in CHAMP_THREAT_TAGS.get(normalize(e.get('championName', '')), []) for e in fed)
+    fed_assassin = any('ASSASSIN' in enemy_threat_tags(e) for e in fed)
     max_hp = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
     out = []
     for heading, body in variants or []:
@@ -2105,6 +2105,46 @@ _CRIT_ITEM_NORMS = {normalize(n) for n in [
     "Runaan's Hurricane", 'Immortal Shieldbow', 'Fiendhunter Bolts', 'Hexoptics C44',
     "Lord Dominik's Regards", 'Mortal Reminder', 'Cloak of Agility', 'Zeal',
 ]}
+_CRIT_COMPONENT_NORMS = {normalize(n) for n in ['Cloak of Agility', 'Zeal']}
+
+
+_AS_ITEM_NORMS = {normalize(n) for n in [
+    'Phantom Dancer', "Guinsoo's Rageblade", 'Blade of The Ruined King', "Nashor's Tooth",
+    "Wit's End", 'Terminus', 'Kraken Slayer', 'Rapid Firecannon', "Runaan's Hurricane",
+    'Statikk Shiv', 'Navori Flickerblade', 'Yun Tal Wildarrows', 'Stridebreaker',
+]}
+_LETHALITY_ITEM_NORMS = {normalize(n) for n in [
+    "Youmuu's Ghostblade", 'Edge of Night', 'Profane Hydra', "Serpent's Fang", 'Hubris',
+    'Umbral Glaive', 'Axiom Arc', 'The Collector', 'Voltaic Cyclosword', 'Bastionbreaker',
+]}
+
+
+def _item_norms(enemy):
+    return [normalize((it or {}).get('displayName', '')) for it in (enemy.get('items') or [])]
+
+
+def is_crit_builder(enemy):
+    """CRIT-tagged champ with any crit item, or anyone with 2+ finished crit items.
+    The tag list alone missed a crit Garen (IE + PD + Collector) — he's tagged TANK."""
+    crit = [n for n in _item_norms(enemy) if n in _CRIT_ITEM_NORMS]
+    if 'CRIT' in CHAMP_THREAT_TAGS.get(normalize(enemy.get('championName', '')), []):
+        return bool(crit)
+    return len([n for n in crit if n not in _CRIT_COMPONENT_NORMS]) >= 2
+
+
+def enemy_threat_tags(enemy):
+    """Champ archetype tags plus tags earned by items: CRIT (is_crit_builder),
+    ATTACK-SPEED (2+ attack-speed items), ASSASSIN (2+ lethality items). Use this,
+    not CHAMP_THREAT_TAGS, wherever the enemy dict is at hand."""
+    tags = list(CHAMP_THREAT_TAGS.get(normalize(enemy.get('championName', ''))) or [])
+    norms = _item_norms(enemy)
+    if 'CRIT' not in tags and is_crit_builder(enemy):
+        tags.append('CRIT')
+    if 'ATTACK-SPEED' not in tags and sum(n in _AS_ITEM_NORMS for n in norms) >= 2:
+        tags.append('ATTACK-SPEED')
+    if 'ASSASSIN' not in tags and sum(n in _LETHALITY_ITEM_NORMS for n in norms) >= 2:
+        tags.append('ASSASSIN')
+    return tags
 # Champs whose kit punishes HP stacking via % max-HP damage. Warmog's big HP spike
 # is weaker against these — prefer Standard meat (no Warmog's) path.
 _ANTI_WARMOGS_CHAMPS = set("camille fiora gwen irelia kogmaw urgot vayne".split())
@@ -2155,6 +2195,16 @@ def strip_duplicate_boots(item_names):
             seen_boots = True
         out.append(n)
     return out
+
+
+def keep_owned_boots(item_names, my_items):
+    """Owned finished boots are the boots. A Pure tank path switch or a Steelcaps
+    swap put Steelcaps on screen over bought Swiftness — that's 'sell your boots'."""
+    owned = next((n for n in ((i or {}).get('displayName', '') for i in (my_items or []))
+                  if normalize(n) in _BOOTS_NORMS), None)
+    if not owned:
+        return list(item_names or [])
+    return [owned if normalize(n) in _BOOTS_NORMS else n for n in (item_names or [])]
 
 
 def validate_counter_citation(live_build, committed_items, bullets, build_change_reason,
@@ -2305,7 +2355,7 @@ def format_swap_rules(swaps):
     return out
 
 
-def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
+def filter_swaps(swaps, enemies, ap, ad, player_pos='', game_time=0, item_index=None):
     """Drop swap options whose comp condition isn't met by the current enemy team.
 
     player_pos: raw Live API position string ('TOP', 'BOTTOM', 'UTILITY', etc.).
@@ -2319,15 +2369,22 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
     """
     enemy_tags = set()
     crit_count = 0
+    fed_crit = False
+    fed_autoattacker = False
     hard_cc_count = 0
     for e in enemies:
         name = normalize(e.get('championName', ''))
-        tags = CHAMP_THREAT_TAGS.get(name, [])
+        tags = enemy_threat_tags(e)
         enemy_tags.update(tags)
-        if 'CRIT' in tags:
-            item_norms = {normalize((it or {}).get('displayName', '')) for it in (e.get('items') or [])}
-            if item_norms & _CRIT_ITEM_NORMS:
-                crit_count += 1
+        fed = _enemy_threat_state(e, game_time, enemies, item_index) == 'SNOWBALLING'
+        if is_crit_builder(e):
+            crit_count += 1
+            fed_crit = fed_crit or fed
+        # One fed AD auto-attacker justifies Steelcaps even when the comp isn't 3+ AD.
+        # Not AP on-hit (Teemo, Kayle): armor boots do nothing vs their magic damage.
+        if fed and ('CRIT' in tags or 'ATTACK-SPEED' in tags) and \
+                classify_enemy(e.get('championName', ''), e.get('items') or [], item_index) != 'AP':
+            fed_autoattacker = True
         if 'HARD-CC' in tags:
             hard_cc_count += 1
 
@@ -2340,7 +2397,8 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
         and any('kraken slayer' in (it.get('displayName') or '').lower() for it in (e.get('items') or []))
         for e in enemies
     )
-    randuin_threshold = 1 if kraken_crit else 2
+    # Same for one SNOWBALLING crit builder (12/9 crit Garen in a 1-ADC comp).
+    randuin_threshold = 1 if (kraken_crit or fed_crit) else 2
 
     result = []
     for new_item, old_item, condition in swaps:
@@ -2355,7 +2413,8 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos=''):
             if ap >= 4:
                 result.append((new_item, old_item, condition))
         elif 'plated steelcaps' in item_l:
-            if ad >= 3:
+            # Not for ADCs: Sivir's Steelcaps rule trades away Berserker's attack speed.
+            if ad >= 3 or (fed_autoattacker and not bot_role):
                 result.append((new_item, old_item, condition))
         elif 'unending despair' in item_l:
             result.append((new_item, old_item, condition))
@@ -3309,6 +3368,7 @@ class Coach:
             live_build = enforce_swap_gates(live_build, gated_swaps, ref_pick, my_items, item_index)
             live_build = enforce_swap_targets(live_build, swap_pairs, ref_pick, my_items, item_index)
             live_build = enforce_path_lock(live_build, swap_pairs, ref_pick, my_items, item_index, offered_counters)
+            live_build = keep_owned_boots(live_build, my_items)
             # Counter-citation validator: reject ungrounded counter-item adds
             # (counter present in live_build, not in committed_build, no priority
             # enemy named in bullets/reason). Snaps live_build back to committed
@@ -3553,7 +3613,14 @@ def _tower_state_summary(ev, your_team):
     return '\n'.join(lines)
 
 
-def _enemy_threat_state(enemy, game_time):
+FED_GOLD_RATIO = 1.35
+
+
+def _enemy_threat_state(enemy, game_time, enemies=None, item_index=None):
+    """SNOWBALLING / AHEAD / BEHIND / None from KDA. With `enemies` + `item_index`,
+    the kill rules also need item gold >= FED_GOLD_RATIO x the enemy-team average:
+    KDA couldn't separate a 12/9 Garen (1.61x, a real carry) from an 8/6 Viego
+    (1.21x, who took Thornmail's slot for Randuin's). Short of it they read AHEAD."""
     sc = enemy.get('scores') or {}
     k = int(sc.get('kills', 0) or 0)
     d = int(sc.get('deaths', 0) or 0)
@@ -3561,8 +3628,15 @@ def _enemy_threat_state(enemy, game_time):
     diff = k - d
     kp = k + a
     minutes = max(1, game_time // 60)
-    # KP rule needs low deaths: a 3/8/7 jungler isn't snowballing.
-    if k >= 6 or diff >= 4 or (kp >= 8 and d * 3 <= kp and minutes <= 20):
+    kill_fed = k >= 6 or diff >= 4
+    if kill_fed and enemies and item_index:
+        golds = [_enemy_item_gold(e, item_index) for e in enemies]
+        avg = sum(golds) / len(golds)
+        if avg > 0 and _enemy_item_gold(enemy, item_index) < FED_GOLD_RATIO * avg:
+            kill_fed = False
+    # KP rule needs low deaths: a 3/8/7 jungler isn't snowballing. Early only, so
+    # no gold check (item gold is too flat before 20 min to mean much).
+    if kill_fed or (kp >= 8 and d * 3 <= kp and minutes <= 20):
         return 'SNOWBALLING'
     if diff >= 2 or (k >= 3 and d == 0):
         return 'AHEAD'
@@ -3807,9 +3881,16 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     _committed_norm = {normalize(i) for i in committed_items}
     _owned_norm = {normalize(i.get('displayName', '')) for i in (me or {}).get('items', [])}
     _already_have = _committed_norm | _owned_norm
+    # Already in finished boots: a boots counter would mean selling them, so skip
+    # it and let the next counter (Randuin's after Steelcaps) lead.
+    if _owned_norm & _BOOTS_NORMS:
+        _already_have = _already_have | _BOOTS_NORMS
 
     lines.append('ENEMIES:')
     threats = []
+    behind = []
+    _enemy_golds = [_enemy_item_gold(e, item_index) for e in enemies]
+    _avg_enemy_gold = sum(_enemy_golds) / len(_enemy_golds) if _enemy_golds else 0
     spike_summary = []  # (champ, [spike names])
     for e in enemies:
         sc = e.get('scores') or {}
@@ -3857,7 +3938,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                     )
                 lines.append(f'    counters: {"; ".join(parts)}')
 
-        state = _enemy_threat_state(e, game_time)
+        state = _enemy_threat_state(e, game_time, enemies, item_index)
         all_counters = (ce.get('counters') or []) if ce else []
         pending = [c for c in all_counters if normalize(c['item']) not in _already_have]
         top_counter = pending[0] if pending else None
@@ -3865,6 +3946,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             threats.append((state, e.get('championName'), pos, tier, top_counter))
         elif tier == 'Extreme' and state != 'BEHIND':
             threats.append(('SPIKE INCOMING', e.get('championName'), pos, tier, None))
+        # Low threat = behind on KDA, not playmaking (1/4/20 support), and not the
+        # richest enemy (a 2/5 Kog'Maw on 4 items still hurts).
+        sc_k, sc_d, sc_a = (int(sc.get(f, 0) or 0) for f in ('kills', 'deaths', 'assists'))
+        _rich = _avg_enemy_gold and _enemy_item_gold(e, item_index) >= 1.15 * _avg_enemy_gold
+        if state == 'BEHIND' and sc_k + sc_a <= sc_d and not _rich:
+            behind.append(f'{e.get("championName")}{f" [{tier}]" if tier else ""}')
 
     if spike_summary:
         spike_lines = [f'{champ}: {", ".join(spikes)}' for champ, spikes in spike_summary]
@@ -3886,6 +3973,13 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
             'already pivoted for them. If you do pivot, ADD ONE counter-item to live_build '
             '(do NOT remove other items) and KEEP that counter-item for the rest of the game. '
             'SPIKE INCOMING = Extreme-tier laner at or near their power window — respect it even if KDA is even.'
+        )
+
+    if behind:
+        lines.append(
+            f'LOW THREAT (behind on kills and items, not making plays): {", ".join(behind)}. '
+            'A matchup tier is the champion on paper; these players are losing this game. '
+            'Name the SNOWBALLING/AHEAD enemies as the threats, not these.'
         )
 
     urgent_counters = [
@@ -4814,7 +4908,14 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             phase = compute_phase(game_time, players)
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
-            active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper())
+            active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper(),
+                                        game_time, item_index)
+            # Boots already bought: a boots swap would mean selling them, so don't offer
+            # it. keep_owned_boots (after the validators) is the backstop.
+            _my_boots = {normalize((i or {}).get('displayName', '')) for i in (me.get('items') or [])} & _BOOTS_NORMS
+            if _my_boots:
+                active_swaps = [s for s in active_swaps
+                                if normalize(s[0]) not in _BOOTS_NORMS or normalize(s[0]) in _my_boots]
             # A swap item is gated only if no active rule also offers it (Unending Despair has two).
             _active_norms = {normalize(s[0]) for s in active_swaps}
             gated_swaps = [(n, o) for n, o, _c in (swaps or []) if normalize(n) not in _active_norms]
@@ -4843,7 +4944,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 priority_for_validator, item_index, active_swaps, _player_class(your_champ or ''),
                 item_pool, {normalize(n) for n, _o in gated_swaps},
             ) if (priority_for_validator and item_index) else []
-            _states = {normalize(e.get('championName') or ''): _enemy_threat_state(e, game_time)
+            _states = {normalize(e.get('championName') or ''): _enemy_threat_state(e, game_time, enemies, item_index)
                        for _r, e in priority_for_validator}
             offered_counters = [c['item'] for entry in _council
                                 if _states.get(normalize(entry['enemy'])) in ('SNOWBALLING', 'AHEAD')
