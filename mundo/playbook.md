@@ -111,6 +111,13 @@
 
 **Mundo is an Illaoi/Sion-type splitter — kill whoever shows up, not Garen/Trynd run-away. If you can't 1v1 the responder, don't split. Group.**
 
+### Split or dive (Jay's game plan, once Warmog's/level 11 is online)
+- **Your team has a real carry (fed or scaling ADC/mid/skirmisher):** split. They win the 4v4/4v5 while you take towers and pull responders.
+  - Still group if you're the only frontline and the carry is an immobile ADC, if the side-lane responder beats you 1v1, or Baron/Soul spawns within ~90s (shove the wave, then walk).
+- **Your team lacks damage:** group and dive their carry like an assassin. Titanic + Heartsteel are the kill pressure.
+  - Only with R up. Land a cleaver on the carry first, enter from a warded flank, and wait for their key CC/escape (traps, binds, charms) to be spent.
+  - On a pure-tank build you can't kill the carry: run at them to force focus instead.
+
 ### Split when:
 - Your team has another frontline (tanky jungler, tanky support) — you're not the only tank
 - Enemy win condition is teamfight-dependent (Malphite + Orianna, engage + AoE) — force them to fight 4v5
