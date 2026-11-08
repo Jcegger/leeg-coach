@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>leeg live</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #0b0f14; --line: #2a313c; --text: #e6edf3; --dim: #8b949e;
+    --good: #3fb950; --warn: #d29922; --bad: #f85149; --accent: #58a6ff; --gold: #e3b341; --orange: #ff8c42;
+    --tile: clamp(50px, 4.6vw, 72px);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.4 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  main { max-width: 1560px; margin: 0 auto; padding: 16px 18px 48px; display: grid; gap: 14px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+  .col { display: grid; gap: 14px; }
+  @media (max-width: 1100px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .label { color: var(--dim); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .grow { flex: 1; min-width: 0; }
+  .dim { color: var(--dim); }
+  .hidden { display: none !important; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* header */
+  header .champ { width: 56px; height: 56px; border-radius: 10px; border: 2px solid var(--line); }
+  header .name { font-size: 22px; font-weight: 600; }
+  header .stats { color: var(--dim); font-size: 15px; }
+  header .clock { font-size: 30px; font-weight: 600; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--dim); }
+  .dot.on { background: var(--good); } .dot.off { background: var(--bad); }
+  .youdead { background: var(--bad); color: #fff; border-radius: 8px; padding: 4px 10px; font-weight: 700; }
+
+  /* coach / hint */
+  #coach .text { font-size: clamp(19px, 1.7vw, 28px); font-weight: 500; line-height: 1.3; }
+  #coach .age { color: var(--dim); font-size: 13px; margin-top: 6px; }
+  #coach.fresh { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  #coach .err { color: var(--warn); font-size: 15px; }
+  #hint { font-size: clamp(17px, 1.5vw, 23px); font-weight: 600; }
+  #hint.back { background: #3a2a05; border-color: var(--gold); color: var(--gold); }
+
+  /* build tiles */
+  .tiles { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tile { width: var(--tile); text-align: center; }
+  .tile .img { width: var(--tile); height: var(--tile); border-radius: 10px; border: 2px solid var(--line);
+    background: var(--panel2) center/cover no-repeat; position: relative; display: flex; align-items: center;
+    justify-content: center; font-size: 10px; color: var(--dim); padding: 4px; overflow: hidden; }
+  .tile.future .img { filter: grayscale(.85) brightness(.6); }
+  .tile.owned .img { border-color: var(--good); }
+  .tile.owned .img::after { content: "\2713"; position: absolute; right: 3px; bottom: 1px; color: var(--good);
+    font-size: 16px; font-weight: 800; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+  .tile.next .img { border-color: var(--gold); box-shadow: 0 0 12px rgba(227,179,65,.45); }
+  .tile .cost { font-size: 12px; color: var(--dim); margin-top: 3px; }
+  .tile.next .cost { color: var(--gold); }
+  .buildname { font-size: 14px; color: var(--dim); }
+  .reason { color: var(--warn); font-size: 14px; margin-top: 8px; }
+
+  /* timers */
+  .timers { display: flex; gap: 10px; flex-wrap: wrap; }
+  .timer { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; min-width: 112px; }
+  .timer .t { font-size: 25px; font-weight: 700; }
+  .timer .k { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .timer.soon .t { color: var(--warn); } .timer.up .t { color: var(--good); }
+  .lead.pos { color: var(--good); } .lead.neg { color: var(--bad); }
+  .csm.good { color: var(--good); } .csm.ok { color: var(--warn); } .csm.low { color: var(--bad); }
+  .chip { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .chip.bad { background: rgba(248,81,73,.18); color: var(--bad); } .chip.good { background: rgba(63,185,80,.18); color: var(--good); }
+  .chip.warn { background: rgba(210,153,34,.18); color: var(--warn); } .chip.plain { background: #222a35; color: var(--dim); }
+  .chip.accent { background: rgba(88,166,255,.16); color: var(--accent); }
+
+  /* enemy cards */
+  .enemy { border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); margin-top: 8px; }
+  .enemy:first-of-type { margin-top: 0; }
+  .ehead { display: flex; gap: 12px; align-items: center; padding: 8px 10px; cursor: pointer; user-select: none; }
+  .ehead:hover { background: rgba(255,255,255,.03); }
+  .portrait { position: relative; width: 52px; height: 52px; flex: none; }
+  .portrait img { width: 52px; height: 52px; border-radius: 10px; border: 3px solid var(--line); display: block; }
+  .portrait .lvl { position: absolute; right: -4px; bottom: -4px; background: #000; border: 1px solid var(--line);
+    border-radius: 6px; font-size: 11px; font-weight: 700; padding: 0 4px; }
+  .portrait .deadt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 800; color: #fff; text-shadow: 0 0 4px #000, 0 0 4px #000; }
+  .enemy.SNOWBALLING .portrait img { border-color: var(--bad); box-shadow: 0 0 10px rgba(248,81,73,.5); }
+  .enemy.AHEAD .portrait img { border-color: var(--orange); }
+  .enemy.low .portrait img { opacity: .55; }
+  .enemy.isdead .portrait img { filter: grayscale(1) brightness(.5); }
+  .ename { font-weight: 700; } .emeta { color: var(--dim); font-size: 13px; }
+  .minis { display: flex; gap: 3px; flex-wrap: wrap; }
+  .minis img { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--line); }
+  .chev { color: var(--dim); font-size: 13px; width: 14px; text-align: center; }
+  .ebody { padding: 4px 12px 12px; border-top: 1px solid var(--line); }
+  .styles { display: flex; gap: 14px; flex-wrap: wrap; margin: 8px 0 4px; font-size: 12px; color: var(--dim); }
+  .bars { display: inline-flex; gap: 2px; margin-left: 5px; vertical-align: middle; }
+  .bars i { width: 12px; height: 6px; border-radius: 2px; background: #2a313c; display: inline-block; }
+  .bars i.on { background: var(--accent); }
+  .ab { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
+  .ab img { width: 38px; height: 38px; border-radius: 7px; border: 1px solid var(--line); flex: none; }
+  .ab .key { display: inline-block; min-width: 18px; margin-right: 6px; font-weight: 800; color: var(--accent); }
+  .ab .cd { color: var(--dim); font-size: 12px; margin-left: 6px; }
+  .ab .desc { color: #c9d1d9; font-size: 14px; }
+  .notes { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .note { white-space: pre-wrap; font-size: 14px; }
+  .note.auto { color: var(--dim); font-size: 13px; }
+  .srclbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 8px 0 3px; }
+  .tier { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; }
+  .tier.Extreme { color: var(--bad); } .tier.Major { color: var(--orange); } .tier.Even { color: var(--warn); }
+  .tier.Minor { color: var(--good); } .tier.Tiny { color: var(--dim); }
+  .focuslbl { color: var(--bad); font-weight: 700; font-size: 13px; }
+  .plan { white-space: pre-wrap; font-size: 14px; }
+  .threats { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
+  .threats b { color: var(--dim); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .06em; margin-right: 4px; }
+
+  /* champ select */
+  .runepage { padding: 8px 0; border-top: 1px solid var(--line); }
+  .runepage:first-of-type { border-top: 0; padding-top: 0; }
+  .runepage .rl { font-size: 14px; color: #c9d1d9; }
+  .quote { border-left: 3px solid var(--gold); padding: 4px 10px; margin: 6px 0; font-size: 14px; }
+  .quote .from { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .record { font-weight: 700; }
+
+  /* post-game review */
+  .result { font-weight: 800; padding: 4px 12px; border-radius: 8px; font-size: 15px; }
+  .result.Win { background: rgba(63,185,80,.18); color: var(--good); }
+  .result.Loss { background: rgba(248,81,73,.18); color: var(--bad); }
+  .result.unknown { background: #222a35; color: var(--dim); }
+  .stats4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat .v { font-size: 26px; font-weight: 700; }
+  .stat .k { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .stat .s { color: var(--dim); font-size: 12px; margin-top: 2px; }
+  .tl { position: relative; height: 150px; margin: 22px 18px 4px; }
+  .tl .axis { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--line); }
+  .tl .tick { position: absolute; top: 6px; font-size: 11px; color: var(--dim); transform: translateX(-50%); }
+  .tl .item { position: absolute; transform: translateX(-50%); text-align: center; }
+  .tl .item img, .tl .item .ph { width: 34px; height: 34px; border-radius: 7px; border: 2px solid var(--line); display: block; background: var(--panel2); }
+  .tl .item .m { font-size: 11px; }
+  .tl .item.late img { border-color: var(--bad); } .tl .item.early img { border-color: var(--good); }
+  .tl .bench { position: absolute; top: 0; height: 66px; border-left: 2px dashed rgba(227,179,65,.55); }
+  .tl .bench span { position: absolute; top: -14px; left: 3px; font-size: 10px; color: var(--gold); white-space: nowrap; }
+  .tl .death { position: absolute; top: 0; transform: translateX(-50%); text-align: center; color: var(--bad); font-size: 11px; }
+  .tl .death::before { content: ""; display: block; width: 10px; height: 10px; margin: 0 auto 2px; background: var(--bad); transform: rotate(45deg); }
+  .legend { color: var(--dim); font-size: 12px; margin-top: 8px; }
+  .hist { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 10px; }
+  .hist .hcol { flex: 1; max-width: 46px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+  .hist .bar { border-radius: 6px 6px 0 0; min-height: 4px; }
+  .hist .bar.good { background: var(--good); } .hist .bar.ok { background: var(--warn); } .hist .bar.low { background: var(--bad); }
+  .hist .v { font-size: 11px; }
+  .hist .wl { font-size: 11px; font-weight: 700; margin-top: 3px; }
+  .hist .wl.Win { color: var(--good); } .hist .wl.Loss { color: var(--bad); }
+
+  .center { text-align: center; padding: 50px 20px; }
+  .center h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; }
+  #demo { position: fixed; left: 12px; bottom: 12px; background: #3d2a6b; color: #e6dcff; border: 1px solid #7c5cd6;
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 600; z-index: 5; }
+  #offline { position: fixed; inset: auto 0 0 0; background: var(--bad); color: #fff; text-align: center; padding: 6px; font-size: 14px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="demo" class="hidden"></div>
+<div id="offline" class="hidden">leeg isn't running, or it lost the page. Start it with <b>leeg</b> in WSL.</div>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mmss = t => { t = Math.max(0, Math.round(t)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');           // notes use **bold**
+const csClass = (v, target) => v >= target ? 'good' : v >= target - 1.5 ? 'ok' : 'low';
+const STATE_LABEL = { SNOWBALLING: ['fed', 'bad'], AHEAD: ['ahead', 'warn'] };
+const TAG_LABEL = { 'HARD-CC': 'hard CC', 'ATTACK-SPEED': 'attack speed', HEALING: 'healing', TANK: 'tank', ASSASSIN: 'assassin', CRIT: 'crit' };
+
+let raw = '', state = null;
+const expanded = new Set();   // enemy names the user opened (survives re-renders)
+const collapsed = new Set();  // auto-opened cards the user closed
+
+function age() { return state ? (Date.now() / 1000 - state.at) : 0; }
+
+// Live text that ticks between renders: clocks, countdowns, "Ns ago".
+function tick() {
+  for (const el of document.querySelectorAll('[data-clock]')) el.textContent = mmss(+el.dataset.clock + age());
+  for (const el of document.querySelectorAll('[data-cd]')) {
+    const left = Math.max(0, +el.dataset.cd - age());
+    el.textContent = el.dataset.fmt === 'timer' ? (left === 0 ? 'UP' : mmss(left)) : `${Math.round(left)}s`;
+  }
+  for (const el of document.querySelectorAll('[data-ago]')) el.textContent = `${Math.round(Math.max(0, Date.now() / 1000 - +el.dataset.ago))}s ago`;
+  if (state && state.mode === 'game') document.title = `${mmss(state.time + age())} · leeg`;
+}
+
+/* ---------- shared pieces ---------- */
+function tiles(items) {
+  return `<div class="tiles">${(items || []).map(it => {
+    const cls = it.owned ? 'owned' : it.next ? 'next' : 'future';
+    const img = it.icon ? `style="background-image:url('${esc(it.icon)}')"` : '';
+    return `<div class="tile ${cls}" title="${esc(it.name)}"><div class="img" ${img}>${it.icon ? '' : esc(it.name)}</div>
+      <div class="cost num">${it.owned ? '&nbsp;' : (it.cost ? it.cost + 'g' : '')}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function bars(n) { return `<span class="bars">${[1, 2, 3].map(i => `<i class="${i <= (n || 0) ? 'on' : ''}"></i>`).join('')}</span>`; }
+
+function cdText(cd) {
+  if (!cd || !cd.length) return '';
+  if (cd.every(x => x === cd[0])) return `${cd[0]}s`;
+  return cd.length > 3 ? `${cd[0]}→${cd[cd.length - 1]}s` : `${cd.join('/')}s`;
+}
+
+function kitBlock(kit) {
+  if (!kit) return '<div class="dim" style="margin-top:8px">Kit loading…</div>';
+  const st = kit.style || {};
+  return `<div class="styles">
+      <span>${esc(kit.damage || '?')} · ${esc(kit.attack || '?')}</span>
+      <span>damage${bars(st.damage)}</span><span>toughness${bars(st.durability)}</span>
+      <span>CC${bars(st.crowdControl)}</span><span>mobility${bars(st.mobility)}</span></div>
+    ${kit.abilities.map(a => `<div class="ab">${a.icon ? `<img src="${esc(a.icon)}" alt="">` : ''}
+      <div class="grow"><span class="key">${esc(a.key)}</span><b>${esc(a.name)}</b><span class="cd num">${cdText(a.cd)}</span>
+      <div class="desc">${esc(a.desc)}</div></div></div>`).join('')}`;
+}
+
+function notesBlock(c) {
+  const parts = [];
+  if (c.note_personal) parts.push(`<div class="srclbl">Your notes ${c.tier ? `<span class="tier ${esc(c.tier)}">${esc(c.tier)}</span>` : ''}</div><div class="note">${md(c.note_personal)}</div>`);
+  if (c.note_auto) parts.push(`<div class="srclbl">Auto notes · generated, may be wrong</div><div class="note auto">${esc(c.note_auto)}</div>`);
+  return parts.length ? `<div class="notes">${parts.join('')}</div>` : '';
+}
+
+function isOpen(c, auto) { return expanded.has(c.name) || (auto && !collapsed.has(c.name)); }
+
+function enemyCard(c, { auto = false, focus = '' } = {}) {
+  const open = isOpen(c, auto);
+  const st = STATE_LABEL[c.state];
+  const chips = [
+    c.lane ? '<span class="chip accent">your lane</span>' : '',
+    st ? `<span class="chip ${st[1]}">${st[0]}</span>` : c.low ? '<span class="chip plain">low threat</span>' : '',
+    c.kind ? `<span class="chip plain">${esc(c.kind)}</span>` : '',
+    ...(c.tags || []).filter(t => t !== 'TANK' || c.kind === 'Tank').map(t => `<span class="chip plain">${esc(TAG_LABEL[t] || t)}</span>`),
+  ].join(' ');
+  return `<div class="enemy ${c.state || ''} ${c.low ? 'low' : ''} ${c.dead ? 'isdead' : ''}">
+    <div class="ehead" data-toggle="${esc(c.name)}" data-auto="${auto ? 1 : 0}">
+      <div class="portrait">${c.icon ? `<img src="${esc(c.icon)}" alt="">` : ''}
+        ${c.level ? `<span class="lvl">${esc(c.level)}</span>` : ''}
+        ${c.dead ? `<span class="deadt num" data-cd="${c.respawn}">${c.respawn}s</span>` : ''}</div>
+      <div class="grow">
+        <div class="row" style="gap:6px"><span class="ename">${esc(c.name)}</span>
+          ${c.k !== undefined ? `<span class="emeta num">${c.k}/${c.d}/${c.a}</span>` : `<span class="emeta">${esc(c.pos || '')}</span>`}
+          ${c.tier && c.k === undefined ? `<span class="tier ${esc(c.tier)}">${esc(c.tier)}</span>` : ''}
+          ${focus ? `<span class="focuslbl">${esc(focus)}</span>` : ''}</div>
+        <div class="row" style="gap:5px;margin-top:3px">${chips}</div>
+      </div>
+      ${c.items ? `<div class="minis">${c.items.map(i => i.icon ? `<img src="${esc(i.icon)}" title="${esc(i.name)}" alt="">` : '').join('')}</div>` : ''}
+      <span class="chev">${open ? '▾' : '▸'}</span>
+    </div>
+    ${open ? `<div class="ebody">${kitBlock(c.kit)}${notesBlock(c)}${c.extra || ''}</div>` : ''}
+  </div>`;
+}
+
+function timerBox(label, t) {
+  if (t === null || t === undefined) return `<div class="timer"><div class="k">${label}</div><div class="t dim">—</div></div>`;
+  const left = t === 0 ? 0 : Math.max(0, t - age());
+  const cls = left === 0 ? 'up' : left <= 60 ? 'soon' : '';
+  return `<div class="timer ${cls}"><div class="k">${label}</div><div class="t num" data-cd="${t === 0 ? 0 : t}" data-fmt="timer">${left === 0 ? 'UP' : mmss(left)}</div></div>`;
+}
+
+function threatsLine(th) {
+  const order = ['HEALING', 'HARD-CC', 'ASSASSIN', 'CRIT', 'ATTACK-SPEED', 'TANK'];
+  const parts = order.filter(k => th && th[k] && th[k].length).map(k => `<span><b>${esc(TAG_LABEL[k] || k)}</b>${th[k].map(esc).join(', ')}</span>`);
+  return parts.length ? `<div class="threats">${parts.join('')}</div>` : '<div class="dim">No standout threats tagged.</div>';
+}
+
+/* ---------- in game ---------- */
+function csPerMin(s) {
+  const mins = (s.time + age()) / 60;
+  if (mins < 2) return '';
+  const v = s.you.cs / mins;
+  return ` <b class="csm ${csClass(v, s.cs_target)}" title="target ${s.cs_target}/min">(${v.toFixed(1)}/min)</b>`;
+}
+
+function drakeBox(d) {
+  const soul = d.you === 3 ? ' <span class="chip good">SOUL POINT</span>' : d.them === 3 ? ' <span class="chip bad">THEIR SOUL POINT</span>' : '';
+  return `<div class="timer"><div class="k">Drakes you–them</div><div class="t num">${d.you}<span class="dim">–</span>${d.them}${soul}</div></div>`;
+}
+
+function renderGame(s) {
+  const y = s.you, c = s.coach, o = s.objectives;
+  const live = c.live, build = live ? live.items : (s.build ? s.build.items : []);
+  const buildLabel = live ? (live.diverged ? 'coach · changed from default' : 'coach') : (s.build ? 'default' : '');
+  const coachAge = c.bullet_at ? Math.max(0, Date.now() / 1000 - c.bullet_at) : null;
+  const leadCls = o && o.gold_lead !== null ? (o.gold_lead >= 0 ? 'pos' : 'neg') : '';
+  const enemies = s.enemies || [];
+  const early = s.time < 90;
+  const lane = enemies.find(e => e.lane);
+  const focus = enemies.find(e => e.state === 'SNOWBALLING') || lane || enemies[0];
+  const focusName = y.dead && focus ? focus.name : null;
+
+  const header = `<header class="panel row">
+    ${y.icon ? `<img class="champ" src="${esc(y.icon)}" alt="">` : ''}
+    <div class="grow">
+      <div class="name">${esc(y.champ)} <span class="dim" style="font-size:15px">lvl ${esc(y.level ?? '?')}</span></div>
+      <div class="stats num">${y.k}/${y.d}/${y.a} · ${y.cs} cs${csPerMin(s)} · <b style="color:var(--gold)">${y.gold}g</b></div>
+    </div>
+    ${y.dead ? `<span class="youdead">DEAD <span data-cd="${y.respawn}">${y.respawn}s</span></span>` : ''}
+    <div class="clock num" data-clock="${s.time}">${mmss(s.time + age())}</div>
+    <span class="dot ${c.enabled ? 'on' : 'off'}" title="coach ${c.enabled ? 'on' : 'off'}"></span>
+  </header>`;
+
+  const left = `
+  <section id="coach" class="panel ${coachAge !== null && coachAge < 20 ? 'fresh' : ''}">
+    <div class="label">Coach</div>
+    ${c.error ? `<div class="err">coach off: ${esc(c.error)}</div>` : ''}
+    <div class="text">${c.bullet ? esc(c.bullet) : '<span class="dim">waiting for the first call…</span>'}</div>
+    ${c.bullet_at ? `<div class="age" data-ago="${c.bullet_at}"></div>` : ''}
+  </section>
+  ${s.hint ? `<section id="hint" class="panel ${s.hint.back ? 'back' : ''}">${esc(s.hint.text)}</section>` : ''}
+  ${build.length ? `<section class="panel">
+    <div class="row" style="justify-content:space-between"><div class="label" style="margin:0">Build · ${esc(buildLabel)}</div>
+      <div class="buildname">${s.build ? esc(s.build.name) : ''}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div></div>
+    <div style="margin-top:10px">${tiles(build)}</div>
+    ${live && live.diverged && live.reason ? `<div class="reason">${esc(live.reason)}</div>` : ''}
+  </section>` : ''}
+  ${o ? `<section class="panel"><div class="label">Objectives</div><div class="timers">
+      ${timerBox('Drake', o.drake)}${timerBox('Baron', o.baron)}${drakeBox(o.drakes)}
+      ${o.grubs ? `<div class="timer"><div class="k">Grubs taken</div><div class="t num">${o.grubs}</div></div>` : ''}
+      ${o.gold_lead !== null ? `<div class="timer"><div class="k">Item gold</div><div class="t num lead ${leadCls}">${(o.gold_lead >= 0 ? '+' : '') + (o.gold_lead / 1000).toFixed(1)}k</div></div>` : ''}
+    </div></section>` : ''}`;
+
+  // Right column density follows how much time you have: game plan in the first
+  // 90s, the main threat opened up while you're dead, compact strip otherwise.
+  let right = '';
+  if (early) {
+    right += `<section class="panel"><div class="label">Game plan</div>
+      ${threatsLine(s.plan && s.plan.threats)}
+      ${s.plan && s.plan.win_condition ? `<div class="srclbl" style="margin-top:12px">Win condition (your playbook)</div><div class="plan">${md(s.plan.win_condition)}</div>` : ''}
+    </section>`;
+  }
+  if (y.dead && focus) {
+    right += `<section class="panel"><div class="label">While you're dead</div>${enemyCard(focus, { auto: true, focus: focus.state === 'SNOWBALLING' ? 'biggest threat' : 'your lane' })}</section>`;
+  }
+  const autoOpen = e => (early && e.lane);
+  right += `<section class="panel"><div class="label">Enemies <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
+    ${enemies.filter(e => e.name !== focusName).map(e => enemyCard(e, { auto: autoOpen(e) })).join('') || '<div class="dim">No enemy data yet.</div>'}
+  </section>`;
+
+  return `${header}<div class="cols"><div class="col">${left}</div><div class="col">${right}</div></div>`;
+}
+
+/* ---------- champ select ---------- */
+function renderCS(s) {
+  const lane = s.enemies.find(e => e.lane);
+  if (lane) {
+    const rec = lane.record ? `<div class="srclbl">Your record</div><div class="record">${lane.record[0]}W – ${lane.record[1]}L vs ${esc(lane.name)} on ${esc(s.you.champ)}</div>` : '';
+    const hints = (lane.rune_hints || []).map(h => `<div class="quote"><div class="from">${esc(h.from)}</div>${md(h.text)}</div>`).join('');
+    lane.extra = `<div class="notes">${rec}${hints ? `<div class="srclbl">Runes for this lane</div>${hints}` : ''}</div>`;
+  }
+  const runes = (s.runes || []).map((p, i) => `<div class="runepage"><div class="row" style="gap:8px"><b>${esc(p.name)}</b>${i === 0 ? '<span class="chip good">default</span>' : ''}</div>
+    ${p.lines.map(l => `<div class="rl">${md(l)}</div>`).join('')}</div>`).join('');
+  return `<header class="panel row">
+    ${s.you.icon ? `<img class="champ" src="${esc(s.you.icon)}" alt="">` : ''}
+    <div class="grow"><div class="name">${esc(s.you.champ)} <span class="dim" style="font-size:15px">${esc(s.you.pos)}</span></div>
+      <div class="stats">Champ select · ${esc((s.phase || '').replace(/_/g, ' ').toLowerCase())}</div></div>
+  </header>
+  <div class="cols">
+    <div class="col">
+      ${s.build ? `<section class="panel"><div class="label">Planned build · ${esc(s.build.name)}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div>${tiles(s.build.items)}</section>` : ''}
+      ${runes ? `<section class="panel"><div class="label">Rune pages (your build guide)</div>${runes}</section>` : ''}
+    </div>
+    <div class="col"><section class="panel"><div class="label">Enemy picks <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
+      ${s.enemies.length ? s.enemies.map(e => enemyCard(e, { auto: e.lane })).join('') : '<div class="dim">Enemy picks not visible yet.</div>'}
+    </section></div>
+  </div>`;
+}
+
+/* ---------- between games ---------- */
+function timeline(g) {
+  const D = Math.max(g.duration, 60), pct = t => Math.min(100, Math.max(0, t / D * 100));
+  const timed = g.items.filter(i => i.t !== null && i.t !== undefined).sort((a, b) => a.t - b.t);
+  const bench = g.item_bench || [];
+  let legN = 0, prev = -99, row = 0;
+  const items = timed.map(i => {
+    let cls = '';
+    if (!i.boots) { const b = bench[legN++]; if (b !== undefined) cls = i.t / 60 <= b ? 'early' : i.t / 60 > b + 1 ? 'late' : ''; }
+    const p = pct(i.t); row = (p - prev < 6) ? 1 - row : 0; prev = p;
+    return `<div class="item ${cls}" style="left:${p}%;top:${row ? 42 : 0}px" title="${esc(i.name)} at ${mmss(i.t)}">
+      ${i.icon ? `<img src="${esc(i.icon)}" alt="">` : '<div class="ph"></div>'}<div class="m num">${mmss(i.t)}</div></div>`;
+  }).join('');
+  const benches = bench.map((m, n) => m * 60 < D ? `<div class="bench" style="left:${pct(m * 60)}%"><span>median #${n + 1} ${mmss(m * 60)}</span></div>` : '').join('');
+  const ticks = []; for (let m = 5; m * 60 < D; m += 5) ticks.push(`<div class="tick" style="left:${pct(m * 60)}%">${m}m</div>`);
+  const deaths = g.deaths.map(t => `<div class="death num" style="left:${pct(t)}%">${mmss(t)}</div>`).join('');
+  return `<div class="tl"><div style="position:absolute;left:0;right:0;top:0;height:84px">${benches}${items}</div>
+    <div style="position:absolute;left:0;right:0;top:86px"><div class="axis"></div>${ticks.join('')}
+      <div style="position:absolute;left:0;right:0;top:24px">${deaths}</div></div></div>`;
+}
+
+function renderReview(g, target, record) {
+  const cs10 = g.cs_marks['10'], cs15 = g.cs_marks['15'];
+  const early = g.deaths.filter(t => t < 900).length;
+  const legs = g.items.filter(i => !i.boots && i.t !== null && i.t !== undefined).sort((a, b) => a.t - b.t);
+  const first = legs[0], b1 = (g.item_bench || [])[0];
+  const firstDelta = first && b1 !== undefined ? first.t - b1 * 60 : null;
+  const untimed = g.items.filter(i => i.t === null || i.t === undefined);
+  const res = g.result || 'unknown';
+  return `<section class="panel">
+    <div class="row">
+      <span class="result ${res}">${g.result ? g.result.toUpperCase() : 'RESULT ?'}</span>
+      ${g.icon ? `<img src="${esc(g.icon)}" alt="" style="width:40px;height:40px;border-radius:8px">` : ''}
+      <div class="grow"><b>${esc(g.champ)}</b>${g.vs ? ` <span class="dim">vs</span> ${g.vs_icon ? `<img src="${esc(g.vs_icon)}" alt="" style="width:26px;height:26px;border-radius:6px;vertical-align:middle">` : ''} <b>${esc(g.vs)}</b>` : ''}
+        · <span class="num">${g.k}/${g.d}/${g.a}</span> · lvl ${esc(g.level)} · <span class="num">${mmss(g.duration)}</span>
+        ${record ? ` · <span class="record">${record.w}W–${record.l}L</span> <span class="dim">in this matchup</span>` : ''}</div>
+      <span class="dim">${esc(g.date)}</span>
+    </div>
+    <div class="stats4">
+      <div class="stat"><div class="k">CS / min</div><div class="v num csm ${csClass(g.cs_min, target)}">${g.cs_min}</div><div class="s">target ${target} · ${g.cs} total</div></div>
+      <div class="stat"><div class="k">CS at 10 min</div><div class="v num ${cs10 !== undefined ? 'csm ' + csClass(cs10 / 10, target) : 'dim'}">${cs10 ?? '—'}</div><div class="s">target ${Math.round(target * 10)}${cs15 !== undefined ? ` · ${cs15} at 15` : ''}</div></div>
+      <div class="stat"><div class="k">Deaths before 15</div><div class="v num ${early === 0 ? 'csm good' : early <= 2 ? 'csm ok' : 'csm low'}">${early}</div><div class="s">${g.d} total</div></div>
+      <div class="stat"><div class="k">First item</div><div class="v num ${firstDelta === null ? '' : firstDelta <= 0 ? 'csm good' : firstDelta <= 60 ? 'csm ok' : 'csm low'}">${first ? mmss(first.t) : '—'}</div>
+        <div class="s">${first ? esc(first.name) : ''}${firstDelta !== null ? ` · median ${mmss(b1 * 60)} (${firstDelta > 0 ? '+' : '−'}${mmss(Math.abs(firstDelta))})` : ''}</div></div>
+    </div>
+    ${timeline(g)}
+    <div class="legend">Items above the line (green = at or before the median ${esc(g.champ)}, red = over a minute behind), deaths below.${g.joined ? ` leeg started at ${mmss(g.joined)}, so earlier timings are missing.` : ''}${untimed.length ? ` Owned before that: ${untimed.map(i => esc(i.name)).join(', ')}.` : ''}</div>
+  </section>`;
+}
+
+function renderHistory(h, target) {
+  if (h.length < 2) return '';
+  const avg = h.reduce((a, g) => a + (g.cs_min || 0), 0) / h.length;
+  const wins = h.filter(g => g.result === 'Win').length;
+  return `<section class="panel">
+    <div class="label">Last ${h.length} games · ${wins}W ${h.filter(g => g.result === 'Loss').length}L · avg <span class="csm ${csClass(avg, target)}">${avg.toFixed(1)}</span> cs/min</div>
+    <div class="hist">${h.map(g => `<div class="hcol" title="${esc(g.champ)}${g.vs ? ' vs ' + esc(g.vs) : ''} · ${esc(g.date)}">
+      <div class="v num">${g.cs_min}</div><div class="bar ${csClass(g.cs_min, target)}" style="height:${Math.min(100, g.cs_min / 10 * 100)}%"></div>
+      <div class="wl ${esc(g.result || '')}">${g.result ? g.result[0] : '?'}</div></div>`).join('')}</div>
+  </section>`;
+}
+
+function renderIdle(s) {
+  const waiting = `<div class="panel row"><span class="dot ${s.client ? 'on' : ''}"></span>
+    <div class="grow"><b>Waiting for a game.</b> <span class="dim">${s.client ? 'League client is open; this page switches on its own in champ select and in game.' : 'League client not detected yet.'}</span></div></div>`;
+  if (!s.last) return waiting + `<div class="panel center"><h1>No games recorded yet</h1><div class="dim">Your post-game review shows up here after your next game.</div></div>`;
+  return waiting + `<div class="label" style="margin:6px 2px 0">Last game</div>` + renderReview(s.last, s.cs_target, s.record) + renderHistory(s.history, s.cs_target);
+}
+
+/* ---------- loop ---------- */
+function render() {
+  if (!state) return;
+  $('#app').innerHTML = state.mode === 'game' ? renderGame(state) : state.mode === 'cs' ? renderCS(state) : renderIdle(state);
+  const d = state.demo, badge = $('#demo');
+  badge.classList.toggle('hidden', !d);
+  if (d) {
+    const names = { cs: 'champ select', early: 'first 90 seconds', mid: 'mid-game', dead: 'while dead', review: 'post-game review' };
+    badge.innerHTML = `DEMO · made-up game · ${esc(names[d.view] || d.view)}${d.left !== null ? ` · next view in <span data-cd="${d.left}">${d.left}s</span>` : ''}`;
+  }
+  tick();
+}
+
+$('#app').addEventListener('click', e => {
+  const h = e.target.closest('[data-toggle]');
+  if (!h) return;
+  const name = h.dataset.toggle, auto = h.dataset.auto === '1';
+  const open = expanded.has(name) || (auto && !collapsed.has(name));
+  if (open) { expanded.delete(name); if (auto) collapsed.add(name); }
+  else { expanded.add(name); collapsed.delete(name); }
+  render();
+});
+
+let lastMode = '';
+async function poll() {
+  try {
+    const r = await fetch('/state', { cache: 'no-store' });
+    const text = await r.text();
+    $('#offline').classList.add('hidden');
+    if (text !== raw) {          // re-render only on change; tick() keeps timers moving
+      raw = text; state = JSON.parse(text);
+      if (lastMode && state.mode !== lastMode) { expanded.clear(); collapsed.clear(); }
+      lastMode = state.mode;
+      render();
+    }
+  } catch (e) {
+    $('#offline').classList.remove('hidden');
+  }
+}
+
+// #open=Kayn,Viego pre-opens cards (bookmarks, screenshot tests)
+for (const n of decodeURIComponent((location.hash.match(/open=([^&]*)/) || [])[1] || '').split(',')) if (n) expanded.add(n);
+
+poll();
+setInterval(poll, 1000);
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

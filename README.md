@@ -21,6 +21,10 @@ python tools/live.py
 
 Leave it running. It waits at "WAITING FOR GAME" until you load into a match, then renders. Auto-detects your champion from the live API — pass `--champ <name>` to force a specific profile.
 
+**Second-monitor page:** it opens <http://localhost:8765> in your Windows browser on start (WSL2 forwards it), unless a tab is already showing it, so restarts don't stack tabs. Drag that tab to the second monitor once and leave it; it reconnects on its own. `--no-open` skips opening it. Same minimal screen as the terminal, with item and champion icons: coach tip, next buy, build (owned / next / later), drake and baron timers, item-gold lead, enemies dead. On a wide window it splits into two columns: you on the left, the enemy team on the right as cards with each champion's real kit (ability icons, names, cooldowns, what each ability does, from CommunityDragon), your matchup notes, and live items/KDA with a fed / ahead / low-threat read. The page shows more when you have time: a game plan in the first 90 seconds, the biggest threat opened up while you're dead, a compact strip otherwise (click any enemy to open it). Champ select shows your rune pages, your notes on the lane opponent and your record against them. It switches to champ select and back on its own. Between games it shows a **post-game review** of your last game (CS/min and CS at 10 vs a 7/min target, deaths before 15, item timings vs the median for your champion, an item/death timeline) and a CS/min trend for recent games; history is kept in `data/games.jsonl`. `--web-port N` changes the port, `--no-web` turns it off.
+
+**Preview without a game:** `python tools/live.py --demo` serves the page with a made-up game (Mundo vs a fed crit Garen) and cycles champ select → first 90 seconds → mid-game → dead → post-game review. Real kits, icons and notes; no coach calls, nothing saved. `--demo mid` (or `cs`, `early`, `dead`, `review`) holds one view. If `leeg` is already running it moves to the next port.
+
 ### AI coach setup (optional)
 
 Get a key at [console.anthropic.com](https://console.anthropic.com) → API Keys. Note: Claude Pro and the API are separate billing systems.
@@ -177,6 +181,7 @@ leeg-coach/
 
 ### Working
 - Minimal in-game screen: coach tip, build + next-buy hint, drake/baron timers, gold lead, enemies dead
+- Local web page for a second monitor (`http://localhost:8765`): the same screen with item/champion icons, plus champ select and a post-game review with CS and item-timing benchmarks
 - AI coach: Claude Sonnet 4.6, prompt caching, build commitment, 5-call history, 11+ event triggers
 - Comp-aware threat tags (HEALING / HARD-CC / ATTACK-SPEED / TANK / ASSASSIN / CRIT) with stacking flags
 - Macro signals: game phase, team item-gold lead, power-spike item annotation

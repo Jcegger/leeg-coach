@@ -27,3 +27,7 @@ Thumbs.db
 /tmp/
 *.log.*
 data/.live.lock
+
+# Per-game history for the post-game review (personal)
+data/games.jsonl
+data/champ_kits.json
