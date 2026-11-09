@@ -2224,7 +2224,7 @@ _REFUSAL_PHRASES = {
 
 def _is_valid_champ_notes(text):
     low = text.lower()
-    if any(p in low for p in _REFUSAL_PHRASES):
+    if any(p in low for p in _REFUSAL_PHRASES) or _REMOVED_ITEMS_RE.search(text):
         return False
     if '- q ' not in low and '- q(' not in low:
         return False
@@ -2235,7 +2235,7 @@ def _is_valid_champ_notes(text):
 
 def _is_valid_matchup_notes(text):
     low = text.lower()
-    if any(p in low for p in _REFUSAL_PHRASES):
+    if any(p in low for p in _REFUSAL_PHRASES) or _REMOVED_ITEMS_RE.search(text):
         return False
     bullets = [ln for ln in text.splitlines() if ln.strip().startswith('- ')]
     return len(bullets) >= 4
@@ -3000,10 +3000,36 @@ def kit_reference(kit):
 # Removed from the game (mythics went in 2024). Generated notes citing these get
 # regenerated; the prompts name them so Haiku stops suggesting them.
 _REMOVED_ITEMS_RE = re.compile(
-    r'mythic|duskblade|goredrinker|\bdivine\b|everfrost|galeforce|prowler|turbo chemtank|night harvester',
+    r'mythic|duskblade|goredrinker|\bdivine\b(?! judgment)|everfrost|galeforce|prowler|turbo chemtank|night harvester',
     re.IGNORECASE)
-_PROMPT_ITEM_RULE = ('Mythic items no longer exist, and Duskblade, Goredrinker, Divine Sunderer, Everfrost, '
-                     'Galeforce, Prowler\'s Claw, Turbo Chemtank and Night Harvester were removed from the game. ')
+# Naming the removed items primed Haiku to write about them ("Everfrost removal means
+# he spikes later"), so the rule stays generic and the validators reject any hit.
+_PROMPT_ITEM_RULE = ('Name only items that exist in the current game; never mention mythic items, '
+                     'removed items, or item removals. ')
+
+
+def note_needed(entry, patch):
+    """A cached Haiku note needs (re)generating when missing or 3+ patches stale."""
+    if not entry:
+        return True
+    current, stored = parse_patch(patch or ''), parse_patch(entry.get('patch', ''))
+    if not (current and stored):
+        return False  # can't compare, keep existing
+    return (current[1] - stored[1] >= 3) if current[0] == stored[0] else True
+
+
+def _merge_disk_notes(path, version, field, mine, drop=None):
+    """Entries another leeg process saved since we loaded (we only add keys we lack),
+    so two processes writing the same cache don't erase each other's notes."""
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return
+    if data.get('version') != version:
+        return
+    for k, v in (data.get(field) or {}).items():
+        if k not in mine and not (drop and drop(v)):
+            mine[k] = v
 
 
 class ChampDB:
@@ -3033,13 +3059,16 @@ class ChampDB:
             try:
                 data = json.loads(self._NOTES_PATH.read_text())
                 if data.get('version') == self._CACHE_VERSION:
-                    self._notes = data.get('champions', {})
+                    self._notes = {k: v for k, v in data.get('champions', {}).items()
+                                   if not _REMOVED_ITEMS_RE.search(v.get('notes', ''))}
                 # else: old version — leave _notes empty so notes regen in new format.
             except Exception:
                 pass
 
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
+        _merge_disk_notes(self._NOTES_PATH, self._CACHE_VERSION, 'champions', self._notes,
+                          drop=lambda v: _REMOVED_ITEMS_RE.search(v.get('notes', '')))
         self._NOTES_PATH.write_text(
             json.dumps({'version': self._CACHE_VERSION, 'champions': self._notes}, indent=2)
         )
@@ -3059,16 +3088,8 @@ class ChampDB:
         with self._lock:
             if key in self._pending:
                 return
-            entry = self._notes.get(key)
-            if entry:
-                current = parse_patch(self.patch)
-                stored = parse_patch(entry.get('patch', ''))
-                if current and stored:
-                    stale = (current[1] - stored[1] >= 3) if current[0] == stored[0] else True
-                    if not stale:
-                        return
-                else:
-                    return  # can't compare, keep existing
+            if not note_needed(self._notes.get(key), self.patch):
+                return
             self._pending.add(key)
         threading.Thread(target=self._generate, args=(champ_name, key), daemon=True).start()
 
@@ -3168,6 +3189,8 @@ class MatchupDB:
 
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
+        _merge_disk_notes(self._NOTES_PATH, self._CACHE_VERSION, 'pairs', self._notes,
+                          drop=lambda v: _REMOVED_ITEMS_RE.search(v.get('notes', '')))
         self._NOTES_PATH.write_text(
             json.dumps({'version': self._CACHE_VERSION, 'pairs': self._notes}, indent=2)
         )
@@ -3191,16 +3214,8 @@ class MatchupDB:
         with self._lock:
             if key in self._pending:
                 return
-            entry = self._notes.get(key)
-            if entry:
-                current = parse_patch(self.patch)
-                stored = parse_patch(entry.get('patch', ''))
-                if current and stored:
-                    stale = (current[1] - stored[1] >= 3) if current[0] == stored[0] else True
-                    if not stale:
-                        return
-                else:
-                    return  # can't compare, keep existing
+            if not note_needed(self._notes.get(key), self.patch):
+                return
             self._pending.add(key)
         threading.Thread(
             target=self._generate,
@@ -4927,7 +4942,28 @@ def parse_lockfile(p):
     }
 
 
+_WIN_CURL = '/mnt/c/Windows/System32/curl.exe'
+_lcu_via_windows = False  # set once Windows curl.exe worked and the direct hosts didn't
+
+
+def _lcu_get_windows(lockinfo, path):
+    """WSL2 on Win10 can't reach the client's API (random port, no portproxy), but a
+    Windows exe started from WSL runs on the Windows side: curl.exe reaches 127.0.0.1
+    there (~0.15s). Password goes in through stdin, not argv."""
+    try:
+        r = subprocess.run([_WIN_CURL, '-skf', '--max-time', '2', '-K', '-',
+                            f'https://127.0.0.1:{lockinfo["port"]}{path}'],
+                           input=f'user = "riot:{lockinfo["password"]}"\n', capture_output=True,
+                           text=True, timeout=4, cwd='/mnt/c')
+        return json.loads(r.stdout) if r.returncode == 0 and r.stdout else None
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
+        return None
+
+
 def lcu_get(lockinfo, path, hosts):
+    global _lcu_via_windows
+    if _lcu_via_windows:
+        return _lcu_get_windows(lockinfo, path)
     auth = base64.b64encode(f'riot:{lockinfo["password"]}'.encode()).decode()
     for h in hosts:
         url = f'https://{h}:{lockinfo["port"]}{path}'
@@ -4937,12 +4973,86 @@ def lcu_get(lockinfo, path, hosts):
                 return json.loads(resp.read())
         except (URLError, ConnectionError, TimeoutError, json.JSONDecodeError):
             continue
+    if os.path.exists(_WIN_CURL):
+        # Probe a path that always answers while the client is up, so a 404
+        # (not in champ select) doesn't hide that the route works.
+        if _lcu_get_windows(lockinfo, '/lol-gameflow/v1/gameflow-phase') is not None:
+            _lcu_via_windows = True
+            log.info('lcu: reaching the client through Windows curl.exe')
+            return _lcu_get_windows(lockinfo, path)
     return None
 
 
 def fetch_champ_select(lockinfo, hosts):
     """Returns the champ select session, or None if not in champ select."""
     return lcu_get(lockinfo, '/lol-champ-select/v1/session', hosts)
+
+
+def build_notes(only=None, workers=6):
+    """--build-notes: generate every missing/stale ChampDB note and MatchupDB pair
+    (each champion folder vs every champion) now instead of on first sight in a game."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    coach = Coach()
+    if not coach.enabled:
+        print(f'coach disabled — {coach.error_msg}', file=sys.stderr)
+        return
+    champ_index, _ = fetch_champion_index()
+    if not champ_index:
+        print('could not load the champion list (CommunityDragon)', file=sys.stderr)
+        return
+    set_web_champ_index(champ_index)
+    patch = fetch_current_patch()
+    global _kit_db
+    _kit_db = KitDB(patch=patch)
+    cdb = ChampDB(client=coach.client, patch=patch, kit_db=_kit_db)
+    mdb = MatchupDB(client=coach.client, patch=patch, kit_db=_kit_db)
+    names = sorted(champ_index.values())
+    by_norm = {normalize(n): n for n in names}
+    players = []
+    for folder in available_champs():
+        if only and normalize(folder) not in {normalize(o) for o in only}:
+            continue
+        disp = by_norm.get(normalize(folder)) or next(
+            (n for n in names if CHAMP_ALIASES.get(normalize(n)) == folder), None)
+        if disp:
+            players.append(disp)
+    jobs = [('champ', n, None) for n in names if note_needed(cdb._notes.get(normalize(n)), patch)]
+    for pl in players:
+        jobs += [('pair', pl, n) for n in names
+                 if n != pl and note_needed(mdb._notes.get(mdb._key(pl, n)), patch)]
+    print(f'leeg notes · patch {patch} · players: {", ".join(players) or "none"} · '
+          f'{sum(j[0] == "champ" for j in jobs)} champion note(s) + '
+          f'{sum(j[0] == "pair" for j in jobs)} matchup pair(s) to generate', flush=True)
+
+    def run(job):
+        kind, a, b = job
+        if kind == 'champ':
+            key = normalize(a)
+            cdb._generate(a, key)
+            return cdb.get_note(a) is not None
+        mdb._generate(a, b, mdb._key(a, b))
+        return mdb.get_note(a, b) is not None
+
+    done, todo = 0, jobs
+    for attempt in range(3):  # failures are mostly timeouts or notes rejected by the validators
+        if not todo:
+            break
+        if attempt:
+            print(f'  retrying {len(todo)} failed', flush=True)
+        retry = []
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = {pool.submit(run, j): j for j in todo}
+            for n, fut in enumerate(as_completed(futs), 1):
+                if fut.result():
+                    done += 1
+                else:
+                    retry.append(futs[fut])
+                if n % 50 == 0 or n == len(todo):
+                    print(f'  {n}/{len(todo)}  ({len(retry)} failed)', flush=True)
+        todo = retry
+    failed = len(todo)
+    print(f'leeg notes · {done} generated, {failed} failed (rerun --build-notes to retry). '
+          f'Cached: {len(cdb._notes)} champion notes, {len(mdb._notes)} pairs.')
 
 
 def show_matchup_notes(player_champ):
@@ -5629,6 +5739,9 @@ CS_MARKS = (10, 15, 20)  # minutes
 LEGENDARY_MIN_COST = 2200
 
 
+IDLE_GRACE_S = 30
+
+
 class GameTracker:
     """Records the player's timeline each in-game poll; `finish()` writes a summary
     when the game ends (Live API gone, or a new game starts). Games under 5 min
@@ -5636,6 +5749,7 @@ class GameTracker:
 
     def __init__(self):
         self.g = None
+        self.last_seen = 0.0
         self.history = self._load()
 
     @staticmethod
@@ -5655,6 +5769,7 @@ class GameTracker:
     def update(self, data, me, your_champ, game_time, item_index, champ_folder):
         if not me:
             return
+        self.last_seen = time.time()
         if self.g and (game_time < self.g['time'] - 30 or your_champ != self.g['champ']):
             self.finish()
         if self.g is None:
@@ -5962,6 +6077,8 @@ def main():
                     help='stop an already-running leeg and start this one')
     ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
                     help='print all cached matchup pair notes for a player champion and exit')
+    ap.add_argument('--build-notes', dest='build_notes', nargs='*', metavar='CHAMP',
+                    help='generate all missing champion notes and matchup pairs now (optionally only for these champion folders) and exit')
     ap.add_argument('--sync-champ-constants', dest='sync_champ_constants', action='store_true',
                     help='print a patch-sync diff of champs missing from CHAMP_DAMAGE / CHAMP_THREAT_TAGS and exit')
     args = ap.parse_args()
@@ -5972,6 +6089,10 @@ def main():
 
     if args.show_matchups:
         show_matchup_notes(args.show_matchups)
+        return
+
+    if args.build_notes is not None:
+        build_notes(args.build_notes)
         return
 
     if args.sync_champ_constants:
@@ -6230,9 +6351,10 @@ def main():
             time.sleep(args.poll)
             continue
 
-        # Mode 3: idle
-        if tracker.g:
-            tracker.finish()
+        # Mode 3: idle. The live API drops out for a poll or two mid-game (loading
+        # spikes, Vanguard, reconnects); only call the game over after 30s without it,
+        # or one hiccup splits a game into a no-result record plus a "started late" one.
+        if tracker.g and time.time() - tracker.last_seen > IDLE_GRACE_S:
             last_state = None  # re-render idle with the new review
         if last_state != 'idle':
             try:

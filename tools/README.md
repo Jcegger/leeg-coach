@@ -5,7 +5,7 @@
 CLI that auto-detects which League state is active and renders a live tactical assistant. Three modes, in priority order:
 
 1. **In game** — polls the Live Client Data API on `https://127.0.0.1:2999`. Shows the full assistant: rule-based DO advice, objective timers, recent events, enemies with KDA/CS/items/level sorted by threat, plus an optional Claude-powered coach.
-2. **Champ select** — reads the LCU lockfile and queries the local League client. Shows bans + enemy picks as they lock in, with `← your lane` highlighted. Requires WSL2 mirrored networking (Win11 only) or running natively on Windows — the basic Win10 portproxy setup doesn't cover the LCU's dynamic port.
+2. **Champ select** — reads the LCU lockfile and queries the local League client. Shows bans + enemy picks as they lock in, with `← your lane` highlighted. On Win10 WSL2 the portproxy doesn't cover the LCU's random port, so leeg reaches it through Windows' own `curl.exe` (run from WSL, it connects from the Windows side); no setup needed.
 3. **Waiting** — idle banner with diagnostic info, including which champ profiles are available.
 
 The script also auto-detects **which champion you're playing** and loads the matching `leeg/<champ>/matchups.md` automatically (see "Champ resolution" below). No `--champ` flag needed for the common case.
@@ -218,7 +218,7 @@ netsh interface portproxy add v4tov4 listenport=2999 listenaddress=172.22.64.1 c
 New-NetFirewallRule -DisplayName "WSL LeagueLiveAPI" -Direction Inbound -Protocol TCP -LocalPort 2999 -Action Allow
 ```
 
-Replace `172.22.64.1` with your WSL gateway IP if different (`ip route | grep default` from WSL prints it). The `listenaddress=` must be the WSL gateway IP, **not** `0.0.0.0` — binding to `0.0.0.0` causes the proxy to intercept Windows-side `127.0.0.1:2999` traffic and self-loop instead of forwarding cleanly to the real Live API listener. Champ select uses a dynamic LCU port so this workaround doesn't cover it; for champ select on Win10 either upgrade to Win11 or run the script natively on Windows.
+Replace `172.22.64.1` with your WSL gateway IP if different (`ip route | grep default` from WSL prints it). The `listenaddress=` must be the WSL gateway IP, **not** `0.0.0.0` — binding to `0.0.0.0` causes the proxy to intercept Windows-side `127.0.0.1:2999` traffic and self-loop instead of forwarding cleanly to the real Live API listener. Champ select uses a dynamic LCU port this rule doesn't cover; leeg falls back to calling it through Windows `curl.exe` instead.
 
 **Alternative — run on Windows:** Copy or symlink this script to a Windows-accessible path and run with Windows Python. From PowerShell:
 

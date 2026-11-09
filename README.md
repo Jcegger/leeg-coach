@@ -8,7 +8,7 @@ The champion notes in this repo (`mundo/`, `sivir/`) are my own, but the tool wo
 
 - **Minimal in-game screen** — the coach's top tip, your build (rule-based pick, the coach's live build, next-buy hint), drake/baron timers with team item-gold lead, and who's dead on the enemy team. Matchup notes, events and comp signals are still gathered, but only the coach reads them.
 - **AI coach** (optional) — fires on significant events with 1–2 tactical bullets grounded in structured comp signals (threat tags, item-gold lead, phase, power spikes), per-pair matchup data, and your champion's playbook win-conditions / side-selection framing
-- **Auto-generated matchup notes** — Haiku-generated 4-6 sentence notes per (your champ, enemy champ) pair, cached to disk, refreshed when a patch is 3+ versions stale. Browse with `--show-matchups <champ>`.
+- **Auto-generated matchup notes** — Haiku-generated 4-6 sentence notes per (your champ, enemy champ) pair, cached to disk, refreshed when a patch is 3+ versions stale. Browse with `--show-matchups <champ>`; `--build-notes` fills the whole cache up front instead of on first sight.
 - **Voice output** (opt-in with `--tts`) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
 
 ## Quickstart
@@ -78,6 +78,7 @@ Hand-written notes in `<champ>/matchups.md` always take precedence — they show
 
 ```bash
 python tools/live.py --show-matchups Mundo   # browse all cached pairs for one champ
+python tools/live.py --build-notes          # generate every missing champion note + matchup pair now (~$2 from empty)
 ```
 
 ## Setup — WSL2 / Windows

@@ -181,6 +181,8 @@
     .chip { font-size: 10px; padding: 1px 6px; }
     .ab img { width: 32px; height: 32px; }
     .ab .desc { font-size: 13px; }
+    /* build stays in view: pinned to the top once you scroll past it */
+    .buildp { position: sticky; top: 0; z-index: 3; box-shadow: 0 6px 14px rgba(0,0,0,.45); }
   }
   /* soul point: a tag on the objectives panel at half screen (the in-box chip hides there) */
   .soulnote { display: none; }
@@ -336,8 +338,9 @@ function renderGame(s) {
   </header>`;
 
   // Stacking order at half screen: what you have time for comes first.
-  const O = early ? { dead: 0, coach: 1, plan: 2, enemies: 3, hint: 4, build: 5, obj: 6 }
-          : y.dead ? { dead: 1, coach: 2, hint: 3, build: 4, obj: 5, enemies: 6 }
+  // The build always sits right under the coach line (and sticks to the top when scrolled).
+  const O = early ? { coach: 1, hint: 2, build: 3, plan: 4, enemies: 5, obj: 6 }
+          : y.dead ? { coach: 1, hint: 2, build: 3, dead: 4, obj: 5, enemies: 6 }
           : { coach: 1, hint: 2, build: 3, obj: 4, enemies: 5 };
   const soul = o && o.drakes ? (o.drakes.you === 3 ? '<span class="chip good soulnote">YOUR SOUL POINT</span>'
              : o.drakes.them === 3 ? '<span class="chip bad soulnote">THEIR SOUL POINT</span>' : '') : '';
@@ -349,7 +352,7 @@ function renderGame(s) {
     ${c.bullet_at ? `<div class="age" data-ago="${c.bullet_at}"></div>` : ''}
   </section>
   ${s.hint ? `<section id="hint" ${ord(O.hint)} class="panel ${s.hint.back ? 'back' : ''}">${esc(s.hint.text)}</section>` : ''}
-  ${build.length ? `<section ${ord(O.build)} class="panel">
+  ${build.length ? `<section ${ord(O.build)} class="panel buildp">
     <div class="row" style="justify-content:space-between"><div class="label" style="margin:0">Build · ${esc(buildLabel)}</div>
       <div class="buildname">${s.build ? esc(s.build.name) : ''}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div></div>
     <div style="margin-top:10px">${tiles(build)}</div>
@@ -398,10 +401,10 @@ function renderCS(s) {
   </header>
   <div class="cols">
     <div class="col">
-      ${s.build ? `<section ${ord(2)} class="panel"><div class="label">Planned build · ${esc(s.build.name)}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div>${tiles(s.build.items)}</section>` : ''}
+      ${s.build ? `<section ${ord(1)} class="panel buildp"><div class="label">Planned build · ${esc(s.build.name)}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div>${tiles(s.build.items)}</section>` : ''}
       ${runes ? `<section ${ord(3)} class="panel"><div class="label">Rune pages (your build guide)</div>${runes}</section>` : ''}
     </div>
-    <div class="col"><section ${ord(1)} class="panel"><div class="label">Enemy picks <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
+    <div class="col"><section ${ord(2)} class="panel"><div class="label">Enemy picks <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
       ${s.enemies.length ? s.enemies.map(e => enemyCard(e, { auto: e.lane })).join('') : '<div class="dim">Enemy picks not visible yet.</div>'}
     </section></div>
   </div>`;
