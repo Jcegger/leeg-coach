@@ -128,7 +128,7 @@ You: Dr. Mundo (top)
 
 Kept short on purpose — build and objectives only:
 
-1. **Coach** — the latest call's top bullet, one line (the rest are spoken via TTS).
+1. **Coach** — the latest call's top bullet, one line (the rest are spoken when `--tts` is on).
 2. **Build** — comp label + rule-based build pick, the coach's live build (✓ on owned items), and a next-buy hint (highlighted when it's time to BACK).
 3. **Objectives** — drake / baron timers (approximate; event-driven last-kill + respawn), highlighted inside 60s. Also drakes/barons/grubs taken and team item-gold lead (`gold +1.2k`).
 4. **Enemies dead** — only when someone's down: `Lee Sin 12s, Darius 24s`, soonest respawn first.
@@ -194,22 +194,9 @@ Per game (~25–30 minutes, 10–15 coach calls):
 
 If `LEEG_ANTHROPIC_API_KEY` is unset or `pip install anthropic` hasn't been run, the coach disables silently — the build line, buy hint and timers still work.
 
-### Planned: text-to-speech for coach output
+### Voice (opt-in)
 
-Not yet implemented. Easiest path on Win10/WSL: invoke Windows SAPI from WSL via `powershell.exe`. Test from a WSL prompt:
-
-```bash
-powershell.exe -NoProfile -Command "(New-Object -ComObject SAPI.SpVoice).Speak('Push wave, Mord respawn 18 seconds')"
-```
-
-Implementation sketch:
-1. Add a `speak` field to `COACH_SCHEMA` — TTS-optimized 1-sentence summary (≤80 chars, no abbreviations, simpler grammar than the on-screen bullets).
-2. New helper that fires `powershell.exe ... SAPI.SpVoice.Speak(...)` in a background thread, with previous-speech cancellation when a new event triggers.
-3. In `Coach._call`, after parsing JSON: if `speak` is non-empty, call the helper.
-4. Env var `LEEG_COACH_TTS=0` to disable (default on once shipped).
-5. Champion-name phonetic substitutions (Kha'Zix → "kuh-ZIX") because SAPI mangles them.
-
-Latency: ~500ms (PowerShell cold-start dominates). Voice quality: fine-but-robotic. Higher quality later via ElevenLabs (~$1–2/game) or OpenAI TTS (~$0.10/game) — same interface, different backend.
+Off by default; `leeg --tts` speaks each call's lines (ElevenLabs if configured, else edge-tts through PowerShell). A new call interrupts the previous speech. Setup is in the top-level README.
 
 ### WSL2 caveat (important)
 

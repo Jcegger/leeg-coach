@@ -5736,18 +5736,21 @@ def open_page_when_needed(url, wait=3.5):
     leeg shouldn't stack tabs). From WSL via cmd.exe start; elsewhere via webbrowser."""
     def run():
         time.sleep(wait)
-        if time.time() - _web_last_poll < wait:
-            return
-        try:
-            if os.path.exists('/proc/sys/fs/binfmt_misc/WSLInterop'):
-                subprocess.Popen(['cmd.exe', '/c', 'start', '', url], cwd='/mnt/c',
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            else:
-                import webbrowser
-                webbrowser.open(url)
-        except OSError as e:
-            log.error('open page: %s', e)
+        if time.time() - _web_last_poll >= wait:
+            open_page(url)
     threading.Thread(target=run, daemon=True).start()
+
+
+def open_page(url):
+    try:
+        if os.path.exists('/proc/sys/fs/binfmt_misc/WSLInterop'):
+            subprocess.Popen(['cmd.exe', '/c', 'start', '', url], cwd='/mnt/c',
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            import webbrowser
+            webbrowser.open(url)
+    except OSError as e:
+        log.error('open page: %s', e)
 
 
 def start_web_server(port):
@@ -5886,6 +5889,39 @@ def run_demo(mode, port, open_browser=True):
                 time.sleep(1)
 
 
+def page_is_up(url):
+    try:
+        with urllib.request.urlopen(url + '/state', timeout=1.5) as r:
+            return r.status == 200
+    except (OSError, ValueError):
+        return False
+
+
+def stop_running_instance(pid_str):
+    """SIGTERM the leeg holding the lock (only if its cmdline is live.py), wait for the lock."""
+    try:
+        pid = int(pid_str)
+        cmd = Path(f'/proc/{pid}/cmdline').read_bytes().replace(b'\0', b' ').decode(errors='replace')
+    except (ValueError, OSError):
+        print(f'Could not find the running leeg (pid {pid_str}).', file=sys.stderr)
+        return False
+    if 'live.py' not in cmd:
+        print(f'pid {pid} is not leeg ({cmd.strip()[:60]}) — not stopping it.', file=sys.stderr)
+        return False
+    print(f'leeg live · stopping the running leeg (pid {pid})...', flush=True)
+    import signal
+    os.kill(pid, signal.SIGTERM)
+    for _ in range(50):
+        try:
+            if Path(f'/proc/{pid}/stat').read_text().split(')', 1)[1].split()[0] == 'Z':
+                return True  # exited, not yet reaped
+        except (OSError, IndexError):
+            return True
+        time.sleep(0.1)
+    print(f'pid {pid} did not stop — close its window and run leeg again.', file=sys.stderr)
+    return False
+
+
 def acquire_instance_lock():
     """flock a pidfile so only one live loop runs. A forgotten second instance
     double-fires every coach trigger and runs stale build.md / code (it ran for
@@ -5919,8 +5955,11 @@ def main():
                     help="don't open the page in the browser (it only opens when no tab is already showing it)")
     ap.add_argument('--demo', nargs='?', const='all', choices=['all', 'cs', 'early', 'mid', 'dead', 'review'],
                     help='preview the page with a made-up game (no League needed); cycles every view, or pick one')
-    ap.add_argument('--no-tts', action='store_true', default=False,
-                    help='disable voice coach (TTS is on by default)')
+    ap.add_argument('--tts', action='store_true', default=False,
+                    help='speak coach lines (off by default; the page and terminal show them)')
+    ap.add_argument('--no-tts', action='store_true', default=False, help=argparse.SUPPRESS)  # old default-on flag
+    ap.add_argument('--restart', action='store_true', default=False,
+                    help='stop an already-running leeg and start this one')
     ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
                     help='print all cached matchup pair notes for a player champion and exit')
     ap.add_argument('--sync-champ-constants', dest='sync_champ_constants', action='store_true',
@@ -5947,9 +5986,21 @@ def main():
         return
 
     instance_lock = acquire_instance_lock()
+    if isinstance(instance_lock, str) and args.restart:
+        if stop_running_instance(instance_lock):
+            instance_lock = acquire_instance_lock()
     if isinstance(instance_lock, str):
-        print(f'leeg live is already running (pid {instance_lock}) — close that one first, '
-              f'or two coaches fire on every trigger.', file=sys.stderr)
+        # One live loop only (two double-fire every coach trigger). `leeg` typed again
+        # means "show me the app": open the running one's page if it has one.
+        url = f'http://localhost:{args.web_port}'
+        if page_is_up(url):
+            print(f'leeg is already running (pid {instance_lock}) — opening the page: {url}')
+            if not args.no_open:
+                open_page(url)
+        else:
+            print(f'leeg is already running (pid {instance_lock}) with no page at {url} (older code or --no-web). '
+                  f'Run `leeg --restart` to stop it and start this one, or close that window first.',
+                  file=sys.stderr)
         return
 
     available = available_champs()
@@ -6037,8 +6088,14 @@ def main():
     print(f'leeg live · live API hosts={hosts}  lockfile={lockfile}  notes={mode_label}', flush=True)
 
     log.info('=== leeg started ===')
+    import signal
+    def _stopped(signum, frame):  # `leeg --restart` from another window
+        print('\nleeg live · stopped: a newer leeg took over (leeg --restart).', flush=True)
+        log.info('stopped by SIGTERM')
+        raise SystemExit(0)
+    signal.signal(signal.SIGTERM, _stopped)
     coach = Coach()
-    coach.tts = not args.no_tts
+    coach.tts = args.tts and not args.no_tts
     if coach.tts:
         warmup_tts()
     if coach.enabled:

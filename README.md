@@ -9,7 +9,7 @@ The champion notes in this repo (`mundo/`, `sivir/`) are my own, but the tool wo
 - **Minimal in-game screen** — the coach's top tip, your build (rule-based pick, the coach's live build, next-buy hint), drake/baron timers with team item-gold lead, and who's dead on the enemy team. Matchup notes, events and comp signals are still gathered, but only the coach reads them.
 - **AI coach** (optional) — fires on significant events with 1–2 tactical bullets grounded in structured comp signals (threat tags, item-gold lead, phase, power spikes), per-pair matchup data, and your champion's playbook win-conditions / side-selection framing
 - **Auto-generated matchup notes** — Haiku-generated 4-6 sentence notes per (your champ, enemy champ) pair, cached to disk, refreshed when a patch is 3+ versions stale. Browse with `--show-matchups <champ>`.
-- **Voice output** (optional) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
+- **Voice output** (opt-in with `--tts`) — ElevenLabs neural voice, with a free edge-tts fallback via PowerShell
 
 ## Quickstart
 
@@ -21,7 +21,9 @@ python tools/live.py
 
 Leave it running. It waits at "WAITING FOR GAME" until you load into a match, then renders. Auto-detects your champion from the live API — pass `--champ <name>` to force a specific profile.
 
-**Second-monitor page:** it opens <http://localhost:8765> in your Windows browser on start (WSL2 forwards it), unless a tab is already showing it, so restarts don't stack tabs. Drag that tab to the second monitor once and leave it; it reconnects on its own. `--no-open` skips opening it. Same minimal screen as the terminal, with item and champion icons: coach tip, next buy, build (owned / next / later), drake and baron timers, item-gold lead, enemies dead. On a wide window it splits into two columns: you on the left, the enemy team on the right as cards with each champion's real kit (ability icons, names, cooldowns, what each ability does, from CommunityDragon), your matchup notes, and live items/KDA with a fed / ahead / low-threat read. The page shows more when you have time: a game plan in the first 90 seconds, the biggest threat opened up while you're dead, a compact strip otherwise (click any enemy to open it). Champ select shows your rune pages, your notes on the lane opponent and your record against them. It switches to champ select and back on its own. Between games it shows a **post-game review** of your last game (CS/min and CS at 10 vs a 7/min target, deaths before 15, item timings vs the median for your champion, an item/death timeline) and a CS/min trend for recent games; history is kept in `data/games.jsonl`. `--web-port N` changes the port, `--no-web` turns it off.
+**Running `leeg` again** while it's already running just brings the page back up; `leeg --restart` stops the running one and starts fresh (use it after pulling new code).
+
+**Second-monitor page:** it opens <http://localhost:8765> in your Windows browser on start (WSL2 forwards it), unless a tab is already showing it, so restarts don't stack tabs. Drag that tab to the second monitor once and leave it; it reconnects on its own. `--no-open` skips opening it. Same minimal screen as the terminal, with item and champion icons: coach tip, next buy, build (owned / next / later), drake and baron timers, item-gold lead, enemies dead. On a wide window it splits into two columns: you on the left, the enemy team on the right; snapped to half the screen it becomes one column ordered by what matters right now (coach and next buy first mid-game, the threat card first while you're dead, your lane opponent first in champ select). Enemies show as cards with each champion's real kit (ability icons, names, cooldowns, what each ability does, from CommunityDragon), your matchup notes, and live items/KDA with a fed / ahead / low-threat read. The page shows more when you have time: a game plan in the first 90 seconds, the biggest threat opened up while you're dead, a compact strip otherwise (click any enemy to open it). Champ select shows your rune pages, your notes on the lane opponent and your record against them. It switches to champ select and back on its own. Between games it shows a **post-game review** of your last game (CS/min and CS at 10 vs a 7/min target, deaths before 15, item timings vs the median for your champion, an item/death timeline) and a CS/min trend for recent games; history is kept in `data/games.jsonl`. `--web-port N` changes the port, `--no-web` turns it off.
 
 **Preview without a game:** `python tools/live.py --demo` serves the page with a made-up game (Mundo vs a fed crit Garen) and cycles champ select → first 90 seconds → mid-game → dead → post-game review. Real kits, icons and notes; no coach calls, nothing saved. `--demo mid` (or `cs`, `early`, `dead`, `review`) holds one view. If `leeg` is already running it moves to the next port.
 
@@ -37,6 +39,8 @@ export ANTHROPIC_API_KEY=sk-ant-...
 Cost: ~$0.05–$0.10/game with Claude Sonnet, thanks to prompt caching. The build line, buy hint and timers still work without a key.
 
 ### Voice output setup (optional)
+
+Voice is **off by default**; the coach's lines show on the page and in the terminal. Run `leeg --tts` to have them spoken.
 
 **ElevenLabs** (best quality):
 ```bash
