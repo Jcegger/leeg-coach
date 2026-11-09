@@ -32,27 +32,40 @@
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--dim); }
   .dot.on { background: var(--good); } .dot.off { background: var(--bad); }
   .youdead { background: var(--bad); color: #fff; border-radius: 8px; padding: 4px 10px; font-weight: 700; }
+  .deadchip { font-size: 14px; font-weight: 700; color: var(--good); background: rgba(63,185,80,.14); border-radius: 8px; padding: 4px 10px; }
+  body.stale #app { opacity: .45; filter: grayscale(.6); }
+  #stale { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); background: var(--warn); color: #000;
+    padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; z-index: 6; }
 
   /* coach / hint */
-  #coach .text { font-size: clamp(19px, 1.7vw, 28px); font-weight: 500; line-height: 1.3; }
+  #coach .glance { font-size: clamp(22px, 2vw, 32px); font-weight: 700; line-height: 1.25; max-width: 40ch; }
+  #coach .text { font-size: clamp(19px, 1.7vw, 28px); font-weight: 500; line-height: 1.3; max-width: 52ch; }
+  #coach .glance + .text { font-size: 15px; font-weight: 400; color: var(--dim); margin-top: 6px; }
+  #coach.new { animation: pulse 1.6s ease-out; }
+  @keyframes pulse { from { background: #1d3352; } to { background: var(--panel); } }
+  #coach.old .glance, #coach.old .text { opacity: .6; }
   #coach .age { color: var(--dim); font-size: 13px; margin-top: 6px; }
   #coach.fresh { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
   #coach .err { color: var(--warn); font-size: 15px; }
-  #hint { font-size: clamp(17px, 1.5vw, 23px); font-weight: 600; }
-  #hint.back { background: #3a2a05; border-color: var(--gold); color: var(--gold); }
+  .hintrow { margin-top: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2);
+    font-size: clamp(16px, 1.4vw, 21px); font-weight: 600; }
+  .hintrow.back { background: #3a2a05; border-color: var(--gold); color: var(--gold); }
 
   /* build tiles */
   .tiles { display: flex; gap: 10px; flex-wrap: wrap; }
-  .tile { width: var(--tile); text-align: center; }
-  .tile .img { width: var(--tile); height: var(--tile); border-radius: 10px; border: 2px solid var(--line);
+  .tile { width: calc(var(--tile) + 30px); text-align: center; }
+  .tile .nm { font-size: 12px; line-height: 1.2; margin-top: 3px; color: #c9d1d9; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tile.future .nm { color: var(--dim); }
+  .tile .img { margin: 0 auto; width: var(--tile); height: var(--tile); border-radius: 10px; border: 2px solid var(--line);
     background: var(--panel2) center/cover no-repeat; position: relative; display: flex; align-items: center;
     justify-content: center; font-size: 10px; color: var(--dim); padding: 4px; overflow: hidden; }
-  .tile.future .img { filter: grayscale(.85) brightness(.6); }
+  .tile.future .img { filter: grayscale(.5) brightness(.8); }
   .tile.owned .img { border-color: var(--good); }
   .tile.owned .img::after { content: "\2713"; position: absolute; right: 3px; bottom: 1px; color: var(--good);
     font-size: 16px; font-weight: 800; text-shadow: 0 0 3px #000, 0 0 3px #000; }
   .tile.next .img { border-color: var(--gold); box-shadow: 0 0 12px rgba(227,179,65,.45); }
-  .tile .cost { font-size: 12px; color: var(--dim); margin-top: 3px; }
+  .tile .cost { font-size: 12px; color: var(--dim); margin-top: 1px; }
   .tile.next .cost { color: var(--gold); }
   .buildname { font-size: 14px; color: var(--dim); }
   .reason { color: var(--warn); font-size: 14px; margin-top: 8px; }
@@ -62,7 +75,8 @@
   .timer { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; min-width: 112px; }
   .timer .t { font-size: 25px; font-weight: 700; }
   .timer .k { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-  .timer.soon .t { color: var(--warn); } .timer.up .t { color: var(--good); }
+  .timer.soon .t { color: var(--warn); } .timer.up .t { color: var(--accent); }
+  .timer .sub { color: var(--dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lead.pos { color: var(--good); } .lead.neg { color: var(--bad); }
   .csm.good { color: var(--good); } .csm.ok { color: var(--warn); } .csm.low { color: var(--bad); }
   .chip { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
@@ -102,6 +116,10 @@
   .notes { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
   .note { white-space: pre-wrap; font-size: 14px; }
   .note.auto { color: var(--dim); font-size: 13px; }
+  .note.auto b { color: #c9d1d9; font-weight: 600; }
+  .eitems { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 2px; font-size: 13px; }
+  .eitems span { display: inline-flex; align-items: center; gap: 5px; }
+  .eitems img { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--line); }
   .srclbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 8px 0 3px; }
   .tier { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; }
   .tier.Extreme { color: var(--bad); } .tier.Major { color: var(--orange); } .tier.Even { color: var(--warn); }
@@ -115,6 +133,7 @@
   .runepage { padding: 8px 0; border-top: 1px solid var(--line); }
   .runepage:first-of-type { border-top: 0; padding-top: 0; }
   .runepage .rl { font-size: 14px; color: #c9d1d9; }
+  .runehead { cursor: pointer; user-select: none; } .runepage:has(.runehead) { padding: 5px 0; }
   .quote { border-left: 3px solid var(--gold); padding: 4px 10px; margin: 6px 0; font-size: 14px; }
   .quote .from { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
   .record { font-weight: 700; }
@@ -141,13 +160,47 @@
   .tl .death { position: absolute; top: 0; transform: translateX(-50%); text-align: center; color: var(--bad); font-size: 11px; }
   .tl .death::before { content: ""; display: block; width: 10px; height: 10px; margin: 0 auto 2px; background: var(--bad); transform: rotate(45deg); }
   .legend { color: var(--dim); font-size: 12px; margin-top: 8px; }
-  .hist { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 10px; }
+  .hist { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 10px; position: relative; }
+  .hist .target { position: absolute; left: 0; right: 0; border-top: 2px dashed rgba(139,148,158,.6); pointer-events: none; }
+  .hist .target span { position: absolute; right: 0; top: -16px; font-size: 11px; color: var(--dim); }
+  .tl .item .d { font-size: 11px; font-weight: 700; } .tl .item.early .d { color: var(--good); } .tl .item.late .d { color: var(--bad); }
   .hist .hcol { flex: 1; max-width: 46px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
   .hist .bar { border-radius: 6px 6px 0 0; min-height: 4px; }
   .hist .bar.good { background: var(--good); } .hist .bar.ok { background: var(--warn); } .hist .bar.low { background: var(--bad); }
   .hist .v { font-size: 11px; }
   .hist .wl { font-size: 11px; font-weight: 700; margin-top: 3px; }
   .hist .wl.Win { color: var(--good); } .hist .wl.Loss { color: var(--bad); }
+
+  /* stats tab */
+  .tabs { display: flex; gap: 6px; }
+  .tabs button { background: var(--panel); color: var(--dim); border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .tabs button.on { color: var(--text); border-color: var(--accent); background: rgba(88,166,255,.12); }
+  .chart { width: 100%; height: auto; max-height: 210px; display: block; margin-top: 6px; }
+  .chart text { fill: var(--dim); font-size: 11px; font-family: inherit; }
+  .chart .grid { stroke: var(--line); stroke-width: 1; }
+  .chart .tgt { stroke: var(--dim); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .chart .ln { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .chart .hit { fill: transparent; }
+  .chart .dot { stroke: var(--panel); stroke-width: 2; }
+  .chart .dot.Win { fill: var(--good); } .chart .dot.Loss { fill: var(--bad); } .chart .dot.unknown { fill: var(--dim); }
+  .chart .bar { fill: var(--accent); } .chart .bar.peak { fill: var(--orange); }
+  .chart .bar.pos { fill: var(--good); } .chart .bar.neg { fill: var(--bad); }
+  .chart g:hover .bar, .chart g:hover .dot { opacity: .75; }
+  .board { display: grid; gap: 6px; margin-top: 4px; }
+  .brow { display: grid; grid-template-columns: 30px minmax(70px, 120px) 1fr auto; gap: 8px; align-items: center; font-size: 14px; }
+  .brow img { width: 28px; height: 28px; border-radius: 6px; }
+  .brow .track { height: 10px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .brow .fill { height: 100%; background: var(--bad); border-radius: 0 4px 4px 0; }
+  .vtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .vtable td, .vtable th { padding: 5px 6px; border-top: 1px solid var(--line); text-align: left; }
+  .vtable th { color: var(--dim); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; border-top: 0; }
+  .vtable img { width: 24px; height: 24px; border-radius: 5px; vertical-align: middle; margin-right: 6px; }
+  .itemcount { display: flex; flex-wrap: wrap; gap: 10px; }
+  .itemcount div { text-align: center; font-size: 12px; width: 64px; }
+  .itemcount img { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--line); display: block; margin: 0 auto 3px; }
+  .fun { color: var(--dim); font-size: 14px; }
+  .fun b { color: var(--text); }
 
   .center { text-align: center; padding: 50px 20px; }
   .center h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; }
@@ -164,13 +217,14 @@
     .label { margin-bottom: 6px; }
     header .champ { width: 44px; height: 44px; }
     header .name { font-size: 19px; } header .clock { font-size: 26px; }
-    #coach .text { font-size: 19px; }
-    #hint { font-size: 17px; padding: 9px 12px; }
+    #coach .glance { font-size: 22px; }
+    #coach .text { font-size: 18px; }
+    .hintrow { font-size: 16px; padding: 7px 10px; margin-top: 8px; }
     :root { --tile: 46px; }
     .tiles { gap: 7px; }
     .timers { gap: 6px; flex-wrap: nowrap; }
     .timer { flex: 1; min-width: 0; padding: 5px 9px; }
-    .timer .t { font-size: 19px; } .timer .k { font-size: 10px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .timer .t { font-size: 19px; } .timer .k { font-size: 11px; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .timer .chip { display: none; }
     .ehead { padding: 5px 8px; gap: 10px; }
     .portrait, .portrait img { width: 42px; height: 42px; }
@@ -178,7 +232,8 @@
     .minis img { width: 22px; height: 22px; }
     .enemy { margin-top: 5px; }
     .ehead .row { margin-top: 1px !important; }
-    .chip { font-size: 10px; padding: 1px 6px; }
+    .chip { font-size: 11px; padding: 1px 6px; }
+    .tile { width: calc(var(--tile) + 34px); } .tile .nm { font-size: 11.5px; }
     .ab img { width: 32px; height: 32px; }
     .ab .desc { font-size: 13px; }
     /* build stays in view: pinned to the top once you scroll past it */
@@ -192,6 +247,7 @@
 <body>
 <main id="app"></main>
 <div id="demo" class="hidden"></div>
+<div id="stale" class="hidden"></div>
 <div id="offline" class="hidden">leeg isn't running, or it lost the page. Start it with <b>leeg</b> in WSL.</div>
 <script>
 const $ = (s, el = document) => el.querySelector(s);
@@ -203,19 +259,30 @@ const STATE_LABEL = { SNOWBALLING: ['fed', 'bad'], AHEAD: ['ahead', 'warn'] };
 const TAG_LABEL = { 'HARD-CC': 'hard CC', 'ATTACK-SPEED': 'attack speed', HEALING: 'healing', TANK: 'tank', ASSASSIN: 'assassin', CRIT: 'crit' };
 
 let raw = '', state = null;
+let skew = 0;                  // browser clock minus leeg's clock (WSL drifts from Windows after sleep)
+const now = () => Date.now() / 1000 - skew;   // "now" on leeg's clock
 const expanded = new Set();   // enemy names the user opened (survives re-renders)
 const collapsed = new Set();  // auto-opened cards the user closed
 
-function age() { return state ? (Date.now() / 1000 - state.at) : 0; }
+function age() { return state ? Math.max(0, now() - state.at) : 0; }
 
 // Live text that ticks between renders: clocks, countdowns, "Ns ago".
 function tick() {
   for (const el of document.querySelectorAll('[data-clock]')) el.textContent = mmss(+el.dataset.clock + age());
   for (const el of document.querySelectorAll('[data-cd]')) {
     const left = Math.max(0, +el.dataset.cd - age());
-    el.textContent = el.dataset.fmt === 'timer' ? (left === 0 ? 'UP' : mmss(left)) : `${Math.round(left)}s`;
+    el.textContent = el.dataset.fmt === 'timer' ? (left === 0 ? 'UP' : mmss(left))
+                   : el.dataset.fmt === 'resp' ? (left === 0 ? '' : `${Math.round(left)}s`) : `${Math.round(left)}s`;
   }
-  for (const el of document.querySelectorAll('[data-ago]')) el.textContent = `${Math.round(Math.max(0, Date.now() / 1000 - +el.dataset.ago))}s ago`;
+  for (const el of document.querySelectorAll('[data-ago]')) el.textContent = `${Math.round(Math.max(0, now() - +el.dataset.ago))}s ago`;
+  for (const el of document.querySelectorAll('[data-since]')) el.textContent = `${mmss(state.time + age() - +el.dataset.since)} ago`;
+  const co = $('#coach');
+  if (co && co.dataset.at) co.classList.toggle('old', now() - +co.dataset.at > 90);
+  // Live data stopped (leeg closed, API stalled): fade instead of ticking on old numbers.
+  const stale = !!state && state.mode === 'game' && age() > 10;
+  document.body.classList.toggle('stale', stale);
+  $('#stale').classList.toggle('hidden', !stale);
+  if (stale) $('#stale').textContent = `no live data for ${Math.round(age())}s`;
   if (state && state.mode === 'game') document.title = `${mmss(state.time + age())} · leeg`;
 }
 
@@ -224,8 +291,9 @@ function tiles(items) {
   return `<div class="tiles">${(items || []).map(it => {
     const cls = it.owned ? 'owned' : it.next ? 'next' : 'future';
     const img = it.icon ? `style="background-image:url('${esc(it.icon)}')"` : '';
-    return `<div class="tile ${cls}" title="${esc(it.name)}"><div class="img" ${img}>${it.icon ? '' : esc(it.name)}</div>
-      <div class="cost num">${it.owned ? '&nbsp;' : (it.cost ? it.cost + 'g' : '')}</div></div>`;
+    return `<div class="tile ${cls}" title="${esc(it.name)}"><div class="img" ${img}></div>
+      <div class="nm">${esc(it.name)}</div>
+      <div class="cost num" ${it.full && it.cost < it.full ? `title="${it.cost}g left of ${it.full}g (you have parts)"` : ''}>${it.owned ? '&nbsp;' : (it.cost ? it.cost + 'g' + (it.full && it.cost < it.full ? ' left' : '') : '')}</div></div>`;
   }).join('')}</div>`;
 }
 
@@ -252,8 +320,12 @@ function kitBlock(kit) {
 function notesBlock(c) {
   const parts = [];
   if (c.note_personal) parts.push(`<div class="srclbl">Your notes ${c.tier ? `<span class="tier ${esc(c.tier)}">${esc(c.tier)}</span>` : ''}</div><div class="note">${md(c.note_personal)}</div>`);
-  if (c.note_auto) parts.push(`<div class="srclbl">Auto notes · generated, may be wrong</div><div class="note auto">${esc(c.note_auto)}</div>`);
+  if (c.note_auto) parts.push(`<div class="srclbl">Auto notes · generated, may be wrong</div><div class="note auto">${esc(c.note_auto).replace(/^- ([a-z0-9]+):/gim, '- <b>$1:</b>')}</div>`);
   return parts.length ? `<div class="notes">${parts.join('')}</div>` : '';
+}
+
+function itemList(items) {
+  return items && items.length ? `<div class="eitems">${items.map(i => `<span>${i.icon ? `<img src="${esc(i.icon)}" alt="">` : ''}${esc(i.name)}</span>`).join('')}</div>` : '';
 }
 
 function isOpen(c, auto) { return expanded.has(c.name) || (auto && !collapsed.has(c.name)); }
@@ -271,7 +343,7 @@ function enemyCard(c, { auto = false, focus = '' } = {}) {
     <div class="ehead" data-toggle="${esc(c.name)}" data-auto="${auto ? 1 : 0}">
       <div class="portrait">${c.icon ? `<img src="${esc(c.icon)}" alt="">` : ''}
         ${c.level ? `<span class="lvl">${esc(c.level)}</span>` : ''}
-        ${c.dead ? `<span class="deadt num" data-cd="${c.respawn}">${c.respawn}s</span>` : ''}</div>
+        ${c.dead ? `<span class="deadt num" data-cd="${c.respawn}" data-fmt="resp">${c.respawn}s</span>` : ''}</div>
       <div class="grow">
         <div class="row" style="gap:6px"><span class="ename">${esc(c.name)}</span>
           ${c.k !== undefined ? `<span class="emeta num">${c.k}/${c.d}/${c.a}</span>` : `<span class="emeta">${esc(c.pos || '')}</span>`}
@@ -282,7 +354,9 @@ function enemyCard(c, { auto = false, focus = '' } = {}) {
       ${c.items ? `<div class="minis">${c.items.map(i => i.icon ? `<img src="${esc(i.icon)}" title="${esc(i.name)}" alt="">` : '').join('')}</div>` : ''}
       <span class="chev">${open ? '▾' : '▸'}</span>
     </div>
-    ${open ? `<div class="ebody">${kitBlock(c.kit)}${notesBlock(c)}${c.extra || ''}</div>` : ''}
+    ${open ? `<div class="ebody">${itemList(c.items)}${focus || c.extra
+        ? `${c.extra || ''}${notesBlock(c)}${kitBlock(c.kit)}`     // read-now cards: your notes before the kit
+        : `${kitBlock(c.kit)}${notesBlock(c)}`}</div>` : ''}
   </div>`;
 }
 
@@ -314,54 +388,84 @@ function drakeBox(d) {
   return `<div class="timer"><div class="k">Drakes you–them</div><div class="t num">${d.you}<span class="dim">–</span>${d.them}${soul}</div></div>`;
 }
 
+// Laning only: your CS / level against your lane opponent (scoreboard CS moves in steps of 10).
+function laneBox(l) {
+  const cls = l.cs >= 0 ? 'pos' : 'neg', sg = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
+  return `<div class="timer" title="your CS and level minus ${esc(l.vs)}'s"><div class="k">Lane vs ${esc(l.vs)}</div>
+    <div class="t num lead ${cls}">${sg(l.cs)} cs</div><div class="sub">${l.lvl === 0 ? 'even level' : `${sg(l.lvl)} lvl`}</div></div>`;
+}
+
+// Laning only: where their jungler last showed on the kill/objective feed.
+function jungleBox(j) {
+  if (j.at === null || j.at === undefined)
+    return `<div class="timer soon"><div class="k">Their jg · ${esc(j.name)}</div><div class="t">unseen</div><div class="sub">could be anywhere</div></div>`;
+  const ago = state.time + age() - j.at;
+  return `<div class="timer ${ago > 90 ? 'soon' : ''}" title="${esc(j.how)}"><div class="k">Their jg · ${esc(j.name)}</div>
+    <div class="t">${esc(j.where)}</div><div class="sub num" data-since="${j.at}">${mmss(ago)} ago</div></div>`;
+}
+
+let lastBulletAt = 0;
 function renderGame(s) {
   const y = s.you, c = s.coach, o = s.objectives;
   const live = c.live, build = live ? live.items : (s.build ? s.build.items : []);
   const buildLabel = live ? (live.diverged ? 'coach · changed from default' : 'coach') : (s.build ? 'default' : '');
-  const coachAge = c.bullet_at ? Math.max(0, Date.now() / 1000 - c.bullet_at) : null;
+  const coachAge = c.bullet_at ? Math.max(0, now() - c.bullet_at) : null;
   const leadCls = o && o.gold_lead !== null ? (o.gold_lead >= 0 ? 'pos' : 'neg') : '';
   const enemies = s.enemies || [];
   const early = s.time < 90;
   const lane = enemies.find(e => e.lane);
-  const focus = enemies.find(e => e.state === 'SNOWBALLING') || lane || enemies[0];
+  // While dead: laning = biggest threat, else your lane. After the first turret falls,
+  // whoever killed you, else their carry (fed first, then most item gold).
+  const killer = s.laning_over && y.killed_by ? enemies.find(e => e.name === y.killed_by) : null;
+  const carry = enemies.find(e => e.state === 'SNOWBALLING')
+             || [...enemies].sort((a, b) => (b.gold || 0) - (a.gold || 0))[0];
+  const focus = s.laning_over ? (killer || carry) : (enemies.find(e => e.state === 'SNOWBALLING') || lane || enemies[0]);
+  const focusWhy = !focus ? '' : focus === killer ? 'killed you'
+                 : s.laning_over ? 'their carry'
+                 : focus.state === 'SNOWBALLING' ? 'biggest threat' : 'your lane';
   const focusName = y.dead && focus ? focus.name : null;
 
   const header = `<header class="panel row">
     ${y.icon ? `<img class="champ" src="${esc(y.icon)}" alt="">` : ''}
     <div class="grow">
       <div class="name">${esc(y.champ)} <span class="dim" style="font-size:15px">lvl ${esc(y.level ?? '?')}</span></div>
-      <div class="stats num">${y.k}/${y.d}/${y.a} · ${y.cs} cs${csPerMin(s)} · <b style="color:var(--gold)">${y.gold}g</b></div>
+      <div class="stats num">${y.k}/${y.d}/${y.a} · ${y.cs} cs${csPerMin(s)} · ${y.gold}g</div>
     </div>
-    ${y.dead ? `<span class="youdead">DEAD <span data-cd="${y.respawn}">${y.respawn}s</span></span>` : ''}
+    ${(s.dead || []).length ? `<span class="deadchip num" title="enemies dead: a window to push or take objectives">${s.dead.length} dead: ${s.dead.map(d => `${esc(d.name)} <span data-cd="${d.respawn}" data-fmt="resp">${d.respawn}s</span>`).join(', ')}</span>` : ''}
+    ${y.dead ? `<span class="youdead">DEAD <span data-cd="${y.respawn}" data-fmt="resp">${y.respawn}s</span></span>` : ''}
     <div class="clock num" data-clock="${s.time}">${mmss(s.time + age())}</div>
     <span class="dot ${c.enabled ? 'on' : 'off'}" title="coach ${c.enabled ? 'on' : 'off'}"></span>
   </header>`;
 
-  // Stacking order at half screen: what you have time for comes first.
-  // The build always sits right under the coach line (and sticks to the top when scrolled).
-  const O = early ? { coach: 1, hint: 2, build: 3, plan: 4, enemies: 5, obj: 6 }
-          : y.dead ? { coach: 1, hint: 2, build: 3, dead: 4, obj: 5, enemies: 6 }
-          : { coach: 1, hint: 2, build: 3, obj: 4, enemies: 5 };
+  // Stacking order at half screen: what you have time for comes first. The build (with the
+  // next-buy line) always sits right under the coach line and sticks to the top when scrolled.
+  const O = early ? { coach: 1, build: 2, plan: 3, enemies: 4, obj: 5 }
+          : y.dead ? { coach: 1, build: 2, obj: 3, dead: 4, enemies: 5 }
+          : { coach: 1, build: 2, obj: 3, enemies: 4 };
+  const fresh = c.bullet_at && c.bullet_at !== lastBulletAt;
+  lastBulletAt = c.bullet_at || lastBulletAt;
   const soul = o && o.drakes ? (o.drakes.you === 3 ? '<span class="chip good soulnote">YOUR SOUL POINT</span>'
              : o.drakes.them === 3 ? '<span class="chip bad soulnote">THEIR SOUL POINT</span>' : '') : '';
   const left = `
-  <section id="coach" ${ord(O.coach)} class="panel ${coachAge !== null && coachAge < 20 ? 'fresh' : ''}">
+  <section id="coach" ${ord(O.coach)} data-at="${c.bullet_at || ''}" class="panel ${coachAge !== null && coachAge < 20 ? 'fresh' : ''} ${fresh && coachAge < 5 ? 'new' : ''}">
     <div class="label">Coach</div>
     ${c.error ? `<div class="err">coach off: ${esc(c.error)}</div>` : ''}
+    ${c.glance ? `<div class="glance">${esc(c.glance)}</div>` : ''}
     <div class="text">${c.bullet ? esc(c.bullet) : '<span class="dim">waiting for the first call…</span>'}</div>
     ${c.bullet_at ? `<div class="age" data-ago="${c.bullet_at}"></div>` : ''}
   </section>
-  ${s.hint ? `<section id="hint" ${ord(O.hint)} class="panel ${s.hint.back ? 'back' : ''}">${esc(s.hint.text)}</section>` : ''}
   ${build.length ? `<section ${ord(O.build)} class="panel buildp">
     <div class="row" style="justify-content:space-between"><div class="label" style="margin:0">Build · ${esc(buildLabel)}</div>
       <div class="buildname">${s.build ? esc(s.build.name) : ''}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div></div>
     <div style="margin-top:10px">${tiles(build)}</div>
     ${live && live.diverged && live.reason ? `<div class="reason">${esc(live.reason)}</div>` : ''}
-  </section>` : ''}
+    ${s.hint ? `<div class="hintrow ${s.hint.back ? 'back' : ''}">${esc(s.hint.text)}</div>` : ''}
+  </section>` : s.hint ? `<section ${ord(O.build)} class="panel buildp"><div class="hintrow ${s.hint.back ? 'back' : ''}" style="margin:0">${esc(s.hint.text)}</div></section>` : ''}
   ${o ? `<section ${ord(O.obj)} class="panel"><div class="label">Objectives ${soul}</div><div class="timers">
       ${timerBox('Drake', o.drake)}${timerBox('Baron', o.baron)}${drakeBox(o.drakes)}
-      ${o.grubs ? `<div class="timer"><div class="k">Grubs taken</div><div class="t num">${o.grubs}</div></div>` : ''}
-      ${o.gold_lead !== null ? `<div class="timer"><div class="k">Item gold</div><div class="t num lead ${leadCls}">${(o.gold_lead >= 0 ? '+' : '') + (o.gold_lead / 1000).toFixed(1)}k</div></div>` : ''}
+      ${!s.laning_over && o.lane ? laneBox(o.lane) : ''}
+      ${!s.laning_over && o.jungler ? jungleBox(o.jungler) : ''}
+      ${s.laning_over && o.gold_lead !== null ? `<div class="timer" title="your team's item gold minus theirs"><div class="k">Gold lead</div><div class="t num lead ${leadCls}">${(o.gold_lead >= 0 ? '+' : '−') + Math.abs(o.gold_lead / 1000).toFixed(1)}k</div></div>` : ''}
     </div></section>` : ''}`;
 
   // Right column density follows how much time you have: game plan in the first
@@ -374,7 +478,7 @@ function renderGame(s) {
     </section>`;
   }
   if (y.dead && focus) {
-    right += `<section ${ord(O.dead)} class="panel"><div class="label">While you're dead</div>${enemyCard(focus, { auto: true, focus: focus.state === 'SNOWBALLING' ? 'biggest threat' : 'your lane' })}</section>`;
+    right += `<section ${ord(O.dead)} class="panel"><div class="label">While you're dead</div>${enemyCard(focus, { auto: true, focus: focusWhy })}</section>`;
   }
   const autoOpen = e => (early && e.lane);
   right += `<section ${ord(O.enemies)} class="panel"><div class="label">Enemies <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
@@ -392,8 +496,13 @@ function renderCS(s) {
     const hints = (lane.rune_hints || []).map(h => `<div class="quote"><div class="from">${esc(h.from)}</div>${md(h.text)}</div>`).join('');
     lane.extra = `<div class="notes">${rec}${hints ? `<div class="srclbl">Runes for this lane</div>${hints}` : ''}</div>`;
   }
-  const runes = (s.runes || []).map((p, i) => `<div class="runepage"><div class="row" style="gap:8px"><b>${esc(p.name)}</b>${i === 0 ? '<span class="chip good">default</span>' : ''}</div>
-    ${p.lines.map(l => `<div class="rl">${md(l)}</div>`).join('')}</div>`).join('');
+  // Default page in full; the rest collapse to their names (click to open) so the lane card stays near the top.
+  const runes = (s.runes || []).map((p, i) => {
+    const open = i === 0 || openRunes.has(p.name);
+    return `<div class="runepage"><div class="row ${i ? 'runehead' : ''}" style="gap:8px" ${i ? `data-rune="${esc(p.name)}"` : ''}>
+      ${i ? `<span class="chev">${open ? '▾' : '▸'}</span>` : ''}<b>${esc(p.name)}</b>${i === 0 ? '<span class="chip good">default</span>' : ''}</div>
+      ${open ? p.lines.map(l => `<div class="rl">${md(l)}</div>`).join('') : ''}</div>`;
+  }).join('');
   return `<header class="panel row">
     ${s.you.icon ? `<img class="champ" src="${esc(s.you.icon)}" alt="">` : ''}
     <div class="grow"><div class="name">${esc(s.you.champ)} <span class="dim" style="font-size:15px">${esc(s.you.pos)}</span></div>
@@ -401,10 +510,10 @@ function renderCS(s) {
   </header>
   <div class="cols">
     <div class="col">
-      ${s.build ? `<section ${ord(1)} class="panel buildp"><div class="label">Planned build · ${esc(s.build.name)}${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div>${tiles(s.build.items)}</section>` : ''}
-      ${runes ? `<section ${ord(3)} class="panel"><div class="label">Rune pages (your build guide)</div>${runes}</section>` : ''}
+      ${s.build ? `<section ${ord(1)} class="panel buildp"><div class="label">Planned build${s.comp ? ' · ' + esc(s.comp.label) + ' comp' : ''}</div>${tiles(s.build.items)}</section>` : ''}
+      ${runes ? `<section ${ord(2)} class="panel"><div class="label">Rune pages (your build guide)</div>${runes}</section>` : ''}
     </div>
-    <div class="col"><section ${ord(2)} class="panel"><div class="label">Enemy picks <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
+    <div class="col"><section ${ord(3)} class="panel"><div class="label">Enemy picks <span class="dim" style="text-transform:none;letter-spacing:0">· click to open</span></div>
       ${s.enemies.length ? s.enemies.map(e => enemyCard(e, { auto: e.lane })).join('') : '<div class="dim">Enemy picks not visible yet.</div>'}
     </section></div>
   </div>`;
@@ -417,15 +526,25 @@ function timeline(g) {
   const bench = g.item_bench || [];
   let legN = 0, prev = -99, row = 0;
   const items = timed.map(i => {
-    let cls = '';
-    if (!i.boots) { const b = bench[legN++]; if (b !== undefined) cls = i.t / 60 <= b ? 'early' : i.t / 60 > b + 1 ? 'late' : ''; }
+    let cls = '', d = '';
+    if (!i.boots) {
+      const b = bench[legN++];
+      if (b !== undefined) {
+        const delta = i.t - b * 60;
+        cls = delta <= 0 ? 'early' : delta > 60 ? 'late' : '';
+        d = cls ? `${delta <= 0 ? '−' : '+'}${mmss(Math.abs(delta))}` : '';   // vs the median, not color alone
+      }
+    }
     const p = pct(i.t); row = (p - prev < 6) ? 1 - row : 0; prev = p;
     return `<div class="item ${cls}" style="left:${p}%;top:${row ? 42 : 0}px" title="${esc(i.name)} at ${mmss(i.t)}">
-      ${i.icon ? `<img src="${esc(i.icon)}" alt="">` : '<div class="ph"></div>'}<div class="m num">${mmss(i.t)}</div></div>`;
+      ${i.icon ? `<img src="${esc(i.icon)}" alt="">` : '<div class="ph"></div>'}<div class="m num">${mmss(i.t)}</div>${d ? `<div class="d num">${d}</div>` : ''}</div>`;
   }).join('');
   const benches = bench.map((m, n) => m * 60 < D ? `<div class="bench" style="left:${pct(m * 60)}%"><span>median #${n + 1} ${mmss(m * 60)}</span></div>` : '').join('');
   const ticks = []; for (let m = 5; m * 60 < D; m += 5) ticks.push(`<div class="tick" style="left:${pct(m * 60)}%">${m}m</div>`);
-  const deaths = g.deaths.map(t => `<div class="death num" style="left:${pct(t)}%">${mmss(t)}</div>`).join('');
+  const info = g.death_info || [];
+  const kindAt = t => { const m = info.find(x => Math.abs(x.t - t) <= 6); return m ? m : null; };
+  const deaths = g.deaths.map(t => { const k = kindAt(t);
+    return `<div class="death num" style="left:${pct(t)}%" title="${k ? esc(`${k.kind}: ${k.by || '?'}${k.help.length ? ' + ' + k.help.join(', ') : ''}`) : ''}">${mmss(t)}${k ? `<br>${esc(k.kind)}` : ''}</div>`; }).join('');
   return `<div class="tl"><div style="position:absolute;left:0;right:0;top:0;height:84px">${benches}${items}</div>
     <div style="position:absolute;left:0;right:0;top:86px"><div class="axis"></div>${ticks.join('')}
       <div style="position:absolute;left:0;right:0;top:24px">${deaths}</div></div></div>`;
@@ -439,6 +558,10 @@ function renderReview(g, target, record) {
   const firstDelta = first && b1 !== undefined ? first.t - b1 * 60 : null;
   const untimed = g.items.filter(i => i.t === null || i.t === undefined);
   const res = g.result || 'unknown';
+  const lane10 = (g.lane_marks || {})['10'], lane15 = (g.lane_marks || {})['15'];
+  const sg = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
+  const kinds = {}; for (const x of (g.death_info || []).filter(x => x.t < 900)) kinds[x.kind] = (kinds[x.kind] || 0) + 1;
+  const kindTxt = Object.entries(kinds).map(([k, n]) => `${n} ${k}`).join(', ');
   return `<section class="panel">
     <div class="row">
       <span class="result ${res}">${g.result ? g.result.toUpperCase() : 'RESULT ?'}</span>
@@ -450,13 +573,16 @@ function renderReview(g, target, record) {
     </div>
     <div class="stats4">
       <div class="stat"><div class="k">CS / min</div><div class="v num csm ${csClass(g.cs_min, target)}">${g.cs_min}</div><div class="s">target ${target} · ${g.cs} total</div></div>
-      <div class="stat"><div class="k">CS at 10 min</div><div class="v num ${cs10 !== undefined ? 'csm ' + csClass(cs10 / 10, target) : 'dim'}">${cs10 ?? '—'}</div><div class="s">target ${Math.round(target * 10)}${cs15 !== undefined ? ` · ${cs15} at 15` : ''}</div></div>
-      <div class="stat"><div class="k">Deaths before 15</div><div class="v num ${early === 0 ? 'csm good' : early <= 2 ? 'csm ok' : 'csm low'}">${early}</div><div class="s">${g.d} total</div></div>
+      <div class="stat"><div class="k">CS at 10 min</div><div class="v num ${cs10 !== undefined ? 'csm ' + csClass(cs10 / 10, target) : 'dim'}">${cs10 !== undefined ? '~' + cs10 : '—'}</div><div class="s">target ${Math.round(target * 10)}${cs15 !== undefined ? ` · ~${cs15} at 15` : ''} · scoreboard counts in 10s</div></div>
+      ${lane10 ? `<div class="stat"><div class="k">Lane at 10${g.vs ? ' vs ' + esc(g.vs) : ''}</div><div class="v num csm ${lane10.cs >= 0 ? 'good' : lane10.cs >= -15 ? 'ok' : 'low'}">${sg(lane10.cs)} cs</div>
+        <div class="s">${lane10.lvl === 0 ? 'even level' : sg(lane10.lvl) + ' lvl'}${lane15 ? ` · at 15: ${sg(lane15.cs)} cs, ${lane15.lvl === 0 ? 'even' : sg(lane15.lvl) + ' lvl'}` : ''}</div></div>` : ''}
+      <div class="stat"><div class="k">Deaths before 15</div><div class="v num ${early === 0 ? 'csm good' : early <= 2 ? 'csm ok' : 'csm low'}">${early}</div><div class="s">${kindTxt ? kindTxt + ' · ' : ''}${g.d} total</div></div>
+      ${g.dead_s !== undefined ? `<div class="stat"><div class="k">Time dead</div><div class="v num">${mmss(g.dead_s)}</div><div class="s">${Math.round(g.dead_s / Math.max(g.duration, 1) * 100)}% of the game${g.ward_score !== undefined ? ` · ward score ${g.ward_score}` : ''}</div></div>` : ''}
       <div class="stat"><div class="k">First item</div><div class="v num ${firstDelta === null ? '' : firstDelta <= 0 ? 'csm good' : firstDelta <= 60 ? 'csm ok' : 'csm low'}">${first ? mmss(first.t) : '—'}</div>
         <div class="s">${first ? esc(first.name) : ''}${firstDelta !== null ? ` · median ${mmss(b1 * 60)} (${firstDelta > 0 ? '+' : '−'}${mmss(Math.abs(firstDelta))})` : ''}</div></div>
     </div>
     ${timeline(g)}
-    <div class="legend">Items above the line (green = at or before the median ${esc(g.champ)}, red = over a minute behind), deaths below.${g.joined ? ` leeg started at ${mmss(g.joined)}, so earlier timings are missing.` : ''}${untimed.length ? ` Owned before that: ${untimed.map(i => esc(i.name)).join(', ')}.` : ''}</div>
+    <div class="legend">Items above the line, with time vs the median ${esc(g.champ)} (green = at or before it, red = over a minute behind); deaths below (solo = your laner alone, gank = their jungler involved, fight = several, roam = someone else's laner).${g.joined ? ` leeg started at ${mmss(g.joined)}, so earlier timings are missing.` : ''}${untimed.length ? ` Owned before that: ${untimed.map(i => esc(i.name)).join(', ')}.` : ''}</div>
   </section>`;
 }
 
@@ -466,17 +592,107 @@ function renderHistory(h, target) {
   const wins = h.filter(g => g.result === 'Win').length;
   return `<section class="panel">
     <div class="label">Last ${h.length} games · ${wins}W ${h.filter(g => g.result === 'Loss').length}L · avg <span class="csm ${csClass(avg, target)}">${avg.toFixed(1)}</span> cs/min</div>
-    <div class="hist">${h.map(g => `<div class="hcol" title="${esc(g.champ)}${g.vs ? ' vs ' + esc(g.vs) : ''} · ${esc(g.date)}">
+    <div class="hist"><div class="target" style="bottom:calc(18px + ${Math.min(100, target * 10)}%)"><span>target ${target}</span></div>${h.map(g => `<div class="hcol" title="${esc(g.champ)}${g.vs ? ' vs ' + esc(g.vs) : ''} · ${esc(g.date)}">
       <div class="v num">${g.cs_min}</div><div class="bar ${csClass(g.cs_min, target)}" style="height:${Math.min(100, g.cs_min / 10 * 100)}%"></div>
       <div class="wl ${esc(g.result || '')}">${g.result ? g.result[0] : '?'}</div></div>`).join('')}</div>
   </section>`;
 }
 
+/* ---------- stats (every logged game) ---------- */
+const hm = sec => { sec = Math.round(sec || 0); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return h ? `${h}h ${m}m` : `${m}m`; };
+
+// CS/min per game: one line, dots marked win/loss (letter in the tooltip and under the axis), dashed target.
+function csTrend(tr, target) {
+  const pts = tr.filter(g => g.cs_min !== null && g.cs_min !== undefined);
+  if (pts.length < 2) return '<div class="dim">Needs two games.</div>';
+  const W = 640, H = 190, L = 34, R = 10, T = 12, B = 34;
+  const lo = Math.min(3, ...pts.map(g => g.cs_min)), hi = Math.max(9, ...pts.map(g => g.cs_min));
+  const x = i => L + (pts.length === 1 ? 0 : i * (W - L - R) / (pts.length - 1)), y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const grid = [lo, (lo + hi) / 2, hi].map(v => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(0)}</text>`).join('');
+  const line = pts.map((g, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(g.cs_min).toFixed(1)}`).join('');
+  const dots = pts.map((g, i) => `<g><title>${esc(g.date || '')} · ${esc(g.champ || '')}${g.vs ? ' vs ' + esc(g.vs) : ''} · ${g.cs_min} cs/min · ${esc(g.result || 'result ?')}</title>
+    <rect class="hit" x="${x(i) - 12}" y="${T}" width="24" height="${H - T - B + 20}"/>
+    <circle class="dot ${esc(g.result || 'unknown')}" cx="${x(i)}" cy="${y(g.cs_min)}" r="5"/>
+    <text x="${x(i)}" y="${H - 14}" text-anchor="middle">${g.result ? g.result[0] : '?'}</text></g>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="CS per minute by game">${grid}
+    <line class="tgt" x1="${L}" x2="${W - R}" y1="${y(target)}" y2="${y(target)}"/><text x="${W - R}" y="${y(target) - 5}" text-anchor="end">target ${target}</text>
+    <path class="ln" d="${line}"/>${dots}<text x="${L}" y="${H - 1}">older</text><text x="${W - R}" y="${H - 1}" text-anchor="end">latest</text></svg>`;
+}
+
+// Lane CS at 10 minutes vs your laner, one bar per game around zero.
+function laneTrend(tr) {
+  const pts = tr.filter(g => g.lane10 !== null && g.lane10 !== undefined);
+  if (pts.length < 2) return '';
+  const W = 640, H = 150, L = 34, R = 10, T = 10, B = 22;
+  const m = Math.max(20, ...pts.map(g => Math.abs(g.lane10))), y = v => T + (m - v) / (2 * m) * (H - T - B);
+  const bw = Math.min(26, (W - L - R) / pts.length - 4);
+  const bars = pts.map((g, i) => { const cx = L + (i + .5) * (W - L - R) / pts.length, y0 = y(0), y1 = y(g.lane10);
+    return `<g><title>${esc(g.date || '')}${g.vs ? ' vs ' + esc(g.vs) : ''}: ${g.lane10 > 0 ? '+' : ''}${g.lane10} cs at 10</title>
+      <rect class="hit" x="${cx - bw / 2 - 2}" y="${T}" width="${bw + 4}" height="${H - T - B}"/>
+      <rect class="bar ${g.lane10 >= 0 ? 'pos' : 'neg'}" x="${cx - bw / 2}" y="${Math.min(y0, y1)}" width="${bw}" height="${Math.max(2, Math.abs(y1 - y0))}" rx="3"/></g>`; }).join('');
+  return `<div class="srclbl" style="margin-top:14px">Lane CS at 10 vs your laner (above the line = ahead)</div>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Lane CS difference at 10 minutes by game">
+    <line class="grid" x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}"/><text x="${L - 6}" y="${y(0) + 4}" text-anchor="end">0</text>
+    <text x="${L - 6}" y="${y(m) + 8}" text-anchor="end">+${m}</text><text x="${L - 6}" y="${y(-m)}" text-anchor="end">−${m}</text>${bars}</svg>`;
+}
+
+// When you die: 2-minute buckets, the worst window called out.
+function deathStrip(b) {
+  const total = b.reduce((a, v) => a + v, 0);
+  if (!total) return '<div class="dim">No deaths logged yet. Suspicious.</div>';
+  let last = b.length - 1; while (last > 10 && !b[last]) last--;
+  const pts = b.slice(0, last + 1), W = 640, H = 140, L = 10, R = 10, T = 16, B = 22, mx = Math.max(...pts);
+  const peak = pts.indexOf(mx), bw = (W - L - R) / pts.length;
+  const bars = pts.map((v, i) => `<g><title>${i * 2}:00–${i * 2 + 2}:00 · ${v} death${v === 1 ? '' : 's'}</title>
+    <rect class="hit" x="${L + i * bw}" y="${T}" width="${bw}" height="${H - T - B}"/>
+    <rect class="bar ${i === peak ? 'peak' : ''}" x="${L + i * bw + 1}" y="${H - B - (v / mx) * (H - T - B)}" width="${bw - 2}" height="${Math.max(v ? 3 : 0, (v / mx) * (H - T - B))}" rx="3"/>
+    ${i % 5 === 0 ? `<text x="${L + i * bw}" y="${H - 6}">${i * 2}m</text>` : ''}</g>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Deaths by game minute">${bars}
+    <text x="${L + peak * bw + bw / 2}" y="${H - B - (H - T - B) - 4}" text-anchor="middle">${mx}</text></svg>
+    <div class="fun">Worst window: <b>${peak * 2}:00–${peak * 2 + 2}:00</b> (${mx} of ${total} deaths${peak <= 2 ? ', early ganks' : peak <= 7 ? ', laning phase' : ''}).</div>`;
+}
+
+function renderStats(st, target) {
+  if (!st) return `<div class="panel center"><h1>No games logged yet</h1><div class="dim">Stats build up from every game leeg sees.</div></div>`;
+  const decided = st.wins + st.losses, wr = decided ? Math.round(st.wins / decided * 100) : null;
+  const k = st.death_kinds || {}, kinds = ['gank', 'solo', 'fight', 'roam', 'tower'].filter(x => k[x]).map(x => `<b>${k[x]}</b> ${x}`).join(' · ');
+  const nmax = Math.max(1, ...(st.nemesis || []).map(e => e.kills));
+  const sk = st.streak && st.streak.n ? `${st.streak.n} ${st.streak.kind === 'Win' ? 'win' : 'loss'}${st.streak.n === 1 ? '' : st.streak.kind === 'Win' ? 's' : 'es'}` : '—';
+  const tiles = `<div class="stats4">
+    <div class="stat"><div class="k">Games</div><div class="v num">${st.n}</div><div class="s">${st.wins}W ${st.losses}L${wr !== null ? ` · ${wr}%` : ''} · since ${esc((st.since || '').slice(0, 10))}</div></div>
+    <div class="stat"><div class="k">Streak</div><div class="v num ${st.streak && st.streak.kind === 'Win' ? 'csm good' : st.streak && st.streak.kind ? 'csm low' : ''}">${sk}</div><div class="s">current</div></div>
+    <div class="stat"><div class="k">Avg CS / min</div><div class="v num csm ${csClass(st.avg_cs_min, target)}">${st.avg_cs_min}</div><div class="s">best ${esc(st.best_cs.cs_min)}${st.best_cs.vs ? ' vs ' + esc(st.best_cs.vs) : ''}</div></div>
+    <div class="stat"><div class="k">Time spent dead</div><div class="v num">${st.dead_games ? hm(st.dead_s) : '—'}</div><div class="s">${st.dead_games ? `staring at a grey screen · ${st.dead_games} game${st.dead_games === 1 ? '' : 's'}` : 'tracked from your next game'}</div></div>
+    <div class="stat"><div class="k">Comebacks</div><div class="v num">${st.comebacks}</div><div class="s">wins after losing lane at 10</div></div>
+  </div>`;
+  const left = `<section class="panel"><div class="label">CS per minute, last ${st.trend.length} games</div>${csTrend(st.trend, target)}${laneTrend(st.trend)}</section>
+    <section class="panel"><div class="label">When you die</div>${deathStrip(st.death_buckets)}
+      ${kinds ? `<div class="fun" style="margin-top:6px">${kinds}</div>` : ''}</section>`;
+  const right = `${(st.nemesis || []).length ? `<section class="panel"><div class="label">Nemesis board · who kills you most</div><div class="board">
+      ${st.nemesis.map(e => `<div class="brow">${e.icon ? `<img src="${esc(e.icon)}" alt="">` : '<span></span>'}<b>${esc(e.name)}</b>
+        <div class="track"><div class="fill" style="width:${e.kills / nmax * 100}%"></div></div>
+        <span class="num">${e.kills}${e.ganks ? ` <span class="dim">(${e.ganks} gank${e.ganks === 1 ? '' : 's'})</span>` : ''}</span></div>`).join('')}</div></section>` : ''}
+    ${(st.vs || []).length ? `<section class="panel"><div class="label">Lane opponents</div><table class="vtable">
+      <tr><th>vs</th><th>games</th><th>record</th><th>lane at 10</th></tr>
+      ${st.vs.map(e => `<tr><td>${e.icon ? `<img src="${esc(e.icon)}" alt="">` : ''}${esc(e.name)}</td><td class="num">${e.games}</td>
+        <td class="num">${e.w}W–${e.l}L</td><td class="num">${e.lane === null ? '<span class="dim">—</span>' : (e.lane > 0 ? '+' : e.lane < 0 ? '−' : '±') + Math.abs(e.lane) + ' cs'}</td></tr>`).join('')}</table></section>` : ''}
+    ${(st.items || []).length ? `<section class="panel"><div class="label">Most built</div><div class="itemcount">
+      ${st.items.map(i => `<div title="${esc(i.name)}">${i.icon ? `<img src="${esc(i.icon)}" alt="">` : ''}<b class="num">x${i.n}</b><br><span class="dim">${esc(i.name)}</span></div>`).join('')}</div></section>` : ''}
+    <section class="panel fun">Time played: <b>${hm(st.played_s)}</b> across ${st.n} game${st.n === 1 ? '' : 's'}.</section>`;
+  return `${tiles}<div class="cols" style="margin-top:14px"><div class="col">${left}</div><div class="col">${right}</div></div>`;
+}
+
+let idleTab = (() => { try { return localStorage.getItem('leegTab') || 'last'; } catch (e) { return 'last'; } })();
+if (/tab=stats/.test(location.hash)) idleTab = 'stats';
+
 function renderIdle(s) {
   const waiting = `<div class="panel row"><span class="dot ${s.client ? 'on' : ''}"></span>
     <div class="grow"><b>Waiting for a game.</b> <span class="dim">${s.client ? 'League client is open; this page switches on its own in champ select and in game.' : 'League client not detected yet.'}</span></div></div>`;
-  if (!s.last) return waiting + `<div class="panel center"><h1>No games recorded yet</h1><div class="dim">Your post-game review shows up here after your next game.</div></div>`;
-  return waiting + `<div class="label" style="margin:6px 2px 0">Last game</div>` + renderReview(s.last, s.cs_target, s.record) + renderHistory(s.history, s.cs_target);
+  const tabs = `<div class="tabs" style="margin:6px 2px 0">${[['last', 'Last game'], ['stats', 'Stats']].map(([k, t]) =>
+    `<button data-tab="${k}" class="${idleTab === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+  if (idleTab === 'stats') return waiting + tabs + renderStats(s.stats, s.cs_target);
+  if (!s.last) return waiting + tabs + `<div class="panel center"><h1>No games recorded yet</h1><div class="dim">Your post-game review shows up here after your next game.</div></div>`;
+  return waiting + tabs + renderReview(s.last, s.cs_target, s.record) + renderHistory(s.history, s.cs_target);
 }
 
 /* ---------- loop ---------- */
@@ -492,7 +708,12 @@ function render() {
   tick();
 }
 
+const openRunes = new Set();
 $('#app').addEventListener('click', e => {
+  const tb = e.target.closest('[data-tab]');
+  if (tb) { idleTab = tb.dataset.tab; try { localStorage.setItem('leegTab', idleTab); } catch (_) {} render(); return; }
+  const r = e.target.closest('[data-rune]');
+  if (r) { const n = r.dataset.rune; openRunes.has(n) ? openRunes.delete(n) : openRunes.add(n); render(); return; }
   const h = e.target.closest('[data-toggle]');
   if (!h) return;
   const name = h.dataset.toggle, auto = h.dataset.auto === '1';
@@ -507,6 +728,8 @@ async function poll() {
   try {
     const r = await fetch('/state', { cache: 'no-store' });
     const text = await r.text();
+    const sn = +r.headers.get('X-Leeg-Now');
+    if (sn) skew = Date.now() / 1000 - sn;
     $('#offline').classList.add('hidden');
     if (text !== raw) {          // re-render only on change; tick() keeps timers moving
       raw = text; state = JSON.parse(text);

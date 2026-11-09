@@ -100,7 +100,7 @@
 
 ## Win conditions
 
-- **Survive lane.** 0/2/even is fine — no death snowballs Mundo more than the enemy. Hit level 11 + Heartsteel before fights start.
+- **Survive lane.** Don't die: a 0/0 lane down 15 CS is a win for Mundo, because he outscales. If you do die early, don't force it back; farm safe, since one more death snowballs your laner more than it hurts you to give up a wave. Hit level 11 + Heartsteel before fights start.
 - **Mid-game:** cleaver-poke before any engage. Only frontline real fights with R available.
 - **Late-game (level 16, 3+ items):** Rank 3 R + Spirit Visage = stat-check window. Target 9–10 CS/min and a level lead on the rest of your team.
 - **Force focus:** if behind, run at the ADC. Either they focus you (4–5s of free damage for your team) or they ignore you and you actually kill the carry.

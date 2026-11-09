@@ -1020,6 +1020,18 @@
       "patch": "16.22",
       "generated_at": "2026-11-08",
       "notes": "- passive (Frost Shot): Attacks slow targets; crits apply stronger slow, no bonus damage\n- Q (Ranger's Focus): Build stacks attacking; cast at max for attack speed flurry\n- W (Volley): Fires cone of arrows dealing damage and applying Frost Shot\n- E (Hawkshot): Send hawk spirit to scout anywhere on map\n- R (Enchanted Crystal Arrow): Fire ice missile stunning champion; longer range means longer stun\n- spike: Crit item purchases and levels 6, 11 become significantly stronger\n- tip: Stay behind minions to avoid Volley and Enchanted Crystal Arrow engage"
+    },
+    "cassiopeia": {
+      "display_name": "Cassiopeia",
+      "patch": "16.22",
+      "generated_at": "2026-11-08",
+      "notes": "- Passive (Serpentine Grace): Move Speed bonuses increased; stacks infinitely.\n- Q (Noxious Blast): Poison blast grants Move Speed on champion hit.\n- W (Miasma): Poison clouds slow, ground, and damage enemies.\n- E (Twin Fang): Enhanced damage to poisoned targets; heals Cassiopeia.\n- R (Petrifying Gaze): Stun facing enemies, slow those turning away.\n- spike: Level 6 with ultimate; two-item power spike.\n- tip: Avoid standing directly in front; respect grounding effect."
+    },
+    "ksante": {
+      "display_name": "K'Sante",
+      "patch": "16.22",
+      "generated_at": "2026-11-08",
+      "notes": "- passive (Dauntless Instinct): Marks enemies for increased damage; All Out form amplifies all damage\n- Q (Ntofo Strikes): Strikes in line, slows, stacks to two then pulls enemies\n- W (Path Maker): Charges with reduced damage taken, dashes to knock back and stun\n- E (Footwork): Dashes for shield; ally targeting grants increased range and dual shields\n- R (All Out): Knocks enemy through walls, transforms into high-damage low-defense form with healing\n- spike: Level six with ultimate; power spikes at bruiser item completion\n- tip: Stay away from walls to prevent All Out knockback amplification"
     }
   }
 }

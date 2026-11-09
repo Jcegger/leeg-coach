@@ -1107,10 +1107,25 @@ def compute_team_threats(enemies, item_index=None):
     return {'tags': tags, 'counts': counts, 'flags': flags, 'item_promotions': item_promotions}
 
 
-def compute_phase(game_time, players):
+def first_turret(ev):
+    """(game_time, 'top outer') of the first turret to fall, or None."""
+    lanes = {'L': 'top', 'C': 'mid', 'R': 'bot'}
+    for et, _killer, tid in sorted(ev.get('towers') or [], key=lambda t: t[0] or 0):
+        parts = (tid or '').split('_')
+        if len(parts) >= 4:
+            tier = {'01': 'outer', '02': 'inner', '03': 'inhib'}.get(parts[3], 'turret')
+            return et or 0, f'{lanes.get(parts[2], parts[2].lower())} {tier}'
+    return None
+
+
+def compute_phase(game_time, players, ev=None):
     """Game phase label for the coach user message: 'early' / 'mid' / 'late'.
     Whichever threshold trips first wins (a fast-snowballing game can hit late
-    before 25min). Avg level computed from `players` (Live API allPlayers)."""
+    before 25min). Avg level computed from `players` (Live API allPlayers).
+    Laning ('early') ends the moment any turret falls: lanes swap and rotations start."""
+    if ev and first_turret(ev) and game_time < 25 * 60:
+        levels = [int(p.get('level') or 0) for p in (players or []) if p.get('level')]
+        return 'late' if levels and sum(levels) / len(levels) >= 14 else 'mid'
     levels = [int(p.get('level') or 0) for p in (players or []) if p.get('level')]
     avg_level = (sum(levels) / len(levels)) if levels else 0
     if game_time >= 25 * 60 or avg_level >= 14:
@@ -1594,8 +1609,13 @@ def drop_rejected_item_bullets(bullets, proposed, final_build, my_items, item_in
     for n in proposed:
         iid = resolve_item_id(n, name_to_id)
         if iid is not None and iid not in kept_ids:
+            full = (item_index.get(iid) or {}).get('name') or n
             rejected.add(normalize(n))
-            rejected.add(normalize((item_index.get(iid) or {}).get('name')))
+            rejected.add(normalize(full))
+            # Short forms the coach writes: "Randuin's" for Randuin's Omen, "Jak'Sho".
+            first = full.split()[0] if full.split() else ''
+            if "'" in first or len(first) >= 8:
+                rejected.add(normalize(first))
     rejected.discard('')
     if not rejected:
         return list(bullets)
@@ -2029,7 +2049,20 @@ def compute_build_diverged(live_build, build_pick, my_items, item_index=None):
 _BUY_VERBS = ('BACK', 'RECALL', 'BUY', 'FINISH', 'RUSH', 'GET')
 
 
-def affordability_postcheck(bullets, current_gold, item_index):
+GLANCE_MAX_WORDS = 12
+
+
+def clean_glance(text, current_gold, item_index, my_items):
+    """The coach's one-glance action line: one sentence, <= GLANCE_MAX_WORDS words, same
+    affordability rewrite as the bullets. Over-long lines are dropped (the page falls
+    back to the bullet) rather than cut mid-thought."""
+    t = re.sub(r'\s+', ' ', (text or '').strip())
+    if not t or len(t.split()) > GLANCE_MAX_WORDS:
+        return ''
+    return affordability_postcheck([t], current_gold, item_index, my_items)[0]
+
+
+def affordability_postcheck(bullets, current_gold, item_index, my_items=None):
     """Server-side enforcement of the affordability rule. For each bullet that
     uses a BACK/BUY-class verb and names an item whose cheapest component cost
     exceeds current_gold, replace the verb with FARM and append the shortfall.
@@ -2071,7 +2104,8 @@ def affordability_postcheck(bullets, current_gold, item_index):
             out.append(b)
             continue
         info = item_index.get(target_id) or {}
-        target_cost = info.get('cost') or 0
+        # Gold left after owned parts: Chain Vest + 1900g can finish Randuin's.
+        target_cost = item_remaining_cost(target_id, owned_item_counter(my_items), item_index)[0]
         target_name = info.get('name', '?')
         if target_cost <= 0 or current_gold >= target_cost:
             out.append(b)
@@ -2224,7 +2258,7 @@ _REFUSAL_PHRASES = {
 
 def _is_valid_champ_notes(text):
     low = text.lower()
-    if any(p in low for p in _REFUSAL_PHRASES) or _REMOVED_ITEMS_RE.search(text):
+    if any(p in low for p in _REFUSAL_PHRASES) or note_is_stale_text(text):
         return False
     if '- q ' not in low and '- q(' not in low:
         return False
@@ -2235,7 +2269,7 @@ def _is_valid_champ_notes(text):
 
 def _is_valid_matchup_notes(text):
     low = text.lower()
-    if any(p in low for p in _REFUSAL_PHRASES) or _REMOVED_ITEMS_RE.search(text):
+    if any(p in low for p in _REFUSAL_PHRASES) or note_is_stale_text(text):
         return False
     bullets = [ln for ln in text.splitlines() if ln.strip().startswith('- ')]
     return len(bullets) >= 4
@@ -2662,6 +2696,7 @@ def parse_events(data):
             summary['heralds'].append((et, e.get('KillerName', '?')))
         elif name in ('HordeKill', 'VoidGrubKill', 'VoidgrubsKill'):
             summary['grubs'] += 1
+            summary.setdefault('grub_kills', []).append((et, e.get('KillerName', '?')))
         elif name == 'TurretKilled':
             summary['towers'].append((et, e.get('KillerName', '?'), e.get('TurretKilled', '?')))
         elif name == 'InhibKilled':
@@ -2812,6 +2847,37 @@ def format_event(e, your_team=None):
     return None
 
 
+BACK_MIN_SPEND = 900  # don't call a recall for a Ruby Crystal: BACK when it finishes an item or buys 900g+
+
+
+def owned_item_counter(items):
+    """Multiset of owned item IDs from the Live API item list (two Rubies count twice)."""
+    from collections import Counter
+    return Counter((i or {}).get('itemID') for i in (items or []) if (i or {}).get('itemID'))
+
+
+def item_remaining_cost(iid, inv, item_index, _depth=0):
+    """Gold still needed for item `iid` given owned parts, crediting components at every
+    level (Ruby Crystal inside a Kindlegem inside the item). Consumes credited parts from
+    `inv` (a Counter; pass a copy). Returns (remaining_gold, [credited part names])."""
+    info = item_index.get(iid) or {}
+    total = info.get('cost') or 0
+    comps = info.get('from') or []
+    if not comps or _depth > 4:
+        return total, []
+    rem = total - sum((item_index.get(c) or {}).get('cost') or 0 for c in comps)  # combine cost
+    have = []
+    for c in comps:
+        if inv.get(c, 0) > 0:
+            inv[c] -= 1
+            have.append((item_index.get(c) or {}).get('name', '?'))
+        else:
+            r, h = item_remaining_cost(c, inv, item_index, _depth + 1)
+            rem += r
+            have += h
+    return max(rem, 0), have
+
+
 def _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=None):
     """Deterministic 'what to back for' line. Walks committed_items (coach's
     locked-in path) when available, else build_pick's path. Returns a string or None."""
@@ -2827,33 +2893,39 @@ def _next_buy_hint(me, build_pick, item_index, current_gold, committed_items=Non
     if not names:
         return None
     name_to_id = _build_name_to_id(item_index)
-    owned_ids = {(i or {}).get('itemID') for i in (me.get('items') or []) if (i or {}).get('itemID')}
+    inv = owned_item_counter(me.get('items'))
     for raw in names:
         iid = resolve_item_id(raw, name_to_id)
-        if not iid or iid in owned_ids:
+        if not iid:
+            continue
+        if inv.get(iid, 0) > 0:
+            inv[iid] -= 1
             continue
         info = item_index.get(iid) or {}
         item_name = info.get('name', raw)
-        item_cost = info.get('cost') or 0
-        components = info.get('from') or []
-        unowned_comps = [c for c in components if c not in owned_ids]
-        if unowned_comps:
-            costs = sorted(
-                ((c, (item_index.get(c) or {}).get('cost') or 0) for c in unowned_comps),
-                key=lambda x: x[1],
-            )
-            cheap_id, cheap_cost = costs[0]
-            cheap_name = (item_index.get(cheap_id) or {}).get('name', '?')
-            big_id, big_cost = costs[-1]
-            big_name = (item_index.get(big_id) or {}).get('name', '?')
-            if current_gold >= item_cost:
-                return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
-            if current_gold >= cheap_cost:
-                return f'BACK — {current_gold}g, saving toward {item_name} ({item_cost}g)'
-            return f'next: {item_name} ({item_cost}g) — farm {big_cost - current_gold}g for {big_name}'
-        if current_gold >= item_cost:
-            return f'BACK — {current_gold}g buys {item_name} ({item_cost}g)'
-        return f'next: {item_name} ({item_cost}g) — farm {item_cost - current_gold}g'
+        rem, have = item_remaining_cost(iid, inv.copy(), item_index)
+        if current_gold >= rem:
+            return f'BACK — {current_gold}g finishes {item_name} ({rem}g)'
+        # Biggest un-owned part you can afford now (parts already credited don't count).
+        left = inv.copy()
+        parts = []
+        for c in info.get('from') or []:
+            if left.get(c, 0) > 0:
+                left[c] -= 1
+                continue
+            parts.append((item_remaining_cost(c, left, item_index)[0], c))
+        spend, buys = 0, []
+        for cost, c in sorted(parts, reverse=True):  # biggest parts first, as many as fit
+            if spend + cost <= current_gold:
+                spend += cost
+                buys.append((item_index.get(c) or {}).get('name', '?'))
+        if spend >= BACK_MIN_SPEND:
+            return f'BACK — {current_gold}g buys {" + ".join(buys)} toward {item_name} ({rem}g left)'
+        bigger = sorted(pc for pc in parts if pc[0] > current_gold and pc[0] >= BACK_MIN_SPEND)
+        if bigger:
+            part = (item_index.get(bigger[0][1]) or {}).get('name', '?')
+            return f'next: {item_name} ({rem}g left) — farm {bigger[0][0] - current_gold}g for {part}'
+        return f'next: {item_name} ({rem}g left) — farm {rem - current_gold}g'
     return None
 
 
@@ -2867,6 +2939,10 @@ COACH_SCHEMA = {
             "items": {"type": "string"},
             "description": "1-3 short tactical bullet lines, each <=90 chars. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
         },
+        "glance": {
+            "type": "string",
+            "description": "The single action right now in 10 words or fewer, imperative, plain words, no persona or reactions. Read in a one-second glance at a second monitor. e.g. 'Back now, buy Warden's Mail.' / 'Ward river before shoving, Lee unseen.' / 'Group mid for baron in 40s.'",
+        },
         "live_build": {
             "type": "array",
             "items": {"type": "string"},
@@ -2877,7 +2953,7 @@ COACH_SCHEMA = {
             "description": "If you intentionally deviated from the RULE-BASED BUILD DEFAULT, a short reason (<=100 chars). Empty string if you're following the default.",
         },
     },
-    "required": ["bullets", "live_build", "build_change_reason"],
+    "required": ["glance", "bullets", "live_build", "build_change_reason"],
     "additionalProperties": False,
 }
 
@@ -3000,12 +3076,42 @@ def kit_reference(kit):
 # Removed from the game (mythics went in 2024). Generated notes citing these get
 # regenerated; the prompts name them so Haiku stops suggesting them.
 _REMOVED_ITEMS_RE = re.compile(
-    r'mythic|duskblade|goredrinker|\bdivine\b(?! judgment)|everfrost|galeforce|prowler|turbo chemtank|night harvester',
+    r'mythic|duskblade|goredrinker|\bdivine\b(?! judgment)|everfrost|galeforce|evenshroud|prowler|turbo chemtank|night harvester|kaenic (?!rookern)',
     re.IGNORECASE)
 # Naming the removed items primed Haiku to write about them ("Everfrost removal means
 # he spikes later"), so the rule stays generic and the validators reject any hit.
 _PROMPT_ITEM_RULE = ('Name only items that exist in the current game; never mention mythic items, '
                      'removed items, or item removals. ')
+
+_REMOVED_ITEM_KEYS = []  # normalized names of items no longer in the game (set_removed_items)
+
+
+def set_removed_items(item_index):
+    """Items CDragon still lists but the shop no longer sells (Adaptive Helm, Divine Sunderer...):
+    multi-word, 1000g+, not a current item's name. Generated notes naming one get rejected."""
+    try:
+        raw = _cdragon_get(ITEMS_INDEX_URL)
+    except Exception as e:
+        log.error('removed items: %s', e)
+        return
+    current = {normalize(v.get('name', '')) for v in (item_index or {}).values()}
+    current_long = [c for c in current if len(c) >= 6]
+    keys = set()
+    for it in raw or []:
+        n = re.sub(r'<[^>]+>', '', it.get('name', '')).strip()
+        k = normalize(n)
+        if (k and k not in current and len(n.split()) >= 2 and (it.get('priceTotal') or 0) >= 1000
+                and not any(c in k for c in current_long)):
+            keys.add(k)
+    _REMOVED_ITEM_KEYS[:] = sorted(keys)
+
+
+def note_is_stale_text(text):
+    """True when a generated note names a removed item or a made-up one we've seen."""
+    if _REMOVED_ITEMS_RE.search(text or ''):
+        return True
+    flat = re.sub(r'[^a-z0-9]', '', (text or '').lower())
+    return any(k in flat for k in _REMOVED_ITEM_KEYS)
 
 
 def note_needed(entry, patch):
@@ -3060,7 +3166,7 @@ class ChampDB:
                 data = json.loads(self._NOTES_PATH.read_text())
                 if data.get('version') == self._CACHE_VERSION:
                     self._notes = {k: v for k, v in data.get('champions', {}).items()
-                                   if not _REMOVED_ITEMS_RE.search(v.get('notes', ''))}
+                                   if not note_is_stale_text(v.get('notes', ''))}
                 # else: old version — leave _notes empty so notes regen in new format.
             except Exception:
                 pass
@@ -3068,7 +3174,7 @@ class ChampDB:
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
         _merge_disk_notes(self._NOTES_PATH, self._CACHE_VERSION, 'champions', self._notes,
-                          drop=lambda v: _REMOVED_ITEMS_RE.search(v.get('notes', '')))
+                          drop=lambda v: note_is_stale_text(v.get('notes', '')))
         self._NOTES_PATH.write_text(
             json.dumps({'version': self._CACHE_VERSION, 'champions': self._notes}, indent=2)
         )
@@ -3152,7 +3258,10 @@ class MatchupDB:
 
     _NOTES_PATH = DATA_DIR / 'matchup_notes.json'
     _SEP = '__'
-    _CACHE_VERSION = 2
+    # 3: grounded on the player's build.md items, never-buy list, rune pages and own matchup
+    # notes. v2 notes pushed Adaptive Helm (removed), Hollow Radiance (Mundo's never-buy),
+    # Mundo's runes for every champion, and "slow-push" in 177 of 179 Mundo pairs.
+    _CACHE_VERSION = 3
 
     def __init__(self, client=None, patch=None, kit_db=None):
         self._lock = threading.Lock()
@@ -3161,6 +3270,7 @@ class MatchupDB:
         self.client = client
         self.patch = patch or 'unknown'
         self.kit_db = kit_db
+        self.context = {}  # normalize(player display) -> matchup_context() dict
         self._load()
 
     def _key(self, player_champ, enemy_champ):
@@ -3178,7 +3288,7 @@ class MatchupDB:
                     self._notes = data.get('pairs', {})
                     # Notes citing removed items/mythics are wrong, not stale: drop just
                     # those so they regenerate grounded. The rest stay (stable by design).
-                    bad = [k for k, v in self._notes.items() if _REMOVED_ITEMS_RE.search(v.get('notes', ''))]
+                    bad = [k for k, v in self._notes.items() if note_is_stale_text(v.get('notes', ''))]
                     for k in bad:
                         del self._notes[k]
                     if bad:
@@ -3190,7 +3300,7 @@ class MatchupDB:
     def _save(self):
         DATA_DIR.mkdir(exist_ok=True)
         _merge_disk_notes(self._NOTES_PATH, self._CACHE_VERSION, 'pairs', self._notes,
-                          drop=lambda v: _REMOVED_ITEMS_RE.search(v.get('notes', '')))
+                          drop=lambda v: note_is_stale_text(v.get('notes', '')))
         self._NOTES_PATH.write_text(
             json.dumps({'version': self._CACHE_VERSION, 'pairs': self._notes}, indent=2)
         )
@@ -3225,6 +3335,20 @@ class MatchupDB:
 
     def _generate(self, player_display, enemy_display, key):
         try:
+            ctx = self.context.get(normalize(player_display)) or {}
+            ctx_text = ''
+            if ctx.get('items'):
+                ctx_text += f'Items {player_display} builds: {", ".join(ctx["items"])}. '
+            if ctx.get('never'):
+                ctx_text += f'{player_display} never buys: {"; ".join(ctx["never"])}. '
+            own = (ctx.get('notes') or {}).get(normalize(enemy_display))
+            if own:
+                ctx_text += (f'The player\'s own notes on this matchup (authoritative; agree with them, '
+                             f'never contradict them): "{own}" ')
+            runes = ctx.get('runes') or []
+            rune_q = (f'which of these rune pages fits ({", ".join(runes)}) and the one-line reason' if runes
+                      else 'which keystone fits this matchup and the one-line reason')
+            item_q = ' from the items above' if ctx.get('items') else ''
             refs = []
             if self.kit_db:
                 for name in (player_display, enemy_display):
@@ -3240,6 +3364,9 @@ class MatchupDB:
                     'content': (
                         (f'{ref}\n\nUse exactly these ability names and slots. ' if ref else '') +
                         _PROMPT_ITEM_RULE +
+                        'Point-and-click abilities cannot be dodged or baited into missing; only skillshots can. '
+                        'Use each ability\'s damage type and effect exactly as the kit text says. ' +
+                        ctx_text +
                         f'League of Legends matchup notes for a {player_display} player facing {enemy_display}. '
                         f'Write as if coaching {player_display} directly — how do I handle this matchup? '
                         f'Output ONLY a bulleted list — no preamble, no headers, no closing summary, no markdown beyond the bullets. '
@@ -3251,15 +3378,20 @@ class MatchupDB:
                         f'- post6: how the matchup shifts at level 6 or when {enemy_display} ult unlocks\n'
                         f'- spike: when {enemy_display} first item-spikes; is it a danger window or punish window for {player_display}?\n'
                         f'- window: when {player_display} has a power edge or punish window in this matchup\n'
-                        f'- wave: push, freeze, or slow-push — which and why in this specific matchup\n'
-                        f'- rune: Grasp, Stormraider\'s Surge, or other — which fits this matchup and the one-line reason\n'
-                        f'- item: one counter-item {player_display} might add (do NOT reorder core build)\n'
+                        f'- wave: what to do with the wave in THIS matchup (shove, hold it near your tower, or let it bounce) and why; do not default to slow-push\n'
+                        f'- rune: {rune_q}\n'
+                        f'- item: one counter-item {player_display} might add{item_q} (do NOT reorder core build)\n'
                         f'No emojis. Imperative tone.'
                     ),
                 }],
             )
             notes = resp.content[0].text.strip()
-            if not _is_valid_matchup_notes(notes):
+            item_line = next((ln for ln in notes.splitlines() if ln.strip().lower().startswith('- item')), '')
+            flat_item = normalize(item_line)
+            if any(normalize(re.sub(r'\s*\(.*?\)', '', n)) in flat_item for n in ctx.get('never') or []
+                   if len(normalize(re.sub(r'\s*\(.*?\)', '', n))) >= 6):
+                notes = ''  # suggested a never-buy item
+            if not notes or not _is_valid_matchup_notes(notes):
                 with self._lock:
                     self._pending.discard(key)
                 return
@@ -3317,6 +3449,7 @@ class Coach:
         self._emax_champs = set()             # champs where E-max is correct (from build.md)
         self.recent_responses = []  # list of dicts; last 5
         self.last_bullets = []
+        self.last_glance = ''
         self.last_live_build = []
         self.last_diverged = False
         self.last_change_reason = ''
@@ -3339,6 +3472,7 @@ class Coach:
         self.last_trigger = ''
         self.last_event_count = 0
         self.last_bullets = []
+        self.last_glance = ''
         self.last_live_build = []
         self.last_diverged = False
         self.last_change_reason = ''
@@ -3389,10 +3523,12 @@ class Coach:
             f"- If YOU DEAD: frame everything as what to do on spawn or at base. Never tell a dead player to move or farm.\n\n"
             f"Bullet rules (TTS is reading these aloud):\n"
             f"- Each bullet is one complete sentence ending with a period. Nothing appended after.\n"
+            f"- glance: the one action, 10 words or fewer, no persona. It is what he reads mid-fight; the bullets carry the voice and the why.\n"
+            f"- Don't repeat a call from RECENT CALLS unless the game state changed; if it still applies and nothing moved, give the next step instead (five 'push the Nexus' calls in a row helped nobody).\n"
             f"- No hyphens or parentheses. Write 'face tank', 'anti heal', 'mid lane'. Use commas for asides.\n"
             f"- Back/buy actions: START with the verb. 'Back and finish Heartsteel.' Never cite gold amounts — just name the item.\n"
             f"- Never name a component. Say 'Spirit Visage', not 'Spectre's Cowl'. Say 'Heartsteel', not 'Crystalline Bracer'.\n"
-            f"- ROTATION: only tell them to rotate for drake/baron if it spawns within 90 seconds AND their outer tower is already fallen. Tower still up → shove wave and farm.\n\n"
+            f"- ROTATION: only tell them to rotate for drake/baron if it spawns within 90 seconds AND their outer tower is already fallen. Tower still up → stay in lane and farm; shove only when ENEMY JUNGLER puts them on the far side of the map or recently seen elsewhere, never when they're unseen for 90s+. Laning ends when the first turret falls anywhere (PHASE says so): from then on play the map per WIN CONDITION / SIDE SELECTION, not the lane.\n\n"
             f"Build rules:\n"
             f"- First call: pick the right build variant for the enemy comp and lock it in. That's YOUR commitment for the game.\n"
             f"- Do NOT reorder live_build items. The build guide's order is intentional — item 1 is item 1 all game. Only change WHICH items are in the path, never their sequence.\n"
@@ -3577,7 +3713,7 @@ class Coach:
             text = json.dumps(parsed) if parsed else ''
             bullets = [b for b in (parsed.get('bullets') or []) if isinstance(b, str) and b.strip()]
             bullets = [re.sub(r'\.,.*$', '.', b.rstrip()) for b in bullets]
-            bullets = affordability_postcheck(bullets, current_gold, item_index)
+            bullets = affordability_postcheck(bullets, current_gold, item_index, my_items)
             live_build = [s for s in (parsed.get('live_build') or []) if isinstance(s, str) and s.strip()]
             live_build = strip_starters(live_build)
             live_build = strip_duplicate_boots(live_build)
@@ -3605,14 +3741,22 @@ class Coach:
             )
             seen = set(); live_build = [x for x in live_build if not (normalize(x) in seen or seen.add(normalize(x)))]
             bullets = drop_rejected_item_bullets(bullets, proposed, live_build, my_items, item_index)
+            glance = clean_glance(parsed.get('glance'), current_gold, item_index, my_items)
+            if glance and not drop_rejected_item_bullets([glance], proposed, live_build, my_items, item_index):
+                glance = ''  # names an item the validators removed
             diverged = compute_build_diverged(live_build, build_pick, my_items, item_index)
             reason = raw_reason if diverged else ''
+            if reason and not drop_rejected_item_bullets([reason], proposed, live_build, my_items, item_index):
+                # The reason argues for an item the validators took out (Randuin's rushed vs an
+                # itemless Yasuo): it no longer describes the build on screen.
+                reason = ''
             if citation_reject:
                 # Stash for diagnostic visibility; not surfaced in display.
                 self.last_validation_warning = citation_reject
             with self.lock:
                 self.last_response = text
                 self.last_bullets = bullets
+                self.last_glance = glance
                 self.last_live_build = live_build
                 self.last_diverged = diverged
                 self.last_change_reason = reason
@@ -3713,6 +3857,92 @@ def _team_of(players):
             if key:
                 team_of[key] = team
     return team_of
+
+
+_POS_AREA = {'TOP': 'top', 'MIDDLE': 'mid', 'BOTTOM': 'bot', 'UTILITY': 'bot', 'JUNGLE': 'jungle'}
+
+
+def lane_opponent(data, me):
+    pos = (me or {}).get('position')
+    if not pos:
+        return None
+    return next((p for p in data.get('allPlayers') or []
+                 if p.get('team') != me.get('team') and p.get('position') == pos), None)
+
+
+def lane_gap(data, me):
+    """{'vs', 'cs', 'lvl'}: your CS and level minus your lane opponent's (scoreboard-visible;
+    the live API reports others' CS in steps of 10, so +-10 is noise)."""
+    opp = lane_opponent(data, me)
+    if not opp:
+        return None
+    mine, theirs = (me.get('scores') or {}), (opp.get('scores') or {})
+    return {'vs': opp.get('championName', '?'),
+            'cs': int(mine.get('creepScore', 0) or 0) - int(theirs.get('creepScore', 0) or 0),
+            'lvl': int(me.get('level') or 0) - int(opp.get('level') or 0)}
+
+
+def enemy_jungler_seen(data, ev, me):
+    """Where the enemy jungler last showed up on the kill feed / objective feed, which the
+    player can see too: {'name', 'where', 'at' (game time), 'how'}, or None.
+    'where' is inferred: a kill or assist is placed in the lane of the other player
+    involved, drakes bot river, grubs/herald/baron top river, turrets their lane."""
+    if not me:
+        return None
+    jg = next((p for p in data.get('allPlayers') or []
+               if p.get('team') != me.get('team') and p.get('position') == 'JUNGLE'), None)
+    if not jg:
+        return None
+    names = {k for k in (jg.get('riotIdGameName'), jg.get('riotId'), jg.get('summonerName')) if k}
+    area_of = {}
+    for p in data.get('allPlayers') or []:
+        for k in (p.get('riotIdGameName'), p.get('riotId'), p.get('summonerName')):
+            if k:
+                area_of[k] = (_POS_AREA.get(p.get('position') or '', ''), p.get('championName', '?'))
+    seen = []
+    for et, killer, victim, assisters in ev.get('kills') or []:
+        if killer in names or names & set(assisters or []):
+            area, champ = area_of.get(victim, ('', '?'))
+            seen.append((et, area if area and area != 'jungle' else 'jungle', f'kill on {champ}'))
+        elif victim in names:
+            area, champ = area_of.get(killer, ('', '?'))
+            seen.append((et, area if area and area != 'jungle' else 'jungle', f'died to {champ}'))
+    for et, _t, killer, _s in ev.get('drakes') or []:
+        if killer in names:
+            seen.append((et, 'drake', 'took drake'))
+    for et, killer in ev.get('grub_kills') or []:
+        if killer in names:
+            seen.append((et, 'top river', 'took grubs'))
+    for et, killer in ev.get('heralds') or []:
+        if killer in names:
+            seen.append((et, 'top river', 'took herald'))
+    for et, killer, _s in ev.get('barons') or []:
+        if killer in names:
+            seen.append((et, 'baron', 'took baron'))
+    lanes = {'L': 'top', 'C': 'mid', 'R': 'bot'}
+    for et, killer, tid in ev.get('towers') or []:
+        parts = (tid or '').split('_')
+        if killer in names and len(parts) >= 3:
+            seen.append((et, lanes.get(parts[2], '?'), 'took a turret'))
+    last = max(seen, key=lambda x: x[0] or 0) if seen else None
+    return {'name': jg.get('championName', '?'), 'where': last[1] if last else '',
+            'at': int(last[0] or 0) if last else None, 'how': last[2] if last else ''}
+
+
+def killed_by(data, ev, me):
+    """Champion that got the kill on your latest death, or None (turret, minion, or no death yet)."""
+    if not me:
+        return None
+    mine = {k for k in (me.get('riotIdGameName'), me.get('riotId'), me.get('summonerName')) if k}
+    champ_of = {}
+    for p in data.get('allPlayers') or []:
+        if p.get('team') == me.get('team'):
+            continue
+        for k in (p.get('riotIdGameName'), p.get('riotId'), p.get('summonerName')):
+            if k:
+                champ_of[k] = p.get('championName')
+    deaths = [k for k in ev.get('kills') or [] if k[2] in mine]
+    return champ_of.get(max(deaths, key=lambda k: k[0] or 0)[1]) if deaths else None
 
 
 def drakes_by_team(data, ev, your_team):
@@ -3889,43 +4119,28 @@ def _enemy_threat_state(enemy, game_time, enemies=None, item_index=None):
     return None
 
 
-def remaining_item_costs(build_names, owned_names, item_index):
-    """For each unowned build item, subtract owned component costs and return
-    lines like 'Warmog's Armor: have Giant's Belt → 2300g remaining (of 3100g)'."""
+def remaining_item_costs(build_names, owned_names, item_index, my_items=None):
+    """For each unowned build item, the gold still needed after owned parts (every
+    level, duplicates counted), as lines for the coach's prompt."""
     if not item_index or not build_names:
         return []
-    name_to_id = {}
-    for iid, info in item_index.items():
-        if iid >= 200000:
-            continue
-        n = normalize(info.get('name', ''))
-        if n and n not in name_to_id:
-            name_to_id[n] = iid
+    name_to_id = _build_name_to_id(item_index)
+    inv = owned_item_counter(my_items) if my_items is not None else None
     owned_norm = {normalize(_clean_build_name(n) or n) for n in owned_names if n}
+    if inv is None:  # names only: one of each
+        from collections import Counter
+        inv = Counter(i for n in owned_names if n for i in [resolve_item_id(_clean_build_name(n) or n, name_to_id)] if i)
     out = []
     for bname in build_names:
-        norm = normalize(_clean_build_name(bname) or bname)
-        if norm in owned_norm:
-            continue  # already owned
-        iid = name_to_id.get(norm)
-        if not iid:
+        iid = resolve_item_id(_clean_build_name(bname) or bname, name_to_id)
+        if not iid or normalize(_clean_build_name(bname) or bname) in owned_norm:
             continue
         info = item_index[iid]
-        total = info.get('cost', 0)
-        comp_ids = info.get('from') or []
-        owned_comps = []
-        comp_cost = 0
-        for cid in comp_ids:
-            cinfo = item_index.get(cid) or {}
-            cname = cinfo.get('name', '')
-            if normalize(cname) in owned_norm:
-                owned_comps.append(cname)
-                comp_cost += cinfo.get('cost', 0)
-        remaining = total - comp_cost
-        if owned_comps:
-            out.append(f'  {info["name"]}: {remaining}g still needed, already have {", ".join(owned_comps)}')
+        rem, have = item_remaining_cost(iid, inv, item_index)  # parts go to the earliest item
+        if have:
+            out.append(f'  {info["name"]}: {rem}g still needed, already have {", ".join(have)}')
         else:
-            out.append(f'  {info["name"]}: {total}g, no components owned yet')
+            out.append(f'  {info["name"]}: {rem}g, no components owned yet')
     return out
 
 
@@ -4004,11 +4219,28 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     committed_items = list((committed_build or {}).get('items') or [])
     lines = [f'TRIGGER: {trigger}', f'TIME: {mins}:{secs:02d}']
     if phase:
-        lines.append(f'PHASE: {phase}')
+        ft = first_turret(ev) if ev else None
+        if ft:
+            m, sec = divmod(int(ft[0]), 60)
+            lines.append(f'PHASE: {phase} — LANING IS OVER (first turret fell: {ft[1]} at {m}:{sec:02d}). '
+                         f'Lanes swap and junglers/mids rotate; no more lane-phase advice.')
+        else:
+            lines.append(f'PHASE: {phase} (laning — no turret has fallen yet)')
     _pos_label = {'top': 'TOP', 'jungle': 'JUNGLE', 'middle': 'MID', 'bottom': 'ADC', 'utility': 'SUPPORT'}
     _role = _pos_label.get((me.get('position') or '').lower() if me else '', '')
     if _role:
         lines.append(f'ROLE: {_role}')
+    if me and not first_turret(ev):  # laning only: the lane and their jungler are what kill you
+        gap = lane_gap(data, me)
+        if gap:
+            lines.append(f'LANE GAP vs {gap["vs"]}: you {gap["cs"]:+d} CS (scoreboard steps of 10), {gap["lvl"]:+d} level(s)')
+        jg = enemy_jungler_seen(data, ev, me)
+        if jg:
+            if jg['at'] is None:
+                lines.append(f'ENEMY JUNGLER: {jg["name"]}, not seen on the kill/objective feed yet — assume they can be near you.')
+            else:
+                ago = max(0, int(game_time - jg['at']))
+                lines.append(f'ENEMY JUNGLER: {jg["name"]} last seen {jg["where"]} ({jg["how"]}) {ago // 60}:{ago % 60:02d} ago.')
     if is_aram:
         lines.append('GAME MODE: ARAM — no drake/baron objectives; teamfight-focused map.')
 
@@ -4353,7 +4585,7 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
                 lines.append(f'PANEL HINT (already shown on player screen — do NOT repeat verbatim): {panel_hint}')
 
         if item_index and build_names and me:
-            remaining = remaining_item_costs(build_names, owned_names, item_index)
+            remaining = remaining_item_costs(build_names, owned_names, item_index, (me or {}).get('items'))
             lines.append('')
             if remaining:
                 lines.append('BUILD STATUS: INCOMPLETE — do NOT say "full build" or imply the player has everything.')
@@ -4988,6 +5220,36 @@ def fetch_champ_select(lockinfo, hosts):
     return lcu_get(lockinfo, '/lol-champ-select/v1/session', hosts)
 
 
+def matchup_context(available, champ_index):
+    """Per player champion folder: build.md items, never-buy list, rune page names, and the
+    player's own matchup notes, keyed by normalized display name (MatchupDB.context)."""
+    names = list((champ_index or {}).values())
+    by_norm = {normalize(n): n for n in names}
+    out, cache = {}, {}
+    for folder in available:
+        disp = by_norm.get(normalize(folder)) or next(
+            (n for n in names if CHAMP_ALIASES.get(normalize(n)) == folder), None)
+        if not disp:
+            continue
+        cd = load_champ_data(folder, cache)
+        build_md = LEEG_ROOT / folder / 'build.md'
+        never = []
+        if build_md.exists():
+            m = re.search(r'^## Do NOT buy\s*\n(.*?)(?=^## |\Z)', build_md.read_text(), re.M | re.S)
+            if m:
+                never = [re.sub(r'\s+[—-].*$', '', ln.strip('- ').strip()) for ln in m.group(1).splitlines()
+                         if ln.strip().startswith('-')]
+        notes = {}
+        for k, entry in (cd.get('matchups') or {}).items():
+            body = entry[1] if isinstance(entry, (list, tuple)) and len(entry) > 1 else ''
+            if body:
+                notes[k] = re.sub(r'\s+', ' ', body).strip()[:600]
+        out[normalize(disp)] = {'items': sorted(cd.get('item_pool') or []), 'never': never,
+                                'runes': [r.get('name', '') for r in cd.get('runes') or [] if r.get('name')],
+                                'notes': notes}
+    return out
+
+
 def build_notes(only=None, workers=6):
     """--build-notes: generate every missing/stale ChampDB note and MatchupDB pair
     (each champion folder vs every champion) now instead of on first sight in a game."""
@@ -5004,8 +5266,11 @@ def build_notes(only=None, workers=6):
     patch = fetch_current_patch()
     global _kit_db
     _kit_db = KitDB(patch=patch)
+    item_index = fetch_item_index()
+    set_removed_items(item_index)
     cdb = ChampDB(client=coach.client, patch=patch, kit_db=_kit_db)
     mdb = MatchupDB(client=coach.client, patch=patch, kit_db=_kit_db)
+    mdb.context = matchup_context(available_champs(), champ_index)
     names = sorted(champ_index.values())
     by_norm = {normalize(n): n for n in names}
     players = []
@@ -5243,7 +5508,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 committed_snapshot = dict(coach.committed_build) if coach.committed_build else None
             team_threats = compute_team_threats(enemies, item_index)
             players = data.get('allPlayers') or []
-            phase = compute_phase(game_time, players)
+            phase = compute_phase(game_time, players, ev)
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
             active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper(),
@@ -5515,6 +5780,7 @@ def _coach_fields(coach):
         return {'enabled': coach.client is not None,
                 'error': coach.error_msg if coach.client is None else '',
                 'bullet': coach.last_bullets[0] if coach.last_bullets else '',
+                'glance': getattr(coach, 'last_glance', ''),
                 'bullet_at': coach.last_response_at}
 
 
@@ -5540,16 +5806,24 @@ def _short_heading(h):
     return re.sub(r'\s*\(.*?\)', '', h or '').strip() or (h or '')
 
 
-def _web_items(names, owned_ids, item_index):
-    """[{name, icon, owned, next}] for a build path; `next` marks the first un-owned item."""
+def _web_items(names, owned_ids, item_index, inv=None):
+    """[{name, icon, owned, next, cost}] for a build path; `next` marks the first un-owned
+    item; with `inv` (owned_item_counter) cost is what's left after owned parts."""
     name_to_id = _build_name_to_id(item_index) if item_index else {}
+    inv = inv.copy() if inv is not None else None
     out, next_set = [], False
     for n in names or []:
         iid = resolve_item_id(n, name_to_id) if name_to_id else None
         info = (item_index or {}).get(iid) or {}
         owned = bool(iid and iid in owned_ids)
+        cost = info.get('cost', 0)
+        if iid and inv is not None:
+            if owned and inv.get(iid, 0) > 0:
+                inv[iid] -= 1
+            elif not owned:  # parts count toward the earliest item that uses them
+                cost = item_remaining_cost(iid, inv, item_index)[0]
         out.append({'name': info.get('name', n), 'icon': info.get('icon', ''),
-                    'cost': info.get('cost', 0), 'owned': owned, 'next': not owned and not next_set})
+                    'cost': cost, 'full': info.get('cost', 0), 'owned': owned, 'next': not owned and not next_set})
         next_set = next_set or not owned
     return out
 
@@ -5594,10 +5868,22 @@ def web_enemy_cards(your_champ, me, enemies, game_time, item_index, matchups=Non
     return cards
 
 
+def _plan_threats(enemies, item_index):
+    """Team threat tags for the game plan. TANK only for tank-built enemies, matching the cards
+    (an unbuilt Garen isn't a tank yet)."""
+    tags = dict((compute_team_threats(enemies, item_index) or {}).get('tags', {}))
+    if tags.get('TANK'):
+        kinds = {e.get('championName'): classify_enemy(e.get('championName', ''), e.get('items') or [], item_index)
+                 for e in enemies}
+        tags['TANK'] = [n for n in tags['TANK'] if kinds.get(n) == 'Tank']
+    return tags
+
+
 def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram, profile,
                    build_pick, coach, item_index, committed_items, champ_folder,
                    matchups=None, matchup_db=None, win_condition=''):
     owned_ids = {(i or {}).get('itemID') for i in ((me or {}).get('items') or []) if (i or {}).get('itemID')}
+    inv = owned_item_counter((me or {}).get('items'))
     gold = int((data.get('activePlayer') or {}).get('currentGold') or 0)
     sc = (me or {}).get('scores') or {}
     coach_view = {'enabled': coach is not None and coach.client is not None, 'error': '', 'bullet': '',
@@ -5609,13 +5895,13 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
             coach_view['bullet_at'] = coach.last_response_at
             if coach.last_live_build:
                 coach_view['live'] = {
-                    'items': _web_items(coach.last_live_build, owned_ids, item_index),
+                    'items': _web_items(coach.last_live_build, owned_ids, item_index, inv),
                     'diverged': coach.last_diverged, 'reason': coach.last_change_reason,
                 }
     default = None
     if build_pick:
         path = [n.strip() for n in build_path_summary(build_pick[1]).split('·') if n.strip()]
-        default = {'name': _short_heading(build_pick[0]), 'items': _web_items(path, owned_ids, item_index)}
+        default = {'name': _short_heading(build_pick[0]), 'items': _web_items(path, owned_ids, item_index, inv)}
     hint = None
     if me and item_index and (build_pick or committed_items):
         h = _next_buy_hint(me, build_pick, item_index, gold, committed_items=committed_items)
@@ -5631,7 +5917,9 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
         'you': {'champ': your_champ or '?', 'icon': champ_icon_url(your_champ), 'level': (me or {}).get('level'),
                 'k': sc.get('kills', 0), 'd': sc.get('deaths', 0), 'a': sc.get('assists', 0),
                 'cs': sc.get('creepScore', 0), 'gold': gold, 'dead': bool((me or {}).get('isDead')),
-                'respawn': int((me or {}).get('respawnTimer') or 0)},
+                'respawn': int((me or {}).get('respawnTimer') or 0),
+                'killed_by': killed_by(data, ev, me) if me and me.get('isDead') else None},
+        'laning_over': bool(first_turret(ev)),
         'coach': coach_view,
         'comp': {'label': profile[0], 'breakdown': comp_breakdown(enemies, item_index)} if profile and profile[3] else None,
         'build': default,
@@ -5640,13 +5928,13 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
         'objectives': None if is_aram else {
             'drake': timers.get('drake'), 'baron': timers.get('baron'),
             'drakes': dict(zip(('you', 'them'), drakes_by_team(data, ev, (me or {}).get('team')))),
-            'barons': len(ev['barons']), 'grubs': ev['grubs'], 'gold_lead': lead},
+            'barons': len(ev['barons']), 'grubs': ev['grubs'], 'gold_lead': lead,
+            'lane': lane_gap(data, me), 'jungler': enemy_jungler_seen(data, ev, me)},
         'dead': sorted(({'name': e.get('championName', '?'), 'icon': champ_icon_url(e.get('championName')),
                          'respawn': int(e.get('respawnTimer') or 0)} for e in enemies if e.get('isDead')),
                        key=lambda x: x['respawn']),
         'enemies': web_enemy_cards(your_champ, me, enemies, game_time, item_index, matchups, matchup_db),
-        'plan': {'win_condition': win_condition or '',
-                 'threats': (compute_team_threats(enemies, item_index) or {}).get('tags', {})},
+        'plan': {'win_condition': win_condition or '', 'threats': _plan_threats(enemies, item_index)},
     }
 
 
@@ -5674,6 +5962,7 @@ class _WebHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', ctype)
         self.send_header('Cache-Control', 'no-store')
+        self.send_header('X-Leeg-Now', f'{time.time():.3f}')  # page measures WSL-vs-Windows clock skew
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -5776,7 +6065,8 @@ class GameTracker:
             self.g = {'champ': your_champ, 'folder': champ_folder or '', 'icon': champ_icon_url(your_champ),
                       'started': time.strftime('%Y-%m-%d %H:%M'), 'time': game_time, 'cs_marks': {},
                       'items': [], 'deaths': [], 'seen': set(), 'result': None,
-                      'scores': dict(me.get('scores') or {}), 'level': 0, 'joined': game_time}
+                      'scores': dict(me.get('scores') or {}), 'level': 0, 'joined': game_time,
+                      'lane_marks': {}, 'death_info': {}, 'dead_s': 0, 'dead_since': None}
         g = self.g
         sc = me.get('scores') or {}
         # Started mid-game (leeg restarted): what's already owned/happened has no known time.
@@ -5792,6 +6082,44 @@ class GameTracker:
         for m in CS_MARKS:
             if game_time >= m * 60 and str(m) not in g['cs_marks']:
                 g['cs_marks'][str(m)] = int(sc.get('creepScore', 0) or 0)
+                gap = lane_gap(data, me)
+                if gap and m in (10, 15):
+                    g['lane_marks'][str(m)] = {'cs': gap['cs'], 'lvl': gap['lvl']}
+        # Time spent dead: summed from game-time while isDead (polls every ~3s).
+        if me.get('isDead'):
+            if g['dead_since'] is None:
+                g['dead_since'] = game_time
+        elif g['dead_since'] is not None:
+            g['dead_s'] += max(0, game_time - g['dead_since'])
+            g['dead_since'] = None
+        # Each death: solo (lane opponent alone), gank (their jungler involved) or team fight.
+        mine = {k for k in (me.get('riotIdGameName'), me.get('riotId'), me.get('summonerName')) if k}
+        if mine:
+            who = {}
+            for pl in data.get('allPlayers') or []:
+                for k in (pl.get('riotIdGameName'), pl.get('riotId'), pl.get('summonerName')):
+                    if k:
+                        who[k] = (pl.get('championName', '?'), pl.get('position') or '', pl.get('team'))
+            for e in ((data.get('events') or {}).get('Events') or []):
+                if e.get('EventName') != 'ChampionKill' or e.get('VictimName') not in mine:
+                    continue
+                eid = str(e.get('EventID', e.get('EventTime')))
+                if eid in g['death_info']:
+                    continue
+                killer = who.get(e.get('KillerName'))
+                helpers = [who[a] for a in (e.get('Assisters') or []) if a in who]
+                if not killer:
+                    kind = 'tower' if 'turret' in str(e.get('KillerName', '')).lower() else 'other'
+                elif any(h[1] == 'JUNGLE' for h in [killer] + helpers):
+                    kind = 'gank'
+                elif not helpers and killer[1] == me.get('position'):
+                    kind = 'solo'
+                elif not helpers:
+                    kind = 'roam'
+                else:
+                    kind = 'fight'
+                g['death_info'][eid] = {'t': int(e.get('EventTime') or 0), 'by': killer[0] if killer else None,
+                                        'help': [h[0] for h in helpers], 'kind': kind}
         for it in me.get('items') or []:
             iid = (it or {}).get('itemID')
             if not iid or iid in g['seen']:
@@ -5822,6 +6150,10 @@ class GameTracker:
             'cs': sc.get('creepScore', 0), 'cs_min': round((sc.get('creepScore', 0) or 0) / max(minutes, 1), 1),
             'cs_marks': g['cs_marks'], 'items': g['items'], 'deaths': g['deaths'],
             'item_bench': bench.get('item_minutes') or [],
+            'lane_marks': g.get('lane_marks') or {},
+            'death_info': sorted((g.get('death_info') or {}).values(), key=lambda d: d['t']),
+            'dead_s': int(g.get('dead_s', 0) + (g['time'] - g['dead_since'] if g.get('dead_since') is not None else 0)),
+            'ward_score': round(float(sc.get('wardScore', 0) or 0), 1),
             'joined': g['joined'] if g['joined'] > 90 else 0,
         }
         try:
@@ -5836,14 +6168,146 @@ class GameTracker:
         return summary
 
 
-def web_idle_state(tracker, client_open):
+def load_all_games():
+    try:
+        lines = GAMES_LOG.read_text().splitlines()
+    except OSError:
+        return []
+    out = []
+    for ln in lines:
+        try:
+            out.append(json.loads(ln))
+        except json.JSONDecodeError:
+            continue
+    return out
+
+
+def career_stats(games, target=CS_TARGET):
+    """Everything-so-far numbers for the page's Stats tab. Fields recorded only by newer
+    leeg versions (death_info, dead_s, lane_marks) count only the games that have them."""
+    if not games:
+        return None
+    n = len(games)
+    wins = sum(g.get('result') == 'Win' for g in games)
+    losses = sum(g.get('result') == 'Loss' for g in games)
+    streak, kind = 0, None
+    for g in reversed(games):
+        r = g.get('result')
+        if r not in ('Win', 'Loss'):
+            continue
+        if kind is None:
+            kind = r
+        if r != kind:
+            break
+        streak += 1
+    with_dead = [g for g in games if 'dead_s' in g]
+    trend = []
+    for g in games[-25:]:
+        legs = sorted((i for i in g.get('items') or [] if not i.get('boots') and i.get('t') is not None),
+                      key=lambda i: i['t'])
+        bench = (g.get('item_bench') or [None])[0]
+        trend.append({'date': g.get('date'), 'champ': g.get('champ'), 'vs': g.get('vs'), 'result': g.get('result'),
+                      'cs_min': g.get('cs_min'), 'cs10': (g.get('cs_marks') or {}).get('10'),
+                      'lane10': ((g.get('lane_marks') or {}).get('10') or {}).get('cs'),
+                      'early_deaths': sum(1 for t in g.get('deaths') or [] if t < 900),
+                      'first_item': legs[0]['t'] if legs else None,
+                      'first_delta': (legs[0]['t'] - bench * 60) if legs and bench else None})
+    # When you die: 2-minute buckets up to 40:00.
+    buckets = [0] * 20
+    for g in games:
+        for t in g.get('deaths') or []:
+            buckets[min(19, int(t // 120))] += 1
+    nemesis, kinds = {}, {}
+    for g in games:
+        for d in g.get('death_info') or []:
+            kinds[d.get('kind', 'other')] = kinds.get(d.get('kind', 'other'), 0) + 1
+            if d.get('by'):
+                e = nemesis.setdefault(d['by'], {'name': d['by'], 'icon': champ_icon_url(d['by']), 'kills': 0, 'ganks': 0})
+                e['kills'] += 1
+                e['ganks'] += d.get('kind') == 'gank'
+    vs = {}
+    for g in games:
+        if not g.get('vs'):
+            continue
+        e = vs.setdefault(g['vs'], {'name': g['vs'], 'icon': g.get('vs_icon', ''), 'games': 0, 'w': 0, 'l': 0, 'lane': []})
+        e['games'] += 1
+        e['w'] += g.get('result') == 'Win'
+        e['l'] += g.get('result') == 'Loss'
+        lc = ((g.get('lane_marks') or {}).get('10') or {}).get('cs')
+        if lc is not None:
+            e['lane'].append(lc)
+    for e in vs.values():
+        e['lane'] = round(sum(e['lane']) / len(e['lane'])) if e['lane'] else None
+    items = {}
+    for g in games:
+        for i in g.get('items') or []:
+            if i.get('boots'):
+                continue
+            e = items.setdefault(i['name'], {'name': i['name'], 'icon': i.get('icon', ''), 'n': 0})
+            e['n'] += 1
+    comebacks = sum(1 for g in games if g.get('result') == 'Win'
+                    and (((g.get('lane_marks') or {}).get('10') or {}).get('cs', 0) < 0
+                         or ((g.get('cs_marks') or {}).get('10') or 999) < target * 10 - 10))
+    best = max(games, key=lambda g: g.get('cs_min') or 0)
+    return {
+        'n': n, 'wins': wins, 'losses': losses, 'streak': {'n': streak, 'kind': kind},
+        'played_s': sum(g.get('duration', 0) for g in games),
+        'dead_s': sum(g.get('dead_s', 0) for g in with_dead), 'dead_games': len(with_dead),
+        'avg_cs_min': round(sum(g.get('cs_min') or 0 for g in games) / n, 1),
+        'trend': trend, 'death_buckets': buckets, 'death_kinds': kinds,
+        'nemesis': sorted(nemesis.values(), key=lambda e: -e['kills'])[:6],
+        'vs': sorted(vs.values(), key=lambda e: (-e['games'], e['name']))[:12],
+        'items': sorted(items.values(), key=lambda e: -e['n'])[:8],
+        'comebacks': comebacks,
+        'best_cs': {'cs_min': best.get('cs_min'), 'date': best.get('date'), 'vs': best.get('vs')},
+        'since': games[0].get('date'),
+    }
+
+
+GAMES_CSV_FIELDS = ('date', 'champ', 'vs', 'result', 'minutes', 'kills', 'deaths', 'assists', 'cs', 'cs_min',
+                    'cs_at_10', 'cs_at_15', 'lane_cs_diff_10', 'lane_lvl_diff_10', 'lane_cs_diff_15',
+                    'deaths_before_15', 'ganked', 'solo_deaths', 'time_dead_s', 'ward_score',
+                    'first_item', 'first_item_min', 'first_item_vs_median_min', 'items')
+
+
+def export_games_csv(path):
+    """--export: one row per game from data/games.jsonl, for Excel / Sheets."""
+    import csv
+    games = load_all_games()
+    with open(path, 'w', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(GAMES_CSV_FIELDS)
+        for g in games:
+            lm = g.get('lane_marks') or {}
+            legs = sorted((i for i in g.get('items') or [] if not i.get('boots') and i.get('t') is not None),
+                          key=lambda i: i['t'])
+            bench = (g.get('item_bench') or [None])[0]
+            info = g.get('death_info') or []
+            w.writerow([
+                g.get('date'), g.get('champ'), g.get('vs') or '', g.get('result') or '',
+                round((g.get('duration') or 0) / 60, 1), g.get('k'), g.get('d'), g.get('a'), g.get('cs'), g.get('cs_min'),
+                (g.get('cs_marks') or {}).get('10', ''), (g.get('cs_marks') or {}).get('15', ''),
+                (lm.get('10') or {}).get('cs', ''), (lm.get('10') or {}).get('lvl', ''), (lm.get('15') or {}).get('cs', ''),
+                sum(1 for t in g.get('deaths') or [] if t < 900),
+                sum(d.get('kind') == 'gank' for d in info) if info else '',
+                sum(d.get('kind') == 'solo' for d in info) if info else '',
+                g.get('dead_s', ''), g.get('ward_score', ''),
+                legs[0]['name'] if legs else '', round(legs[0]['t'] / 60, 1) if legs else '',
+                round(legs[0]['t'] / 60 - bench, 1) if legs and bench else '',
+                ' | '.join(i['name'] for i in g.get('items') or []),
+            ])
+    return len(games)
+
+
+def web_idle_state(tracker, client_open, all_games=None):
     hist = tracker.history if tracker else []
     return {'mode': 'idle', 'client': client_open, 'cs_target': CS_TARGET,
             'last': hist[-1] if hist else None,
             'history': [{'result': h.get('result'), 'cs_min': h.get('cs_min'), 'champ': h.get('champ'),
                          'icon': h.get('icon'), 'date': h.get('date'), 'vs': h.get('vs')} for h in hist[-10:]],
             'record': (dict(zip(('w', 'l'), matchup_record(hist, hist[-1].get('champ'), hist[-1].get('vs'))))
-                       if hist and hist[-1].get('vs') else None)}
+                       if hist and hist[-1].get('vs') else None),
+            'stats': career_stats(all_games if all_games is not None else load_all_games())}
 
 
 def open_page_when_needed(url, wait=3.5):
@@ -5936,6 +6400,11 @@ def run_demo(mode, port, open_browser=True):
             me.update(isDead=True, respawnTimer=max(0, 30 - int(elapsed)))
         ev_list = [{'EventName': 'DragonKill', 'EventTime': et, 'DragonType': dt, 'KillerName': kn}
                    for et, dt, kn in ((420, 'Fire', 'Lee Sin'), (900, 'Water', 'you'), (1320, 'Air', 'Lee Sin')) if et < t]
+        if mid:  # past laning: bot outer fell at 14:00; while dead, Lee Sin got the kill
+            ev_list.append({'EventName': 'TurretKilled', 'EventTime': 840, 'KillerName': 'Jinx', 'TurretKilled': 'Turret_T2_R_01_A'})
+        if view == 'dead':
+            ev_list.append({'EventName': 'ChampionKill', 'EventTime': t - 4, 'KillerName': 'Lee Sin',
+                            'VictimName': me.get('riotIdGameName', 'you'), 'Assisters': []})
         allies = [{'championName': n, 'position': p, 'team': 'ORDER', 'riotIdGameName': n, 'level': 14 if mid else 1,
                    'scores': {'kills': 4, 'deaths': 3, 'assists': 6, 'creepScore': 140} if mid else {},
                    'items': [item(i) for i in (its if mid else its[:1])]}
@@ -5947,6 +6416,7 @@ def run_demo(mode, port, open_browser=True):
                 'allPlayers': [me] + allies + enemies, 'events': {'Events': ev_list}}
         with coach.lock:
             coach.last_bullets = [lines['mid' if mid else 'early']]
+            coach.last_glance = "Back now, buy Warden's Mail for Randuin's." if mid else 'Start W when Garen presses Q.'
             coach.last_response_at = time.time() - 8
             coach.last_live_build = (['Heartsteel', "Warmog's Armor", 'Boots of Swiftness', "Randuin's Omen", 'Thornmail', 'Titanic Hydra']
                                      if mid else [])
@@ -5976,9 +6446,35 @@ def run_demo(mode, port, open_browser=True):
                           (("Warmog's Armor", 888, False), ('Boots of Swiftness', 1011, True), ('Heartsteel', 1290, False),
                            ("Dead Man's Plate", 1641, False))],
                 'deaths': [207, 669, 1182], 'item_bench': ((read_meta('mundo') or {}).get('benchmarks') or {}).get('item_minutes', []),
-                'joined': 0}
-        hist = [dict(last, cs_min=v, result=r) for v, r in ((5.8, 'Win'), (4.9, 'Loss'), (6.9, 'Win'), (4.4, 'Loss'))] + [last]
-        return web_idle_state(types.SimpleNamespace(history=hist), True)
+                'joined': 0, 'lane_marks': {'10': {'cs': -14, 'lvl': -1}, '15': {'cs': -6, 'lvl': 0}},
+                'death_info': [{'t': 207, 'by': 'Lee Sin', 'help': ['Garen'], 'kind': 'gank'},
+                               {'t': 669, 'by': 'Garen', 'help': [], 'kind': 'solo'},
+                               {'t': 1182, 'by': 'Zoe', 'help': ['Lee Sin', "Kog'Maw"], 'kind': 'fight'}],
+                'dead_s': 96, 'ward_score': 14.2}
+        # 18 made-up past games so the Stats tab has something to show (seeded: same every run).
+        import random
+        rnd = random.Random(7)
+        foes = ['Garen', 'Darius', 'Jax', 'Teemo', 'Sett', 'Garen', 'Fiora', 'Darius', 'Garen']
+        killers = ['Lee Sin', 'Garen', 'Darius', 'Kayn', 'Viego', 'Zed', 'Jax']
+        past = []
+        for i in range(17):
+            vs = foes[i % len(foes)]
+            dur = rnd.randint(1450, 2300)
+            deaths = sorted(rnd.choice([rnd.randint(150, 260), rnd.randint(400, 1300), rnd.randint(1300, dur)])
+                            for _ in range(rnd.randint(2, 7)))
+            info = [{'t': t, 'by': rnd.choice(killers), 'help': [], 'kind': rnd.choice(['gank', 'gank', 'solo', 'fight', 'roam'])}
+                    for t in deaths]
+            csm = round(rnd.uniform(4.6, 7.3) + i * 0.05, 1)
+            first = rnd.randint(780, 1080)
+            past.append(dict(last, date=f'2026-10-{i + 10:02d} 20:{i * 3 % 60:02d}', vs=vs, vs_icon=champ_icon_url(vs),
+                             result=rnd.choice(['Win', 'Loss', 'Win']), duration=dur, cs_min=csm,
+                             cs=int(csm * dur / 60), d=len(deaths), deaths=deaths, death_info=info,
+                             cs_marks={'10': int(csm * 10 - rnd.randint(0, 12))},
+                             lane_marks={'10': {'cs': rnd.randint(-25, 15), 'lvl': rnd.choice([-1, 0, 0, 1])}},
+                             dead_s=sum(rnd.randint(14, 45) for _ in deaths),
+                             items=[dict(it, t=first + n * rnd.randint(300, 420)) for n, it in enumerate(last['items'])]))
+        hist = (past + [last])[-20:]
+        return web_idle_state(types.SimpleNamespace(history=hist), True, past + [last])
 
     build = {'cs': lambda el: champ_select(), 'review': lambda el: review()}
     url = err = None
@@ -6077,6 +6573,8 @@ def main():
                     help='stop an already-running leeg and start this one')
     ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
                     help='print all cached matchup pair notes for a player champion and exit')
+    ap.add_argument('--export', nargs='?', const=str(DATA_DIR / 'games.csv'), metavar='PATH',
+                    help='write every logged game to a CSV (default data/games.csv) for Excel / Sheets, and exit')
     ap.add_argument('--build-notes', dest='build_notes', nargs='*', metavar='CHAMP',
                     help='generate all missing champion notes and matchup pairs now (optionally only for these champion folders) and exit')
     ap.add_argument('--sync-champ-constants', dest='sync_champ_constants', action='store_true',
@@ -6089,6 +6587,15 @@ def main():
 
     if args.show_matchups:
         show_matchup_notes(args.show_matchups)
+        return
+
+    if args.export:
+        n = export_games_csv(args.export)
+        print(f'leeg · wrote {n} game(s) to {args.export}')
+        win = subprocess.run(['wslpath', '-w', args.export], capture_output=True, text=True).stdout.strip() \
+            if os.path.exists('/proc/sys/fs/binfmt_misc/WSLInterop') else ''
+        if win:
+            print(f'       open it in Excel from Windows: {win}')
         return
 
     if args.build_notes is not None:
@@ -6185,6 +6692,7 @@ def main():
     item_index = fetch_item_index()
     if not item_index:
         print('  warning: could not fetch item index — falling back to archetype-only', file=sys.stderr)
+    set_removed_items(item_index)
     set_web_champ_index(champ_index)
     if not args.no_web:
         web_url, web_err = start_web_server(args.web_port)
@@ -6239,6 +6747,7 @@ def main():
         patch=current_patch,
         kit_db=_kit_db,
     )
+    matchup_db.context = matchup_context(available, champ_index)
     pair_count = len(matchup_db._notes)
     print(f'leeg live · matchup db: {pair_count} pair note(s) cached', flush=True)
 
