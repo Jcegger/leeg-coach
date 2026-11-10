@@ -45,7 +45,11 @@ def fetch(url: str, output_path: str, timeout_s: int = 90) -> None:
         page.goto(url, wait_until="domcontentloaded", timeout=60000)
 
         for i in range(timeout_s):
-            title = page.title()
+            try:
+                title = page.title()
+            except Exception:  # the challenge redirects mid-read ("execution context was destroyed")
+                time.sleep(1)
+                continue
             print(f"  [{i:2}s] {title!r}")
             if "just a moment" not in title.lower() and "cloudflare" not in title.lower():
                 time.sleep(2)  # let page finish rendering
@@ -54,7 +58,16 @@ def fetch(url: str, output_path: str, timeout_s: int = 90) -> None:
         else:
             print("WARNING: challenge did not clear — saving anyway")
 
-        content = page.content()
+        for _ in range(10):  # content() can hit the same mid-navigation error
+            try:
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+                content = page.content()
+                break
+            except Exception:
+                time.sleep(1)
+        else:
+            content = ""
+
         browser.close()
 
         with open(output_path, "w", encoding="utf-8") as f:

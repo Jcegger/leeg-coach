@@ -2985,7 +2985,7 @@ class KitDB:
     data/champ_kits.json, refetched when the patch changes."""
 
     _PATH = DATA_DIR / 'champ_kits.json'
-    _VERSION = 3  # 2: sentence-boundary descriptions; 3: R ranks when maxLevel is 0
+    _VERSION = 4  # 2: sentence-boundary descriptions; 3: R ranks when maxLevel is 0; 4: splash art
     _URL = CDRAGON_ASSET_BASE + 'v1/champions/{}.json'
     _DAMAGE = {'kPhysical': 'AD', 'kMagic': 'AP', 'kMixed': 'Mixed'}
 
@@ -3059,7 +3059,9 @@ class KitDB:
                               'icon': cdragon_asset_url(s.get('abilityIconPath')),
                               'desc': _short_desc(s.get('description')),
                               'cd': [int(x) if x == int(x) else x for x in cds]})
+        base = (c.get('skins') or [{}])[0]
         return {'id': c.get('id'), 'name': c.get('name', ''), 'title': c.get('title', ''),
+                'splash': cdragon_asset_url(base.get('splashPath')),
                 'roles': c.get('roles') or [], 'damage': cls._DAMAGE.get(tac.get('damageType'), ''),
                 'attack': tac.get('attackType', ''), 'style': c.get('playstyleInfo') or {},
                 'abilities': abilities}
@@ -5796,6 +5798,32 @@ def set_web_champ_index(champ_index):
     _web_champ_ids.update({normalize(n): cid for cid, n in (champ_index or {}).items()})
 
 
+def champ_splash_url(name):
+    """Base-skin splash art from the kit cache (fetched in the background on first ask)."""
+    if not _kit_db or not name:
+        return ''
+    kit = _kit_db.get_by_name(name)
+    if not kit:
+        _kit_db.ensure_async(name)
+    return (kit or {}).get('splash', '')
+
+
+DRAKE_NAMES = {'Fire': 'Infernal', 'Water': 'Ocean', 'Earth': 'Mountain', 'Air': 'Cloud',
+               'Hextech': 'Hextech', 'Chemtech': 'Chemtech', 'Elder': 'Elder'}
+
+
+def next_drake(data, ev, your_team):
+    """Element of the next drake when it's knowable from the feed: from the third drake on,
+    every elemental drake matches the rift (the third one's type); Elder once a team has soul."""
+    yours, theirs = drakes_by_team(data, ev, your_team)
+    if max(yours, theirs) >= 4:
+        return 'Elder'
+    elemental = [d for d in ev.get('drakes') or [] if d[1] != 'Elder']
+    if len(elemental) >= 3:
+        return DRAKE_NAMES.get(elemental[2][1], elemental[2][1])
+    return None
+
+
 def champ_icon_url(name):
     cid = _web_champ_ids.get(normalize(name or ''))
     return f'{CDRAGON_ASSET_BASE}v1/champion-icons/{cid}.png' if cid else ''
@@ -5822,8 +5850,10 @@ def _web_items(names, owned_ids, item_index, inv=None):
                 inv[iid] -= 1
             elif not owned:  # parts count toward the earliest item that uses them
                 cost = item_remaining_cost(iid, inv, item_index)[0]
+        full = info.get('cost', 0)
         out.append({'name': info.get('name', n), 'icon': info.get('icon', ''),
-                    'cost': cost, 'full': info.get('cost', 0), 'owned': owned, 'next': not owned and not next_set})
+                    'cost': cost, 'full': full, 'owned': owned, 'next': not owned and not next_set,
+                    'progress': round(1 - cost / full, 2) if not owned and full and cost < full else 0})
         next_set = next_set or not owned
     return out
 
@@ -5832,12 +5862,35 @@ _TRINKET_IDS = {3340, 3363, 3364, 3330}  # wards/lens: noise on enemy cards
 _STATE_ORDER = {'SNOWBALLING': 0, 'AHEAD': 1, None: 2, 'BEHIND': 3}
 
 
+_enemy_item_seen = {}   # (champion, item name) -> game time first seen; None = owned when leeg started
+_enemy_item_clock = [0]
+NEW_ITEM_WINDOW = 90     # seconds of game time a freshly finished enemy item stays highlighted
+
+
+def _mark_enemy_items(name, items, game_time, priming):
+    """First-seen game time per enemy legendary item (scoreboard-visible). Items already
+    owned the first time leeg sees this game count as old, so a restart doesn't flash them all."""
+    for it in items:
+        if (it.get('cost') or 0) < LEGENDARY_MIN_COST:
+            continue
+        key = (name, it['name'])
+        if key not in _enemy_item_seen:
+            _enemy_item_seen[key] = None if (priming or game_time < 60) else game_time
+        at = _enemy_item_seen[key]
+        if at is not None and game_time - at <= NEW_ITEM_WINDOW:
+            it['new_at'] = at
+
+
 def web_enemy_cards(your_champ, me, enemies, game_time, item_index, matchups=None, matchup_db=None):
     """Per-enemy card data: scoreboard state (all client-visible), our threat read,
     the CDragon kit, and notes labeled by source. Lane opponent first, then threats."""
     golds = [_enemy_item_gold(e, item_index) for e in enemies]
     avg = sum(golds) / len(golds) if golds else 0
     my_pos = ((me or {}).get('position') or '').upper()
+    if game_time < _enemy_item_clock[0] - 30:   # new game
+        _enemy_item_seen.clear()
+    priming = not _enemy_item_seen               # first look at this game: what they own now isn't "new"
+    _enemy_item_clock[0] = game_time
     cards = []
     for e, gold in zip(enemies, golds):
         name = e.get('championName', '?')
@@ -5850,7 +5903,9 @@ def web_enemy_cards(your_champ, me, enemies, game_time, item_index, matchups=Non
             iid = (it or {}).get('itemID')
             if iid and iid not in _TRINKET_IDS:
                 info = (item_index or {}).get(iid) or {}
-                items.append({'name': info.get('name') or it.get('displayName', ''), 'icon': info.get('icon', '')})
+                items.append({'name': info.get('name') or it.get('displayName', ''), 'icon': info.get('icon', ''),
+                              'cost': info.get('cost', 0)})
+        _mark_enemy_items(name, items, game_time, priming)
         cards.append({
             'name': name, 'icon': champ_icon_url(name), 'pos': (e.get('position') or '').lower(),
             'lane': bool(my_pos and (e.get('position') or '').upper() == my_pos),
@@ -5914,7 +5969,8 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
             lead = yg - eg
     return {
         'mode': 'game', 'aram': is_aram, 'time': game_time, 'notes': champ_folder or '',
-        'you': {'champ': your_champ or '?', 'icon': champ_icon_url(your_champ), 'level': (me or {}).get('level'),
+        'you': {'champ': your_champ or '?', 'icon': champ_icon_url(your_champ), 'splash': champ_splash_url(your_champ),
+                'level': (me or {}).get('level'),
                 'k': sc.get('kills', 0), 'd': sc.get('deaths', 0), 'a': sc.get('assists', 0),
                 'cs': sc.get('creepScore', 0), 'gold': gold, 'dead': bool((me or {}).get('isDead')),
                 'respawn': int((me or {}).get('respawnTimer') or 0),
@@ -5926,7 +5982,7 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
         'hint': hint,
         'cs_target': CS_TARGET,
         'objectives': None if is_aram else {
-            'drake': timers.get('drake'), 'baron': timers.get('baron'),
+            'drake': timers.get('drake'), 'drake_next': next_drake(data, ev, (me or {}).get('team')), 'baron': timers.get('baron'),
             'drakes': dict(zip(('you', 'them'), drakes_by_team(data, ev, (me or {}).get('team')))),
             'barons': len(ev['barons']), 'grubs': ev['grubs'], 'gold_lead': lead,
             'lane': lane_gap(data, me), 'jungler': enemy_jungler_seen(data, ev, me)},
@@ -6013,7 +6069,7 @@ def web_cs_state(session, champ_index, matchups, champ_folder, profile, build_pi
         path = [n.strip() for n in build_path_summary(build_pick[1]).split('·') if n.strip()]
         build = {'name': _short_heading(build_pick[0]), 'items': _web_items(path, set(), item_index)}
     return {'mode': 'cs', 'phase': (session.get('timer') or {}).get('phase', ''), 'notes': champ_folder or '',
-            'you': {'champ': me_name or '?', 'icon': champ_icon_url(me_name), 'pos': my_pos},
+            'you': {'champ': me_name or '?', 'icon': champ_icon_url(me_name), 'splash': champ_splash_url(me_name), 'pos': my_pos},
             'comp': {'label': profile[0]} if profile and profile[3] else None,
             'build': build, 'enemies': enemies,
             'runes': [{'name': _short_heading(p['name']), 'full': p['name'], 'lines': p['lines'][:4]}
@@ -6332,14 +6388,62 @@ def open_page(url):
         log.error('open page: %s', e)
 
 
-def start_web_server(port):
-    """Serve the page on 127.0.0.1:<port> in a daemon thread. Returns the URL, or an error string."""
+def start_web_server(port, host='127.0.0.1'):
+    """Serve the page on <host>:<port> in a daemon thread. Returns the URL, or an error string.
+    host is 0.0.0.0 only for --lan (the Windows portproxy forwards the LAN to WSL's address)."""
     try:
-        srv = http.server.ThreadingHTTPServer(('127.0.0.1', port), _WebHandler)
+        srv = http.server.ThreadingHTTPServer((host, port), _WebHandler)
     except OSError as e:
         return None, f'web page off — port {port}: {e.strerror or e}'
     threading.Thread(target=srv.serve_forever, daemon=True, name='leeg-web').start()
     return f'http://localhost:{port}', None
+
+
+_LAN_PS1_SRC = Path(__file__).with_name('lan_fix.ps1')
+_LAN_PS1_WSL = '/mnt/c/Windows/Temp/leeg_lan_fix.ps1'
+_LAN_PS1_WIN = r'C:\Windows\Temp\leeg_lan_fix.ps1'
+_LAN_OUT_WSL = '/mnt/c/Windows/Temp/leeg_lan.txt'
+
+
+def _lan_rule(port):
+    """(listen address, connect address) of the current non-loopback portproxy rule for port, or None."""
+    try:
+        out = subprocess.run(['netsh.exe', 'interface', 'portproxy', 'show', 'v4tov4'], capture_output=True,
+                             text=True, timeout=10, cwd='/mnt/c').stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    for ln in out.splitlines():
+        parts = ln.split()
+        if len(parts) == 4 and parts[1] == str(port) and parts[0] not in ('127.0.0.1', '0.0.0.0'):
+            return parts[0], parts[2]
+    return None
+
+
+def ensure_lan(port):
+    """--lan: make the page reachable at http://<PC's LAN IP>:<port> from a phone/tablet.
+    Re-runs lan_fix.ps1 elevated (one UAC prompt) only when the rule is missing or WSL's IP
+    moved (it changes on reboot). Returns (url, None) or (None, reason)."""
+    if not os.path.exists('/proc/sys/fs/binfmt_misc/WSLInterop'):
+        return None, 'not WSL: open http://<this machine>:%d directly' % port
+    try:
+        wsl_ip = subprocess.run(['hostname', '-I'], capture_output=True, text=True, timeout=5).stdout.split()[0]
+    except (OSError, subprocess.SubprocessError, IndexError):
+        return None, "couldn't read WSL's IP"
+    rule = _lan_rule(port)
+    if not rule or rule[1] != wsl_ip:
+        try:
+            shutil.copyfile(_LAN_PS1_SRC, _LAN_PS1_WSL)
+            subprocess.run(
+                ['powershell.exe', '-NoProfile', '-Command',
+                 f"Start-Process powershell.exe -Verb RunAs -Wait -WindowStyle Hidden "
+                 f"-ArgumentList '-NoProfile -ExecutionPolicy Bypass -File {_LAN_PS1_WIN} -Port {port} -WslIp {wsl_ip}'"],
+                capture_output=True, timeout=120, cwd='/mnt/c')
+        except (OSError, subprocess.SubprocessError) as exc:
+            return None, f'LAN setup failed: {type(exc).__name__}'
+        rule = _lan_rule(port)
+    if not rule or rule[1] != wsl_ip:
+        return None, "LAN setup didn't take (UAC declined?) — see C:\\Windows\\Temp\\leeg_lan.log"
+    return f'http://{rule[0]}:{port}', None
 
 
 # ─── demo: preview the page without a game ──────────────────────────────────
@@ -6380,9 +6484,15 @@ def run_demo(mode, port, open_browser=True):
                                   last_response_at=0.0, last_live_build=[], last_diverged=False, last_change_reason='')
     set_web_coach(coach)
 
+    seen_view = ['']
+
     def game(view, elapsed):
         mid = view != 'early'
         t = int((1500 if mid else 30) + elapsed)
+        if view != seen_view[0]:   # each view starts like a fresh leeg: items owned now aren't "new"
+            seen_view[0] = view
+            _enemy_item_seen.clear()
+            _enemy_item_clock[0] = 0
         enemies = []
         for name, pos, early_items, mid_items, kda, lvl in roster:
             k, d, a = kda if mid else (0, 0, 0)
@@ -6391,6 +6501,8 @@ def run_demo(mode, port, open_browser=True):
                  'items': [item(n) for n in (mid_items if mid else early_items)]}
             if mid and name == 'Zoe':
                 e.update(isDead=True, respawnTimer=max(0, 26 - int(elapsed)))
+            if mid and name == 'Garen' and elapsed >= 4:   # finishes an item mid-view: the new-item flash
+                e['items'].append(item('Mortal Reminder'))
             enemies.append(e)
         me = {'championName': 'Dr. Mundo', 'position': 'TOP', 'team': 'ORDER', 'riotIdGameName': 'you',
               'level': 14 if mid else 1, 'scores': {'kills': 3, 'deaths': 4, 'assists': 5, 'creepScore': 160} if mid
@@ -6569,6 +6681,8 @@ def main():
     ap.add_argument('--tts', action='store_true', default=False,
                     help='speak coach lines (off by default; the page and terminal show them)')
     ap.add_argument('--no-tts', action='store_true', default=False, help=argparse.SUPPRESS)  # old default-on flag
+    ap.add_argument('--lan', action='store_true', default=False,
+                    help='also serve the page to your home network, for a phone or tablet (one admin prompt the first time)')
     ap.add_argument('--restart', action='store_true', default=False,
                     help='stop an already-running leeg and start this one')
     ap.add_argument('--show-matchups', dest='show_matchups', metavar='CHAMP',
@@ -6695,8 +6809,11 @@ def main():
     set_removed_items(item_index)
     set_web_champ_index(champ_index)
     if not args.no_web:
-        web_url, web_err = start_web_server(args.web_port)
+        web_url, web_err = start_web_server(args.web_port, '0.0.0.0' if args.lan else '127.0.0.1')
         print(f'leeg live · page: {web_url} (open on the second monitor)' if web_url else f'  {web_err}', flush=True)
+        if web_url and args.lan:
+            lan_url, lan_err = ensure_lan(args.web_port)
+            print(f'leeg live · on your phone/tablet (same Wi-Fi): {lan_url}' if lan_url else f'  {lan_err}', flush=True)
         if web_url and not args.no_open:
             open_page_when_needed(web_url)
 

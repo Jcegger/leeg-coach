@@ -1,0 +1,160 @@
+
+=== 1a Garen game: coach adds Randuin
+pick: Standard meat (no Warmog's) | Heartsteel · Boots of Swiftness · Unending Despair · Spirit Visage · Jak'Sho, The Protean · Thornmail
+active swaps: ['Hullbreaker', "Randuin's Omen", 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Randuin's Omen 2700g (swap-rule — crit dmg reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — armor + crit reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — AS slow + crit reduction)
+  msg> [SNOWBALLING / Minor-tier matchup] Garen (top) — top counter: Randuin's Omen 2700g (swap-rule)
+  msg> LOW THREAT (behind on kills and items, not making plays): Zoe [Tiny], Kog'Maw [Extreme], Teemo [Even]. A matchup tier is the champion on paper; these players are losing t
+  msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · has-assassin · crit-carry
+  msg> BUILD ADAPTATION: Garen is SNOWBALLING — add Randuin's Omen (2700g) to live_build now.
+offered counters: ["Randuin's Omen", 'Thornmail']
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+coach proposed: ['Heartsteel', 'Boots of Swiftness', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+final build   : ['Heartsteel', 'Boots of Swiftness', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+
+=== 1b Garen game: coach swaps owned Swiftness for Steelcaps
+pick: Standard meat (no Warmog's) | Heartsteel · Boots of Swiftness · Unending Despair · Spirit Visage · Jak'Sho, The Protean · Thornmail
+active swaps: ['Hullbreaker', "Randuin's Omen", 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Randuin's Omen 2700g (swap-rule — crit dmg reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — armor + crit reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — AS slow + crit reduction)
+  msg> [SNOWBALLING / Minor-tier matchup] Garen (top) — top counter: Randuin's Omen 2700g (swap-rule)
+  msg> LOW THREAT (behind on kills and items, not making plays): Zoe [Tiny], Kog'Maw [Extreme], Teemo [Even]. A matchup tier is the champion on paper; these players are losing t
+  msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · has-assassin · crit-carry
+  msg> BUILD ADAPTATION: Garen is SNOWBALLING — add Randuin's Omen (2700g) to live_build now.
+offered counters: ["Randuin's Omen", 'Thornmail']
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+coach proposed: ['Heartsteel', 'Plated Steelcaps', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+final build   : ['Heartsteel', 'Boots of Swiftness', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+
+=== 2 Garen game, no boots yet: Steelcaps allowed
+pick: Standard meat (no Warmog's) | Heartsteel · Boots of Swiftness · Unending Despair · Spirit Visage · Jak'Sho, The Protean · Thornmail
+active swaps: ['Hullbreaker', 'Plated Steelcaps', "Randuin's Omen", 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction); Randuin's Omen 2700g (swap-rule — crit dmg reduction)
+  msg> counters: Randuin's Omen 2700g (swap-rule — armor + crit reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Randuin's Omen 2700g (swap-rule — AS slow + crit reduction)
+  msg> [SNOWBALLING / Minor-tier matchup] Garen (top) — top counter: Plated Steelcaps 1200g (swap-rule)
+  msg> LOW THREAT (behind on kills and items, not making plays): Zoe [Tiny], Kog'Maw [Extreme], Teemo [Even]. A matchup tier is the champion on paper; these players are losing t
+  msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · has-assassin · crit-carry
+offered counters: ['Plated Steelcaps', "Randuin's Omen"]
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+coach proposed: ['Heartsteel', 'Plated Steelcaps', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+final build   : ['Heartsteel', 'Plated Steelcaps', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+
+=== 3 fed AP Teemo: no Steelcaps
+pick: Mixed AP, mixed comp (Titanic variant) | Warmog's Armor · Heartsteel · Boots of Swiftness · Spirit Visage · Thornmail · Titanic Hydra
+active swaps: ['Hullbreaker', 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Spirit Visage 2700g (swap-rule — MR + boosts your healing); Jak'Sho, The Protean 3200g (extension — armor + MR, grows in long fights)
+  msg> counters: Spirit Visage 2700g (swap-rule — MR + boosts your healing); Jak'Sho, The Protean 3200g (extension — armor + MR, grows in long fights)
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg); Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> [SNOWBALLING / Even-tier matchup] Teemo (top) — top counter: Spirit Visage 2700g (swap-rule)
+  msg> TEAM THREATS: heavy-hard-cc · crit-carry
+  msg> BUILD ADAPTATION: Teemo is SNOWBALLING — add Spirit Visage (2700g) to live_build now.
+offered counters: ['Spirit Visage', "Jak'Sho, The Protean"]
+playstyles: []
+
+=== 4 fed crit Tryndamere
+pick: Current build (author's go-to — fallback when no comp-specific path applies) | Warmog's Armor · Heartsteel · Boots of Swiftness · Titanic Hydra · Dead Man's Plate · Jak'Sho, The Protean
+active swaps: ['Hullbreaker', 'Plated Steelcaps', "Randuin's Omen", 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Randuin's Omen 2700g (swap-rule — AS slow + crit reduction)
+  msg> counters: Spirit Visage 2700g (swap-rule — MR + boosts your healing); Jak'Sho, The Protean 3200g (extension — armor + MR, grows in long fights)
+  msg> counters: Randuin's Omen 2700g (swap-rule — armor + crit reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> [SNOWBALLING / Extreme-tier matchup] Tryndamere (top) — top counter: Plated Steelcaps 1200g (swap-rule)
+  msg> TEAM THREATS: stacked-healing · heavy-hard-cc · has-tank · crit-carry
+offered counters: ['Plated Steelcaps', "Randuin's Omen"]
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+
+=== 5 Sivir vs fed Yasuo
+pick: vs Tanks | Yun Tal Wildarrows · Berserker's Greaves · Infinity Edge · Lord Dominik's Regards · Navori Flickerblade · Bloodthirster · Guardian Angel
+active swaps: ['Mercurial Scimitar', 'Mortal Reminder']
+  msg> counters: Guardian Angel 3200g (extension — revive + armor)
+  msg> counters: Guardian Angel 3200g (extension — revive + armor)
+  msg> counters: Mercurial Scimitar 3200g (swap-rule — cleanse + lifesteal)
+  msg> [SNOWBALLING] Yasuo (middle) — top counter: Guardian Angel 3200g (extension)
+  msg> TEAM THREATS: heavy-hard-cc · has-tank · crit-carry
+  msg> BUILD ADAPTATION: Yasuo is SNOWBALLING — add Guardian Angel (3200g) to live_build now.
+offered counters: ['Guardian Angel']
+playstyles: ["Survival (playstyle — coach's call, never auto-picked)"]
+
+=== 6 Shen vs fed Yi
+pick: Current build (go-to) | Sunfire Aegis · Mercury's Treads · Unending Despair · Spirit Visage · Riftmaker · Jak'Sho, The Protean
+active swaps: ['Hollow Radiance', 'Kaenic Rookern', 'Plated Steelcaps', 'Thornmail', "Warmog's Armor"]
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (swap-rule — grievous + reflect AA dmg)
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> [SNOWBALLING] Master Yi (jungle) — top counter: Plated Steelcaps 1200g (swap-rule)
+  msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · crit-carry
+offered counters: ['Plated Steelcaps', 'Thornmail']
+playstyles: []
+
+=== 7 LOW THREAT edges (expect Zoe only)
+pick: Standard meat (no Warmog's) | Heartsteel · Boots of Swiftness · Unending Despair · Spirit Visage · Jak'Sho, The Protean · Thornmail
+active swaps: ['Hullbreaker', 'Plated Steelcaps', 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Thornmail 2450g (swap-rule — grievous + reflect AA dmg); Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg); Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> LOW THREAT (behind on kills and items, not making plays): Zoe [Tiny]. A matchup tier is the champion on paper; these players are losing this game. Name the SNOWBALLING/AH
+  msg> TEAM THREATS: heavy-hard-cc · crit-carry
+offered counters: []
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+
+=== 8 early game quiet
+pick: Current build (author's go-to — fallback when no comp-specific path applies) | Warmog's Armor · Heartsteel · Boots of Swiftness · Titanic Hydra · Dead Man's Plate · Jak'Sho, The Protean
+active swaps: ['Hullbreaker', 'Plated Steelcaps', 'Spirit Visage', 'Unending Despair']
+  msg> counters: Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> counters: Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction); Dead Man's Plate 2900g (extension — armor + move speed)
+  msg> TEAM THREATS: heavy-hard-cc · has-tank · crit-carry
+offered counters: []
+playstyles: []
+
+=== 9 champ select threats: {'TANK': ['Garen'], 'ATTACK-SPEED': ['Yasuo'], 'CRIT': ['Yasuo'], 'ASSASSIN': ['Zed']}
+filter_swaps no items/no index ok: 4
+
+=== 10 tier-3 boots owned
+pick: Standard meat (no Warmog's) | Heartsteel · Boots of Swiftness · Unending Despair · Spirit Visage · Jak'Sho, The Protean · Thornmail
+active swaps: ['Hullbreaker', "Randuin's Omen", 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Randuin's Omen 2700g (swap-rule — crit dmg reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — armor + crit reduction); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Randuin's Omen 2700g (swap-rule — AS slow + crit reduction)
+  msg> [SNOWBALLING / Minor-tier matchup] Garen (top) — top counter: Randuin's Omen 2700g (swap-rule)
+  msg> LOW THREAT (behind on kills and items, not making plays): Zoe [Tiny], Kog'Maw [Extreme], Teemo [Even]. A matchup tier is the champion on paper; these players are losing t
+  msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · has-assassin · crit-carry
+  msg> BUILD ADAPTATION: Garen is SNOWBALLING — add Randuin's Omen (2700g) to live_build now.
+offered counters: ["Randuin's Omen", 'Thornmail']
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+coach proposed: ['Heartsteel', 'Plated Steelcaps', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+final build   : ['Heartsteel', 'Armored Advance', 'Unending Despair', 'Spirit Visage', "Randuin's Omen", 'Thornmail']
+
+=== 11 Kog player vs fed Yasuo
+pick: Standard on-hit (go-to) | Guinsoo's Rageblade · Gluttonous Greaves · Statikk Shiv · Terminus
+active swaps: ["Lord Dominik's Regards", "Randuin's Omen", 'The Collector', "Wit's End", "Zhonya's Hourglass"]
+  msg> [SNOWBALLING] Yasuo (middle)
+  msg> TEAM THREATS: heavy-hard-cc · has-tank · crit-carry
+offered counters: []
+playstyles: []
+
+--- states 12: {'Kayn': 'SNOWBALLING', 'Viego': 'AHEAD', 'Syndra': 'BEHIND', 'Ezreal': 'BEHIND', 'Soraka': 'BEHIND'}
+
+=== 12 Kayn game: coach tries Randuin over Thornmail
+pick: Current build (author's go-to — fallback when no comp-specific path applies) | Warmog's Armor · Heartsteel · Boots of Swiftness · Titanic Hydra · Dead Man's Plate · Jak'Sho, The Protean
+active swaps: ['Hullbreaker', 'Spirit Visage', 'Thornmail', 'Unending Despair']
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Spirit Visage 2700g (swap-rule — MR + boosts your healing); Jak'Sho, The Protean 3200g (extension — armor + MR, grows in long fights)
+  msg> [SNOWBALLING / Minor-tier matchup] Kayn (top) — top counter: Thornmail 2450g (swap-rule)
+  msg> [AHEAD / Minor-tier matchup] Viego (jungle) — top counter: Thornmail 2450g (swap-rule)
+  msg> LOW THREAT (behind on kills and items, not making plays): Syndra [Minor], Ezreal [Minor]. A matchup tier is the champion on paper; these players are losing this game. Nam
+  msg> TEAM THREATS: has-assassin · crit-carry
+  msg> BUILD ADAPTATION: Kayn is SNOWBALLING — add Thornmail (2450g) to live_build now.
+offered counters: ['Thornmail', "Dead Man's Plate", 'Thornmail', "Dead Man's Plate"]
+playstyles: ["Pure tank (playstyle — coach's call, never auto-picked)"]
+coach proposed: ['Heartsteel', "Warmog's Armor", 'Boots of Swiftness', "Dead Man's Plate", 'Titanic Hydra', "Randuin's Omen"]
+final build   : ['Heartsteel', "Warmog's Armor", 'Boots of Swiftness', "Dead Man's Plate", 'Titanic Hydra', "Jak'Sho, The Protean"]
+
+--- states 13: {'Jax': 'BEHIND', 'Warwick': 'BEHIND', 'Sylas': 'BEHIND', 'Aurelion Sol': 'AHEAD', 'Braum': 'BEHIND'}
+
+--- 14 early Zed bought: SNOWBALLING | unspent: AHEAD
+--- 15 Garen: SNOWBALLING | no index (old rule): SNOWBALLING

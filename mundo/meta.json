@@ -1,8 +1,8 @@
 {
   "source_url": "https://www.mobafire.com/league-of-legends/build/too-big-to-fail-na-challenger-mundo-main-guide-check-notes-matchup-update-revamp-632678",
   "source_last_modified": "2026-09-25",
-  "patch_reviewed": "16.19",
-  "last_refreshed_at": "2026-10-24",
+  "patch_reviewed": "16.22",
+  "last_refreshed_at": "2026-11-10",
   "benchmarks": {
     "item_minutes": [
       13.5,
@@ -12,5 +12,6 @@
     "note": "median minute Mundo finishes legendary #1/#2/#3, all ranks",
     "source": "https://metabot.gg/en/league/champion/DrMundo/tips",
     "patch": "16.22"
-  }
+  },
+  "patch_notes_checked": "26.20-26.22: no Mundo/rune changes; Overlord's Bloodmail AD 30->40, Retribution 12%->10% (26.22); Warmog's threshold still 2000 bonus HP"
 }
