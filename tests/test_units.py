@@ -238,3 +238,36 @@ def test_restart_saves_a_finished_game_only():
               m, 'Dr. Mundo', 21 * 60, {}, 'mundo')
     tr.save_on_exit()                                # --restart right after the game must not lose it
     assert [g['result'] for g in live.load_all_games()] == ['Win']
+
+
+GOOD = {'date': '2026-11-10 10:17', 'cs_min': 7.4, 'deaths': [1300], 'k': 14, 'd': 2, 'a': 9, 'duration': 2500,
+        'items': [{'name': 'Yun Tal Wildarrows', 't': 780, 'boots': False}], 'item_bench': [13.5],
+        'lane_marks': {'10': {'cs': 12}}, 'result': 'Win', 'vs': 'Garen', 'champ': 'Sivir'}
+
+
+def test_grade():
+    assert live.grade_game(GOOD)['letter'] == 'S'
+    bad = dict(GOOD, cs_min=4.8, deaths=[200, 400, 700], d=6, k=1, lane_marks={})
+    g = live.grade_game(bad)
+    assert g['letter'] == 'D' and 'deaths before 15' in g['line']
+    assert sum(g['parts'].values()) == g['score']
+
+
+def test_milestones_and_rivals():
+    loss = dict(GOOD, result='Loss', date='2026-11-09 20:00', death_info=[{'t': 1300, 'by': 'Garen', 'kind': 'solo'}])
+    ms = {m['id']: m for m in live.milestones([loss, GOOD])}
+    assert 'got' in ms['revenge'] and ms['revenge']['got']['date'] == GOOD['date']   # beat Garen after losing to him
+    assert 'got' in ms['grade_s'] and 'got' not in ms['ten_games']
+    rv = live.rivalries([loss, GOOD])
+    assert rv[0]['name'] == 'Garen' and (rv[0]['w'], rv[0]['l'], rv[0]['kills']) == (1, 1, 1)
+
+
+def test_game_moment():
+    me = {'team': 'ORDER', 'riotIdGameName': 'you'}
+    data = {'allPlayers': [me, {'team': 'ORDER', 'riotIdGameName': 'ally'}]}
+    ev = {'multi': [(1506, 'you', 3)], 'aces': [], 'barons': [], 'drakes': []}
+    assert live.game_moment(data, ev, me, 1510) == {'text': 'TRIPLE KILL', 'at': 1506}
+    assert live.game_moment(data, ev, me, 1520) is None                      # 8s window
+    ev = {'multi': [(1506, 'someone', 3)], 'aces': [(1600, 'ally', 'CHAOS')], 'barons': [(1700, 'ally', False)], 'drakes': []}
+    assert live.game_moment(data, ev, me, 1601) is None                      # their ace, someone else's multi
+    assert live.game_moment(data, ev, me, 1702)['text'] == 'BARON'

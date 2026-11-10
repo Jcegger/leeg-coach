@@ -3931,6 +3931,37 @@ def enemy_jungler_seen(data, ev, me):
             'at': int(last[0] or 0) if last else None, 'how': last[2] if last else ''}
 
 
+_MULTI_NAMES = {2: 'DOUBLE KILL', 3: 'TRIPLE KILL', 4: 'QUADRA KILL', 5: 'PENTAKILL'}
+
+
+def game_moment(data, ev, me, game_time, window=8):
+    """Your team's latest big moment in the last `window` seconds of game time, for a short
+    header glow: your multikill, your team's ace, Baron, or a dragon soul. None otherwise."""
+    if not me:
+        return None
+    mine = {k for k in (me.get('riotIdGameName'), me.get('riotId'), me.get('summonerName')) if k}
+    team = me.get('team')
+    team_of = _team_of(data.get('allPlayers') or [])
+    found = []
+    for et, killer, streak in ev.get('multi') or []:
+        if killer in mine and streak in _MULTI_NAMES:
+            found.append((et, _MULTI_NAMES[streak]))
+    for et, _acer, acing in ev.get('aces') or []:
+        if acing == team:
+            found.append((et, 'ACE'))
+    for et, killer, _stolen in ev.get('barons') or []:
+        if team_of.get(killer) == team:
+            found.append((et, 'BARON'))
+    drakes = [d for d in ev.get('drakes') or [] if d[1] != 'Elder' and team_of.get(d[2]) == team]
+    if len(drakes) == 4:
+        found.append((drakes[3][0], 'DRAGON SOUL'))
+    recent = [f for f in found if 0 <= game_time - (f[0] or 0) <= window]
+    if not recent:
+        return None
+    et, text = max(recent, key=lambda f: f[0])
+    return {'text': text, 'at': int(et)}
+
+
 def killed_by(data, ev, me):
     """Champion that got the kill on your latest death, or None (turret, minion, or no death yet)."""
     if not me:
@@ -5976,6 +6007,7 @@ def web_game_state(data, your_champ, me, enemies, ev, timers, game_time, is_aram
                 'respawn': int((me or {}).get('respawnTimer') or 0),
                 'killed_by': killed_by(data, ev, me) if me and me.get('isDead') else None},
         'laning_over': bool(first_turret(ev)),
+        'moment': game_moment(data, ev, me, game_time),
         'coach': coach_view,
         'comp': {'label': profile[0], 'breakdown': comp_breakdown(enemies, item_index)} if profile and profile[3] else None,
         'build': default,
@@ -6371,6 +6403,123 @@ def export_games_csv(path):
     return len(games)
 
 
+def grade_game(g, target=CS_TARGET):
+    """Post-game grade on how you played, not whether you won: CS/min 30, deaths before 15
+    25, KDA 20, first item vs median 15, lane CS at 10 vs your laner 10 (unknown parts get
+    half). S >= 85, A >= 72, B >= 58, C >= 44, else D. Returns {letter, score, parts, line}."""
+    clamp = lambda v: max(0.0, min(1.0, v))
+    parts = {}
+    parts['cs'] = round(30 * clamp(((g.get('cs_min') or 0) - 4) / (target + 1 - 4)))
+    early = sum(1 for t in g.get('deaths') or [] if t < 900)
+    parts['deaths'] = (25, 18, 10)[early] if early < 3 else 0
+    kda = ((g.get('k') or 0) + (g.get('a') or 0)) / max(1, g.get('d') or 0)
+    parts['kda'] = round(20 * clamp(kda / 5))
+    legs = sorted((i for i in g.get('items') or [] if not i.get('boots') and i.get('t') is not None), key=lambda i: i['t'])
+    bench = (g.get('item_bench') or [None])[0]
+    if legs and bench:
+        delta = legs[0]['t'] - bench * 60
+        parts['item'] = 15 if delta <= 0 else 10 if delta <= 60 else 5 if delta <= 120 else 0
+    else:
+        parts['item'] = 7
+    lane = ((g.get('lane_marks') or {}).get('10') or {}).get('cs')
+    parts['lane'] = 5 if lane is None else 10 if lane >= 10 else 7 if lane >= 0 else 4 if lane >= -15 else 0
+    score = sum(parts.values())
+    letter = 'S' if score >= 85 else 'A' if score >= 72 else 'B' if score >= 58 else 'C' if score >= 44 else 'D'
+    csm, d = g.get('cs_min') or 0, g.get('d') or 0
+    if letter == 'S':
+        pool = [f'{csm} CS/min and {early} early deaths. Who are you and what did you do with Jay?',
+                'Textbook. Frame this one.', 'The other team is writing a strongly worded letter.']
+    elif early >= 3:
+        pool = [f'{early} deaths before 15. The grey screen sends its regards.', 'Lane was a horror movie and you kept opening the door.']
+    elif csm < target - 1.5:
+        pool = [f'{csm} CS/min. The minions thank you for sparing them.', 'Farming is free gold. Free! Gold!']
+    elif d == 0:
+        pool = ['Zero deaths. Unkillable, like your champion said.', 'Not a single grey screen all game.']
+    elif letter in ('A', 'B'):
+        pool = ['Solid game. Clean it up and that is an S.', f'{csm} CS/min, decent lane, keep stacking these.']
+    else:
+        pool = ['A game was played. Next one.', 'We take the lessons and queue up.']
+    line = pool[sum(map(ord, g.get('date') or '')) % len(pool)]
+    return {'letter': letter, 'score': score, 'parts': parts, 'line': line}
+
+
+MILESTONES = (  # id, title, how to get it
+    ('first_win', 'First win logged', 'win a game with leeg running'),
+    ('on_target', 'On target', f'finish a game at {CS_TARGET} CS/min or better'),
+    ('farm8', 'Farm simulator', 'finish a game at 8+ CS/min'),
+    ('clean15', 'Untouchable', 'no deaths before 15:00'),
+    ('deathless', 'Immortal', 'a whole game without dying'),
+    ('fast_item', 'Speed shopper', 'first item at or before the median'),
+    ('comeback', 'Comeback kid', 'win after losing lane at 10'),
+    ('revenge', 'Revenge', 'beat a lane opponent you lost to before'),
+    ('big_game', 'Took over', '10+ kills in a game'),
+    ('streak3', 'Heater', 'win 3 in a row'),
+    ('grade_s', 'S rank', 'get an S grade'),
+    ('ten_games', 'Regular', 'log 10 games'),
+)
+
+
+def milestones(games, target=CS_TARGET):
+    """First time each MILESTONE was earned, walking the log in order."""
+    got, lost_to, streak = {}, set(), 0
+    for n, g in enumerate(games, 1):
+        def earn(key):
+            if key not in got:
+                got[key] = {'date': g.get('date'), 'champ': g.get('champ'), 'vs': g.get('vs')}
+        win = g.get('result') == 'Win'
+        streak = streak + 1 if win else 0 if g.get('result') == 'Loss' else streak
+        legs = sorted((i for i in g.get('items') or [] if not i.get('boots') and i.get('t') is not None), key=lambda i: i['t'])
+        bench = (g.get('item_bench') or [None])[0]
+        lane = ((g.get('lane_marks') or {}).get('10') or {}).get('cs')
+        if win:
+            earn('first_win')
+        if (g.get('cs_min') or 0) >= target:
+            earn('on_target')
+        if (g.get('cs_min') or 0) >= 8:
+            earn('farm8')
+        if g.get('duration', 0) >= 900 and not any(t < 900 for t in g.get('deaths') or []):
+            earn('clean15')
+        if g.get('duration', 0) >= 900 and not g.get('d'):
+            earn('deathless')
+        if legs and bench and legs[0]['t'] <= bench * 60:
+            earn('fast_item')
+        if win and lane is not None and lane < 0:
+            earn('comeback')
+        if win and g.get('vs') in lost_to:
+            earn('revenge')
+        if g.get('result') == 'Loss' and g.get('vs'):
+            lost_to.add(g['vs'])
+        if (g.get('k') or 0) >= 10:
+            earn('big_game')
+        if streak >= 3:
+            earn('streak3')
+        if grade_game(g, target)['letter'] == 'S':
+            earn('grade_s')
+        if n >= 10:
+            earn('ten_games')
+    return [dict(id=k, title=t, how=h, **({'got': got[k]} if k in got else {})) for k, t, h in MILESTONES]
+
+
+def rivalries(games, limit=4):
+    """Champions you keep meeting: as your lane opponent (record) and as your killer."""
+    r = {}
+    for g in games:
+        if g.get('vs'):
+            e = r.setdefault(g['vs'], {'name': g['vs'], 'w': 0, 'l': 0, 'games': 0, 'kills': 0})
+            e['games'] += 1
+            e['w'] += g.get('result') == 'Win'
+            e['l'] += g.get('result') == 'Loss'
+        for d in g.get('death_info') or []:
+            if d.get('by'):
+                r.setdefault(d['by'], {'name': d['by'], 'w': 0, 'l': 0, 'games': 0, 'kills': 0})['kills'] += 1
+    out = sorted(r.values(), key=lambda e: -(e['games'] * 3 + e['kills']))[:limit]
+    for e in out:
+        e['icon'], e['splash'] = champ_icon_url(e['name']), champ_splash_url(e['name'])
+        e['status'] = ('revenge pending' if e['l'] > e['w'] else 'you own this lane' if e['w'] > e['l'] and e['w'] >= 2
+                       else 'dead even' if e['games'] else 'keeps hunting you')
+    return out
+
+
 def web_idle_state(tracker, client_open, all_games=None):
     hist = tracker.history if tracker else []
     return {'mode': 'idle', 'client': client_open, 'cs_target': CS_TARGET,
@@ -6379,7 +6528,16 @@ def web_idle_state(tracker, client_open, all_games=None):
                          'icon': h.get('icon'), 'date': h.get('date'), 'vs': h.get('vs')} for h in hist[-10:]],
             'record': (dict(zip(('w', 'l'), matchup_record(hist, hist[-1].get('champ'), hist[-1].get('vs'))))
                        if hist and hist[-1].get('vs') else None),
-            'stats': career_stats(all_games if all_games is not None else load_all_games())}
+            'stats': _with_fun(career_stats(games := (all_games if all_games is not None else load_all_games())), games),
+            'grade': grade_game(hist[-1]) if hist else None,
+            'splash': champ_splash_url(hist[-1].get('champ')) if hist else ''}
+
+
+def _with_fun(stats, games):
+    if stats:
+        stats['milestones'] = milestones(games)
+        stats['rivals'] = rivalries(games)
+    return stats
 
 
 def open_page_when_needed(url, wait=3.5):
@@ -6530,6 +6688,8 @@ def run_demo(mode, port, open_browser=True):
                    for et, dt, kn in ((420, 'Fire', 'Lee Sin'), (900, 'Water', 'you'), (1320, 'Air', 'Lee Sin')) if et < t]
         if mid:  # past laning: bot outer fell at 14:00; while dead, Lee Sin got the kill
             ev_list.append({'EventName': 'TurretKilled', 'EventTime': 840, 'KillerName': 'Jinx', 'TurretKilled': 'Turret_T2_R_01_A'})
+        if view == 'mid' and elapsed >= 6:   # a triple kill a few seconds in: header glow + mascot cheer
+            ev_list.append({'EventName': 'Multikill', 'EventTime': 1506, 'KillerName': 'you', 'KillStreak': 3})
         if view == 'dead':
             ev_list.append({'EventName': 'ChampionKill', 'EventTime': t - 4, 'KillerName': 'Lee Sin',
                             'VictimName': me.get('riotIdGameName', 'you'), 'Assisters': []})

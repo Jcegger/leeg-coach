@@ -7,7 +7,7 @@
 <style>
   :root {
     --bg: #0d1117; --panel: #161b22; --panel2: #0b0f14; --line: #2a313c; --text: #e6edf3; --dim: #8b949e;
-    --good: #3fb950; --warn: #d29922; --bad: #f85149; --accent: #58a6ff; --gold: #e3b341; --orange: #ff8c42;
+    --good: #3fb950; --warn: #d29922; --bad: #f85149; --accent: #58a6ff; --accent-rgb: 88,166,255; --gold: #e3b341; --orange: #ff8c42;
     --tile: clamp(50px, 4.6vw, 72px);
   }
   * { box-sizing: border-box; }
@@ -93,7 +93,7 @@
   .chip { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
   .chip.bad { background: rgba(248,81,73,.18); color: var(--bad); } .chip.good { background: rgba(63,185,80,.18); color: var(--good); }
   .chip.warn { background: rgba(210,153,34,.18); color: var(--warn); } .chip.plain { background: #222a35; color: var(--dim); }
-  .chip.accent { background: rgba(88,166,255,.16); color: var(--accent); }
+  .chip.accent { background: rgba(var(--accent-rgb),.16); color: var(--accent); }
 
   /* enemy cards */
   .enemy { border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); margin-top: 8px; }
@@ -186,7 +186,7 @@
   .tabs { display: flex; gap: 6px; }
   .tabs button { background: var(--panel); color: var(--dim); border: 1px solid var(--line); border-radius: 999px;
     padding: 5px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .tabs button.on { color: var(--text); border-color: var(--accent); background: rgba(88,166,255,.12); }
+  .tabs button.on { color: var(--text); border-color: var(--accent); background: rgba(var(--accent-rgb),.12); }
   .chart { width: 100%; height: auto; max-height: 210px; display: block; margin-top: 6px; }
   .chart text { fill: var(--dim); font-size: 11px; font-family: inherit; }
   .chart .grid { stroke: var(--line); stroke-width: 1; }
@@ -212,6 +212,46 @@
   .itemcount img { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--line); display: block; margin: 0 auto 3px; }
   .fun { color: var(--dim); font-size: 14px; }
   .fun b { color: var(--text); }
+
+  /* mascot: original blob, changes face with the game; only bobs once when the mood changes */
+  .mascot { width: 46px; height: 46px; flex: none; }
+  .mascot.bounce { animation: bob .6s ease-out; }
+  @keyframes bob { 30% { transform: translateY(-5px) scale(1.05); } 60% { transform: translateY(1px); } }
+  /* big moments: one short glow on the header */
+  header.moment { animation: momentglow 1.6s ease-out 2; }
+  @keyframes momentglow { 0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb),.0); } 40% { box-shadow: 0 0 0 4px rgba(var(--accent-rgb),.55), 0 0 26px rgba(var(--accent-rgb),.45); } 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb),0); } }
+  .momentchip { font-weight: 800; letter-spacing: .06em; color: var(--accent); font-size: 15px; }
+  /* respawn ring on your portrait while dead */
+  .pring { padding: 3px; border-radius: 13px; background: conic-gradient(var(--bad) var(--p), #2a313c 0); }
+  .pring .champ { display: block; border-color: var(--panel); }
+  /* champ select versus banner */
+  header.vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; padding: 0; overflow: hidden; }
+  header.vs .half { padding: 14px 16px; background-size: cover; background-position: center 22%; min-height: 84px; display: flex; align-items: center; gap: 12px; }
+  header.vs .half.them { justify-content: flex-end; text-align: right; }
+  header.vs .vsmark { align-self: center; font-weight: 900; font-size: 22px; color: var(--accent); padding: 0 10px; text-shadow: 0 0 10px rgba(var(--accent-rgb),.6); }
+  /* post-game grade */
+  .gradebox { display: flex; gap: 16px; align-items: center; margin-top: 12px; }
+  .grade { width: 84px; height: 84px; flex: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    font-size: 54px; font-weight: 900; border: 3px solid currentColor; background: rgba(0,0,0,.35); }
+  .grade.S { color: var(--gold); box-shadow: 0 0 22px rgba(227,179,65,.45); } .grade.A { color: var(--good); }
+  .grade.B { color: var(--accent); } .grade.C { color: var(--warn); } .grade.D { color: var(--bad); }
+  .gline { font-size: 19px; font-weight: 600; }
+  .gparts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .reviewhead { margin: -14px -16px 0; padding: 14px 16px; border-radius: 12px 12px 0 0; background-size: cover; background-position: right 0 top 22%; }
+  .btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px;
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  /* milestones + rivals */
+  .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .badge { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel2); }
+  .badge b { display: block; font-size: 14px; } .badge span { font-size: 12px; color: var(--dim); }
+  .badge.got { border-color: var(--gold); background: rgba(227,179,65,.08); } .badge.got b::before { content: "\2605 "; color: var(--gold); }
+  .badge:not(.got) b { color: var(--dim); }
+  .rivals { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+  .rival { border-radius: 10px; border: 1px solid var(--line); padding: 10px 12px; min-height: 92px; background-size: cover; background-position: center 20%;
+    display: flex; flex-direction: column; justify-content: flex-end; }
+  .rival b { font-size: 16px; } .rival .st { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .rival .st.revenge { color: var(--bad); } .rival .st.own { color: var(--good); } .rival .st.even { color: var(--warn); } .rival .st.hunt { color: var(--orange); }
 
   .center { text-align: center; padding: 50px 20px; }
   .center h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; }
@@ -287,6 +327,8 @@ function tick() {
   }
   for (const el of document.querySelectorAll('[data-ago]')) el.textContent = `${Math.round(Math.max(0, now() - +el.dataset.ago))}s ago`;
   for (const el of document.querySelectorAll('[data-since]')) el.textContent = `${mmss(state.time + age() - +el.dataset.since)} ago`;
+  for (const el of document.querySelectorAll('[data-ring]'))
+    el.style.setProperty('--p', `${Math.round(Math.max(0, +el.dataset.ring - age()) / +el.dataset.ringmax * 100)}%`);
   const co = $('#coach');
   if (co && co.dataset.at) co.classList.toggle('old', now() - +co.dataset.at > 90);
   // Live data stopped (leeg closed, API stalled): fade instead of ticking on old numbers.
@@ -391,6 +433,138 @@ const ord = n => `style="order:${n}"`;
 const splashStyle = u => u ? `style="background-image:linear-gradient(90deg, var(--panel) 30%, rgba(22,27,34,.55) 55%, rgba(22,27,34,.05)), url('${esc(u)}')"` : '';
 const DRAKE_COLOR = { Infernal: '#e8603c', Ocean: '#3fa7d6', Mountain: '#b08a5a', Cloud: '#c3d0dc', Hextech: '#2bd4c7', Chemtech: '#8bc34a', Elder: '#c9a6ff' };  // half-screen stacking priority (see CSS)
 
+/* ---------- fun layer: champion theme, mascot, share card ---------- */
+// Accent color from the champion's splash art: average of the vivid pixels, then pushed into
+// a lightness band that reads on the dark panels. Cached per image.
+const themeCache = {};
+let themeFor = '';
+function applyTheme(url) {
+  if (url === themeFor) return;
+  themeFor = url;
+  const set = c => { document.documentElement.style.setProperty('--accent', c.hex); document.documentElement.style.setProperty('--accent-rgb', c.rgb); };
+  if (!url) { set({ hex: '#58a6ff', rgb: '88,166,255' }); return; }
+  if (themeCache[url]) { set(themeCache[url]); return; }
+  const img = new Image(); img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try {
+      const c = document.createElement('canvas'); c.width = 48; c.height = 28;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0, 48, 28);
+      const d = x.getImageData(0, 0, 48, 28).data; let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+        if (mx - mn > 60 && mx > 70) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }   // vivid pixels only
+      }
+      if (!n) return;
+      let [h, sat] = rgb2hs(r / n, g / n, b / n);
+      const [R, G, B] = hsl2rgb(h, Math.max(.55, sat), .64);
+      const col = { hex: '#' + [R, G, B].map(v => v.toString(16).padStart(2, '0')).join(''), rgb: `${R},${G},${B}` };
+      themeCache[url] = col; if (themeFor === url) set(col);
+    } catch (e) { /* tainted canvas or decode error: keep the current accent */ }
+  };
+  img.src = url;
+}
+function rgb2hs(r, g, b) {
+  r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(h * 60 + 360) % 360, Math.min(1, s)];
+}
+function hsl2rgb(h, s, l) {
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return [r, g, b].map(v => Math.round((v + m) * 255));
+}
+
+// The mascot: an original little blob. Faces: focus, happy, cheer, sad, sleep, hungry.
+const MOOD_TITLE = { focus: 'locked in', happy: 'happy', cheer: 'LET\'S GO', sad: 'waiting for you to respawn', sleep: 'napping until the next game', hungry: 'you have gold to spend' };
+function mascot(mood) {
+  const eyes = {
+    focus: '<circle cx="19" cy="24" r="3.6" fill="#0d1117"/><circle cx="31" cy="24" r="3.6" fill="#0d1117"/><circle cx="20.2" cy="22.8" r="1.2" fill="#fff"/><circle cx="32.2" cy="22.8" r="1.2" fill="#fff"/>',
+    happy: '<path d="M15.5 25 q3.5 -4.5 7 0 M27.5 25 q3.5 -4.5 7 0" stroke="#0d1117" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    cheer: '<path d="M15.5 24 l3.5 -3 l3.5 3 M27.5 24 l3.5 -3 l3.5 3" stroke="#0d1117" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    sad: '<path d="M16 23.5 q3 2.5 6 0 M28 23.5 q3 2.5 6 0" stroke="#0d1117" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M33.5 27 q1.6 3 0 4.4 q-1.6 -1.4 0 -4.4z" fill="#79c0ff"/>',
+    sleep: '<path d="M16 24.5 h6 M28 24.5 h6" stroke="#0d1117" stroke-width="2.4" stroke-linecap="round"/>',
+    hungry: '<circle cx="19" cy="23.5" r="4.4" fill="#fff"/><circle cx="31" cy="23.5" r="4.4" fill="#fff"/><circle cx="19.6" cy="24.3" r="2.6" fill="#0d1117"/><circle cx="31.6" cy="24.3" r="2.6" fill="#0d1117"/>',
+  }[mood] || '';
+  const mouth = {
+    focus: '<path d="M21.5 31 q3.5 2.6 7 0" stroke="#0d1117" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+    happy: '<path d="M19.5 30 q5.5 6 11 0 z" fill="#0d1117"/>',
+    cheer: '<path d="M18.5 29.5 q6.5 8 13 0 z" fill="#0d1117"/><path d="M22 32.6 q3 2 6 0" fill="#f85149"/>',
+    sad: '<path d="M21 33.5 q4 -3.4 8 0" stroke="#0d1117" stroke-width="2.2" fill="none" stroke-linecap="round"/>',
+    sleep: '<circle cx="25" cy="32" r="2" fill="#0d1117"/>',
+    hungry: '<ellipse cx="25" cy="32.5" rx="4.4" ry="3.4" fill="#0d1117"/><path d="M28.6 34.4 q1.4 3.4 0 5 q-1.6 -1.6 0 -5z" fill="#79c0ff"/>',
+  }[mood] || '';
+  const extra = {
+    sleep: '<text x="37" y="11" font-size="9" font-weight="800" fill="var(--dim)">z</text><text x="41.5" y="6" font-size="6.5" font-weight="800" fill="var(--dim)">z</text>',
+    cheer: '<path d="M6 9 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6z M43 6 l1.1 2.3 2.3 1.1 -2.3 1.1 -1.1 2.3 -1.1 -2.3 -2.3 -1.1 2.3 -1.1z" fill="var(--gold)"/>',
+    hungry: '<circle cx="42" cy="38" r="5" fill="var(--gold)" stroke="#a07c1c" stroke-width="1.2"/><text x="42" y="40.6" font-size="6.5" text-anchor="middle" font-weight="900" fill="#6b4f0c">g</text>',
+  }[mood] || '';
+  return `<svg class="mascot" viewBox="0 0 50 50" role="img" aria-label="mascot: ${esc(MOOD_TITLE[mood] || mood)}"><title>${esc(MOOD_TITLE[mood] || mood)}</title>
+    <path d="M25 2.5 v5" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/><circle cx="25" cy="2.8" r="2.4" fill="var(--gold)"/>
+    <path d="M8 30 C8 15 15 8 25 8 C35 8 42 15 42 30 C42 41 35 45 25 45 C15 45 8 41 8 30 Z" fill="var(--accent)"/>
+    <ellipse cx="25" cy="36" rx="11" ry="7" fill="#fff" opacity=".16"/><ellipse cx="17" cy="15.5" rx="4" ry="2.3" fill="#fff" opacity=".28"/>
+    <circle cx="13.5" cy="30.5" r="2.6" fill="#ff7b9c" opacity=".55"/><circle cx="36.5" cy="30.5" r="2.6" fill="#ff7b9c" opacity=".55"/>
+    ${eyes}${mouth}${extra}</svg>`;
+}
+let lastMood = '', lastK = null, killAt = 0;
+function moodFor(s) {
+  if (s.mode !== 'game') return s.mode === 'cs' ? 'focus' : (s.last && s.last.result === 'Win' && s.grade && 'SA'.includes(s.grade.letter) ? 'happy' : 'sleep');
+  const y = s.you;
+  if (lastK !== null && y.k > lastK) killAt = Date.now();
+  lastK = y.k;
+  if (y.dead) return 'sad';
+  const m = s.moment;
+  if ((m && s.time + age() - m.at < 8) || Date.now() - killAt < 20000) return 'cheer';
+  if (s.hint && s.hint.back) return 'hungry';
+  return 'focus';
+}
+function mascotHtml(s) {
+  const mood = moodFor(s), changed = mood !== lastMood;
+  lastMood = mood;
+  return mascot(mood).replace('class="mascot"', `class="mascot ${changed ? 'bounce' : ''}"`);
+}
+
+// Shareable post-game card: drawn on a canvas (CDragon serves CORS), saved as a PNG.
+function loadImg(src) {
+  return new Promise(res => { if (!src) return res(null); const i = new Image(); i.crossOrigin = 'anonymous';
+    i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+async function saveCard(preview = false) {
+  const s = state; if (!s || !s.last) return;
+  const g = s.last, gr = s.grade || {}, W = 1200, H = 630;
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#58a6ff';
+  x.fillStyle = '#0d1117'; x.fillRect(0, 0, W, H);
+  const sp = await loadImg(s.splash);
+  if (sp) { const r = Math.max(W / sp.width, H / sp.height); x.globalAlpha = .8; x.drawImage(sp, W - sp.width * r, (H - sp.height * r) * .3, sp.width * r, sp.height * r); x.globalAlpha = 1; }
+  const grad = x.createLinearGradient(0, 0, W, 0); grad.addColorStop(0, 'rgba(13,17,23,1)'); grad.addColorStop(.45, 'rgba(13,17,23,.85)'); grad.addColorStop(1, 'rgba(13,17,23,.1)');
+  x.fillStyle = grad; x.fillRect(0, 0, W, H);
+  const font = (w, px) => `${w} ${px}px "Segoe UI", system-ui, sans-serif`;
+  x.fillStyle = g.result === 'Win' ? '#3fb950' : g.result === 'Loss' ? '#f85149' : '#8b949e';
+  x.font = font(900, 40); x.fillText((g.result || 'GAME').toUpperCase(), 60, 90);
+  x.fillStyle = '#e6edf3'; x.font = font(700, 64); x.fillText(g.champ || '', 60, 165);
+  x.fillStyle = '#8b949e'; x.font = font(500, 28); x.fillText(`${g.vs ? 'vs ' + g.vs + '  ·  ' : ''}${mmss(g.duration)}  ·  ${(g.date || '').slice(0, 10)}`, 60, 210);
+  x.fillStyle = '#e6edf3'; x.font = font(800, 54); x.fillText(`${g.k} / ${g.d} / ${g.a}`, 60, 300);
+  x.fillStyle = '#8b949e'; x.font = font(500, 28); x.fillText(`${g.cs_min} CS/min  ·  ${g.cs} CS  ·  level ${g.level}`, 60, 345);
+  if (gr.letter) {
+    const col = { S: '#e3b341', A: '#3fb950', B: accent, C: '#d29922', D: '#f85149' }[gr.letter];
+    x.strokeStyle = col; x.lineWidth = 6; x.fillStyle = 'rgba(0,0,0,.45)';
+    x.beginPath(); x.roundRect(W - 250, 60, 190, 190, 28); x.fill(); x.stroke();
+    x.fillStyle = col; x.font = font(900, 140); x.textAlign = 'center'; x.fillText(gr.letter, W - 155, 205); x.textAlign = 'left';
+    x.fillStyle = '#e6edf3'; x.font = font(600, 26); x.fillText(gr.line || '', 60, 400, W - 120);
+  }
+  const icons = await Promise.all((g.items || []).slice(0, 6).map(i => loadImg(i.icon)));
+  icons.forEach((im, i) => { if (im) { x.save(); x.beginPath(); x.roundRect(60 + i * 96, 450, 80, 80, 14); x.clip(); x.drawImage(im, 60 + i * 96, 450, 80, 80); x.restore(); } });
+  x.fillStyle = accent; x.font = font(800, 24); x.fillText('leeg', W - 110, H - 40);
+  if (preview) {   // #card: show it instead of downloading (screenshot tests)
+    const im = document.createElement('img'); im.src = c.toDataURL('image/png'); im.style.cssText = 'position:fixed;inset:0;width:100%;z-index:9';
+    document.body.appendChild(im); return;
+  }
+  c.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = `leeg-${(g.champ || 'game').replace(/\W+/g, '')}-${(g.date || '').slice(0, 10)}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }, 'image/png');
+}
+
 /* ---------- in game ---------- */
 function csPerMin(s) {
   const mins = (s.time + age()) / 60;
@@ -420,7 +594,7 @@ function jungleBox(j) {
     <div class="t">${esc(j.where)}</div><div class="sub num" data-since="${j.at}">${mmss(ago)} ago</div></div>`;
 }
 
-let lastBulletAt = 0;
+let lastBulletAt = 0, deadMax = 0, shownMoment = '';
 function renderGame(s) {
   const y = s.you, c = s.coach, o = s.objectives;
   const live = c.live, build = live ? live.items : (s.build ? s.build.items : []);
@@ -441,14 +615,21 @@ function renderGame(s) {
                  : focus.state === 'SNOWBALLING' ? 'biggest threat' : 'your lane';
   const focusName = y.dead && focus ? focus.name : null;
 
-  const header = `<header class="panel row ${y.splash ? 'splash' : ''}" ${splashStyle(y.splash)}>
-    ${y.icon ? `<img class="champ" src="${esc(y.icon)}" alt="">` : ''}
+  if (y.dead) deadMax = Math.max(deadMax, y.respawn || 0); else deadMax = 0;   // ring drains from the full timer
+  const m = s.moment, mkey = m ? `${m.text}@${m.at}` : '';
+  const momentNow = m && s.time + age() - m.at < 8, glowNow = momentNow && mkey !== shownMoment;
+  if (glowNow) shownMoment = mkey;
+  const portrait = y.icon ? `<img class="champ" src="${esc(y.icon)}" alt="">` : '';
+  const header = `<header class="panel row ${y.splash ? 'splash' : ''} ${glowNow ? 'moment' : ''}" ${splashStyle(y.splash)}>
+    ${y.dead && deadMax ? `<div class="pring" data-ring="${y.respawn}" data-ringmax="${deadMax}" style="--p:${Math.round(Math.max(0, y.respawn - age()) / deadMax * 100)}%">${portrait}</div>` : portrait}
     <div class="grow">
       <div class="name">${esc(y.champ)} <span class="dim" style="font-size:15px">lvl ${esc(y.level ?? '?')}</span></div>
       <div class="stats num">${y.k}/${y.d}/${y.a} · ${y.cs} cs${csPerMin(s)} · ${y.gold}g</div>
     </div>
     ${(s.dead || []).length ? `<span class="deadchip num" title="enemies dead: a window to push or take objectives">${s.dead.length} dead: ${s.dead.map(d => `${esc(d.name)} <span data-cd="${d.respawn}" data-fmt="resp">${d.respawn}s</span>`).join(', ')}</span>` : ''}
+    ${momentNow ? `<span class="momentchip">${esc(m.text)}</span>` : ''}
     ${y.dead ? `<span class="youdead">DEAD <span data-cd="${y.respawn}" data-fmt="resp">${y.respawn}s</span></span>` : ''}
+    ${mascotHtml(s)}
     <div class="clock num" data-clock="${s.time}">${mmss(s.time + age())}</div>
     <span class="dot ${c.enabled ? 'on' : 'off'}" title="coach ${c.enabled ? 'on' : 'off'}"></span>
   </header>`;
@@ -520,10 +701,21 @@ function renderCS(s) {
       ${i ? `<span class="chev">${open ? '▾' : '▸'}</span>` : ''}<b>${esc(p.name)}</b>${i === 0 ? '<span class="chip good">default</span>' : ''}</div>
       ${open ? p.lines.map(l => `<div class="rl">${md(l)}</div>`).join('') : ''}</div>`;
   }).join('');
-  return `<header class="panel row ${s.you.splash ? 'splash' : ''}" ${splashStyle(s.you.splash)}>
-    ${s.you.icon ? `<img class="champ" src="${esc(s.you.icon)}" alt="">` : ''}
-    <div class="grow"><div class="name">${esc(s.you.champ)} <span class="dim" style="font-size:15px">${esc(s.you.pos)}</span></div>
-      <div class="stats">Champ select · ${esc((s.phase || '').replace(/_/g, ' ').toLowerCase())}</div></div>
+  const them = lane && lane.kit && lane.kit.splash ? lane.kit.splash : '';
+  const fade = (dir, u) => u ? `style="background-image:linear-gradient(${dir}, var(--panel) 15%, rgba(22,27,34,.6) 55%, rgba(22,27,34,.15)), url('${esc(u)}')"` : '';
+  return `<header class="panel ${lane ? 'vs' : 'row'}">
+    <div class="half" ${fade('90deg', s.you.splash)}>
+      ${s.you.icon ? `<img class="champ" src="${esc(s.you.icon)}" alt="">` : ''}
+      <div><div class="name">${esc(s.you.champ)} <span class="dim" style="font-size:15px">${esc(s.you.pos)}</span></div>
+        <div class="stats">Champ select · ${esc((s.phase || '').replace(/_/g, ' ').toLowerCase())}</div></div>
+      ${mascotHtml(s)}
+    </div>
+    ${lane ? `<div class="vsmark">VS</div>
+    <div class="half them" ${fade('270deg', them)}>
+      <div><div class="name">${esc(lane.name)}</div>
+        <div class="stats">${lane.record ? `${lane.record[0]}W – ${lane.record[1]}L for you` : 'first time on record'}${lane.tier ? ` · ${esc(lane.tier)}` : ''}</div></div>
+      ${lane.icon ? `<img class="champ" src="${esc(lane.icon)}" alt="">` : ''}
+    </div>` : ''}
   </header>
   <div class="cols">
     <div class="col">
@@ -567,7 +759,7 @@ function timeline(g) {
       <div style="position:absolute;left:0;right:0;top:24px">${deaths}</div></div></div>`;
 }
 
-function renderReview(g, target, record) {
+function renderReview(g, target, record, grade, splash) {
   const cs10 = g.cs_marks['10'], cs15 = g.cs_marks['15'];
   const early = g.deaths.filter(t => t < 900).length;
   const legs = g.items.filter(i => !i.boots && i.t !== null && i.t !== undefined).sort((a, b) => a.t - b.t);
@@ -579,7 +771,13 @@ function renderReview(g, target, record) {
   const sg = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
   const kinds = {}; for (const x of (g.death_info || []).filter(x => x.t < 900)) kinds[x.kind] = (kinds[x.kind] || 0) + 1;
   const kindTxt = Object.entries(kinds).map(([k, n]) => `${n} ${k}`).join(', ');
+  const gradeBox = grade ? `<div class="gradebox"><div class="grade ${grade.letter}" title="${grade.score}/100">${grade.letter}</div>
+    <div class="grow"><div class="gline">${esc(grade.line)}</div>
+      <div class="gparts">${[['cs', 'CS', 30], ['deaths', 'early deaths', 25], ['kda', 'KDA', 20], ['item', 'first item', 15], ['lane', 'lane at 10', 10]]
+        .map(([k, l, mx]) => `<span class="chip plain num">${l} ${grade.parts[k]}/${mx}</span>`).join('')}</div></div>
+    <button class="btn" data-action="savecard" title="Save this game as an image to share">Save card</button></div>` : '';
   return `<section class="panel">
+    <div class="reviewhead" ${splash ? `style="background-image:linear-gradient(90deg, var(--panel) 35%, rgba(22,27,34,.7) 62%, rgba(22,27,34,.2)), url('${esc(splash)}')"` : ''}>
     <div class="row">
       <span class="result ${res}">${g.result ? g.result.toUpperCase() : 'RESULT ?'}</span>
       ${g.icon ? `<img src="${esc(g.icon)}" alt="" style="width:40px;height:40px;border-radius:8px">` : ''}
@@ -587,7 +785,7 @@ function renderReview(g, target, record) {
         · <span class="num">${g.k}/${g.d}/${g.a}</span> · lvl ${esc(g.level)} · <span class="num">${mmss(g.duration)}</span>
         ${record ? ` · <span class="record">${record.w}W–${record.l}L</span> <span class="dim">in this matchup</span>` : ''}</div>
       <span class="dim">${esc(g.date)}</span>
-    </div>
+    </div>${gradeBox}</div>
     <div class="stats4">
       <div class="stat"><div class="k">CS / min</div><div class="v num csm ${csClass(g.cs_min, target)}">${g.cs_min}</div><div class="s">target ${target} · ${g.cs} total</div></div>
       <div class="stat"><div class="k">CS at 10 min</div><div class="v num ${cs10 !== undefined ? 'csm ' + csClass(cs10 / 10, target) : 'dim'}">${cs10 !== undefined ? '~' + cs10 : '—'}</div><div class="s">target ${Math.round(target * 10)}${cs15 !== undefined ? ` · ~${cs15} at 15` : ''} · scoreboard counts in 10s</div></div>
@@ -696,25 +894,35 @@ function renderStats(st, target) {
     ${(st.items || []).length ? `<section class="panel"><div class="label">Most built</div><div class="itemcount">
       ${st.items.map(i => `<div title="${esc(i.name)}">${i.icon ? `<img src="${esc(i.icon)}" alt="">` : ''}<b class="num">x${i.n}</b><br><span class="dim">${esc(i.name)}</span></div>`).join('')}</div></section>` : ''}
     <section class="panel fun">Time played: <b>${hm(st.played_s)}</b> across ${st.n} game${st.n === 1 ? '' : 's'}.</section>`;
-  return `${tiles}<div class="cols" style="margin-top:14px"><div class="col">${left}</div><div class="col">${right}</div></div>`;
+  const got = (st.milestones || []).filter(x => x.got).length;
+  const shelf = (st.milestones || []).length ? `<section class="panel" style="margin-top:14px"><div class="label">Milestones · ${got}/${st.milestones.length}</div><div class="shelf">
+    ${st.milestones.map(x => `<div class="badge ${x.got ? 'got' : ''}" title="${esc(x.how)}"><b>${esc(x.title)}</b>
+      <span>${x.got ? `${esc((x.got.date || '').slice(0, 10))} · ${esc(x.got.champ || '')}${x.got.vs ? ' vs ' + esc(x.got.vs) : ''}` : esc(x.how)}</span></div>`).join('')}</div></section>` : '';
+  const stCls = { 'revenge pending': 'revenge', 'you own this lane': 'own', 'dead even': 'even', 'keeps hunting you': 'hunt' };
+  const rivals = (st.rivals || []).length ? `<section class="panel" style="margin-top:14px"><div class="label">Rivalries</div><div class="rivals">
+    ${st.rivals.map(r => `<div class="rival" ${r.splash ? `style="background-image:linear-gradient(0deg, rgba(11,15,20,.95) 30%, rgba(11,15,20,.35)), url('${esc(r.splash)}')"` : ''}>
+      <b>${esc(r.name)}</b><span class="dim num">${r.games ? `${r.w}W–${r.l}L in lane` : 'never your laner'}${r.kills ? ` · killed you ${r.kills}×` : ''}</span>
+      <span class="st ${stCls[r.status] || ''}">${esc(r.status)}</span></div>`).join('')}</div></section>` : '';
+  return `${tiles}${rivals}<div class="cols" style="margin-top:14px"><div class="col">${left}</div><div class="col">${right}</div></div>${shelf}`;
 }
 
 let idleTab = (() => { try { return localStorage.getItem('leegTab') || 'last'; } catch (e) { return 'last'; } })();
 if (/tab=stats/.test(location.hash)) idleTab = 'stats';
 
 function renderIdle(s) {
-  const waiting = `<div class="panel row"><span class="dot ${s.client ? 'on' : ''}"></span>
+  const waiting = `<div class="panel row">${mascotHtml(s)}<span class="dot ${s.client ? 'on' : ''}"></span>
     <div class="grow"><b>Waiting for a game.</b> <span class="dim">${s.client ? 'League client is open; this page switches on its own in champ select and in game.' : 'League client not detected yet.'}</span></div></div>`;
   const tabs = `<div class="tabs" style="margin:6px 2px 0">${[['last', 'Last game'], ['stats', 'Stats']].map(([k, t]) =>
     `<button data-tab="${k}" class="${idleTab === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
   if (idleTab === 'stats') return waiting + tabs + renderStats(s.stats, s.cs_target);
   if (!s.last) return waiting + tabs + `<div class="panel center"><h1>No games recorded yet</h1><div class="dim">Your post-game review shows up here after your next game.</div></div>`;
-  return waiting + tabs + renderReview(s.last, s.cs_target, s.record) + renderHistory(s.history, s.cs_target);
+  return waiting + tabs + renderReview(s.last, s.cs_target, s.record, s.grade, s.splash) + renderHistory(s.history, s.cs_target);
 }
 
 /* ---------- loop ---------- */
 function render() {
   if (!state) return;
+  applyTheme(state.mode === 'idle' ? state.splash : (state.you && state.you.splash) || '');
   $('#app').innerHTML = state.mode === 'game' ? renderGame(state) : state.mode === 'cs' ? renderCS(state) : renderIdle(state);
   const d = state.demo, badge = $('#demo');
   badge.classList.toggle('hidden', !d);
@@ -727,6 +935,7 @@ function render() {
 
 const openRunes = new Set();
 $('#app').addEventListener('click', e => {
+  if (e.target.closest('[data-action="savecard"]')) { saveCard(); return; }
   const tb = e.target.closest('[data-tab]');
   if (tb) { idleTab = tb.dataset.tab; try { localStorage.setItem('leegTab', idleTab); } catch (_) {} render(); return; }
   const r = e.target.closest('[data-rune]');
@@ -764,6 +973,7 @@ for (const n of decodeURIComponent((location.hash.match(/open=([^&]*)/) || [])[1
 
 poll();
 setInterval(poll, 1000);
+if (/card/.test(location.hash)) setTimeout(() => saveCard(true), 1500);
 setInterval(tick, 1000);
 </script>
 </body>
