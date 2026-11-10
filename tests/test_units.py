@@ -205,3 +205,36 @@ def test_champion_folders_parse():
         assert live.pick_build_variant(cd['build_variants'], 'Standard'), f'{folder}: no default path'
         if (live.LEEG_ROOT / folder / 'playbook.md').exists():
             assert cd['win_conditions'], f'{folder}: playbook has no "## Win conditions"'
+
+
+def _played_game(tracker, minutes=20, result=None):
+    m = dict(ME, scores={'creepScore': 120, 'deaths': 0})
+    evs = [{'EventName': 'GameEnd', 'Result': result}] if result else []
+    for t in range(0, minutes * 60 + 1, 60):
+        tracker.update({'allPlayers': [m] + PLAYERS[1:], 'events': {'Events': evs if t == minutes * 60 else []}},
+                       m, 'Dr. Mundo', t, {}, 'mundo')
+
+
+def test_game_saved_after_idle_grace():
+    """Regression: the idle branch once lost its finish() call and no game was ever saved."""
+    import time as _t
+    live.GAMES_LOG.write_text('')
+    tr = live.GameTracker()
+    _played_game(tr)
+    assert not tr.end_if_gone()                      # API just went away: within the grace
+    tr.last_seen = _t.time() - live.IDLE_GRACE_S - 1
+    assert tr.end_if_gone() and tr.g is None
+    assert len(live.load_all_games()) == 1
+
+
+def test_restart_saves_a_finished_game_only():
+    live.GAMES_LOG.write_text('')
+    tr = live.GameTracker()
+    _played_game(tr)                                 # still running: the next leeg picks it up
+    tr.save_on_exit()
+    assert tr.g is not None and live.load_all_games() == []
+    m = dict(ME, scores={'creepScore': 130, 'deaths': 0})   # same game ends: GameEnd on the feed
+    tr.update({'allPlayers': [m] + PLAYERS[1:], 'events': {'Events': [{'EventName': 'GameEnd', 'Result': 'Win'}]}},
+              m, 'Dr. Mundo', 21 * 60, {}, 'mundo')
+    tr.save_on_exit()                                # --restart right after the game must not lose it
+    assert [g['result'] for g in live.load_all_games()] == ['Win']

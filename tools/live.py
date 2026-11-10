@@ -6191,6 +6191,22 @@ class GameTracker:
             if e.get('EventName') == 'GameEnd':
                 g['result'] = 'Win' if str(e.get('Result', '')).lower().startswith('win') else 'Loss'
 
+    def end_if_gone(self, grace=None):
+        """Idle poll: save the game once the live API has been gone for IDLE_GRACE_S.
+        Returns True when a game was finished."""
+        grace = IDLE_GRACE_S if grace is None else grace
+        if self.g and time.time() - self.last_seen > grace:
+            self.finish()
+            return True
+        return False
+
+    def save_on_exit(self):
+        """leeg stopping (--restart, Ctrl+C): save the game if it's over (GameEnd seen, or the
+        API is already gone). A game still running is left to the next leeg, which picks it up
+        as "started late"; saving it here too would log it twice."""
+        if self.g and (self.g.get('result') or time.time() - self.last_seen > 5):
+            self.finish()
+
     def finish(self):
         g, self.g = self.g, None
         if not g or g['time'] < 300:
@@ -6870,6 +6886,15 @@ def main():
 
     tracker = GameTracker()
     set_web_coach(coach)
+    try:
+        _main_loop(args, hosts, lockfile, available, override, champ_index, champ_cache, item_index,
+                   coach, champ_db, matchup_db, tracker)
+    finally:
+        tracker.save_on_exit()
+
+
+def _main_loop(args, hosts, lockfile, available, override, champ_index, champ_cache, item_index,
+               coach, champ_db, matchup_db, tracker):
     last_sig = None
     last_state = None
     last_champ = None  # last successfully resolved champ folder, used as fallback
@@ -6980,7 +7005,7 @@ def main():
         # Mode 3: idle. The live API drops out for a poll or two mid-game (loading
         # spikes, Vanguard, reconnects); only call the game over after 30s without it,
         # or one hiccup splits a game into a no-result record plus a "started late" one.
-        if tracker.g and time.time() - tracker.last_seen > IDLE_GRACE_S:
+        if tracker.end_if_gone():
             last_state = None  # re-render idle with the new review
         if last_state != 'idle':
             try:
