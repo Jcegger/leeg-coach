@@ -6051,6 +6051,10 @@ class _WebHandler(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-Type', ctype)
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Leeg-Now', f'{time.time():.3f}')  # page measures WSL-vs-Windows clock skew
+        try:  # page reloads itself when web.html changes (an open tab otherwise keeps the old code)
+            self.send_header('X-Leeg-Page', str(int(WEB_HTML.stat().st_mtime)))
+        except OSError:
+            pass
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)

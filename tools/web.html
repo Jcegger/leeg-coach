@@ -214,7 +214,8 @@
   .fun b { color: var(--text); }
 
   /* mascot: original blob, changes face with the game; only bobs once when the mood changes */
-  .mascot { width: 46px; height: 46px; flex: none; }
+  .mascot { width: 56px; height: 56px; flex: none; padding: 4px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,17,23,.92) 58%, rgba(13,17,23,0) 72%); }
   .mascot.bounce { animation: bob .6s ease-out; }
   @keyframes bob { 30% { transform: translateY(-5px) scale(1.05); } 60% { transform: translateY(1px); } }
   /* big moments: one short glow on the header */
@@ -289,6 +290,7 @@
     .ab .desc { font-size: 13px; }
     /* build stays in view: pinned to the top once you scroll past it */
     .buildp { position: sticky; top: 0; z-index: 3; box-shadow: 0 6px 14px rgba(0,0,0,.45); }
+    .mascot { width: 50px; height: 50px; }
   }
   /* soul point: a tag on the objectives panel at half screen (the in-box chip hides there) */
   .soulnote { display: none; }
@@ -949,11 +951,14 @@ $('#app').addEventListener('click', e => {
   render();
 });
 
-let lastMode = '';
+let lastMode = '', pageVersion = '';
 async function poll() {
   try {
     const r = await fetch('/state', { cache: 'no-store' });
     const text = await r.text();
+    const pv = r.headers.get('X-Leeg-Page');
+    if (pv && pageVersion && pv !== pageVersion) { location.reload(); return; }
+    if (pv) pageVersion = pv;
     const sn = +r.headers.get('X-Leeg-Now');
     if (sn) skew = Date.now() / 1000 - sn;
     $('#offline').classList.add('hidden');
