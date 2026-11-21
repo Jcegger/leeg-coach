@@ -1032,6 +1032,12 @@
       "patch": "16.22",
       "generated_at": "2026-11-08",
       "notes": "- passive (Dauntless Instinct): Marks enemies for increased damage; All Out form amplifies all damage\n- Q (Ntofo Strikes): Strikes in line, slows, stacks to two then pulls enemies\n- W (Path Maker): Charges with reduced damage taken, dashes to knock back and stun\n- E (Footwork): Dashes for shield; ally targeting grants increased range and dual shields\n- R (All Out): Knocks enemy through walls, transforms into high-damage low-defense form with healing\n- spike: Level six with ultimate; power spikes at bruiser item completion\n- tip: Stay away from walls to prevent All Out knockback amplification"
+    },
+    "megagnar": {
+      "display_name": "Mega Gnar",
+      "patch": "16.23",
+      "generated_at": "2026-11-21",
+      "notes": "- Passive (Rage Gene): Gains rage from combat; transforms into Mega Gnar at max rage\n- Q (Boomerang Throw / Crunch): Throws boomerang or bites enemies in melee form\n- W (Hyper / Mega Gnar's Wallop): Gains attack speed or slams area in Mega form\n- E (Hop / Mega Gnar's Leap): Hops away or leaps and slams down dealing damage\n- R (GNAR!): Transforms and knocks back nearby enemies upon transformation\n- spike: Level 6 when transformation becomes frequent;bruiser armor items amplify tanking\n- tip: Space away when rage builds to avoid transformation knockback engagement"
     }
   }
 }

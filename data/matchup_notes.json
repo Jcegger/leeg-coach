@@ -6013,6 +6013,20 @@
       "patch": "16.22",
       "generated_at": "2026-11-10",
       "notes": "- threat: Sleepy Trouble Bubble into doubled damage nuke; dodge E or die to her combo chain.\n- early: Safe farm; Zoe outranges you heavily. Stay behind minions, avoid predictable positioning for her Q.\n- trading: Never trade into her after she lands E. Bait her Q by moving unpredictably sideways.\n- post6: Portal Jump gives her escape and repositioning power. She becomes harder to all-in; play patient.\n- spike: First Shadowflame spike hurts; respect her damage window but farm safely until you hit your items.\n- window: Post-first-item, your survivability outscales her burst. Look to run her down if she wastes E.\n- wave: Shove toward her tower to deny her space and force her to choose between wave and harass.\n- rune: Standard (Conqueror) for sustain and DPS; you need healing to offset her poke and burst.\n- item: Kaenic Rookern; reduces her magic damage and gives you resistances to survive her combo."
+    },
+    "drmundo__drmundo": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Dr. Mundo",
+      "patch": "16.22",
+      "generated_at": "2026-11-11",
+      "notes": "- Threat: Q max poke and sustained W damage slowly drain your health despite regeneration\n- Early: Safe farm levels 1-3; respect Q range and avoid standing near minions for poke\n- Trading: Dodge his Q skillshot; trade back with E active when he commits to W\n- Post6: Both ults heal similarly; R gives you movespeed advantage to engage or disengage\n- Spike: First Heartsteel/Jak'Sho spike favors whoever lands more Qs; watch for his all-in attempt\n- Window: Mid-game teamfights favor you with better W AOE damage and tankiness scaling\n- Wave: Hold wave near your tower; mirror his Q max forces him to overextend for poke\n- Rune: Standard; this even matchup needs reliable tankiness and cooldown reduction baseline\n- Item: Unending Despair adds grievous wounds to counter his massive healing and regeneration"
+    },
+    "drmundo__megagnar": {
+      "player_display": "Dr. Mundo",
+      "enemy_display": "Mega Gnar",
+      "patch": "16.23",
+      "generated_at": "2026-11-21",
+      "notes": "- Mega Gnar's teamfight lockdown and burst damage from Gnar Gun and GNAR transformation catches Dr. Mundo immobile and vulnerable.\n- Play safe levels 1-3; Gnar out-trades early. Farm at range with Q Infected Bonesaw, avoid all-ins near minions.\n- Never chase Gnar into his team. Bait his Boomerang Throw, then all-in with E Blunt Force Trauma when it misses.\n- Post-6, Mega Gnar transforms into a teamfight threat. Use Maximum Dosage defensively; don't frontline into his ultimate cooldown window.\n- Mega Gnar's first Sundered Sky spike makes him tanky and threatening. Respect his damage; scale into Heartsteel and Warmog's.\n- Dr. Mundo dominates when Gnar is in mini form without his ultimate. All-in with W Heart Zapper active then.\n- Hold the wave near your tower. Gnar can all-in you with Mega transformation on a pushed wave; safety first.\n- Fleet Footwork\u2014sustain and kiting against Gnar's repeated short-range slows and trading damage during mini form poke phases.\n- Add Randuin's Omen to lower Mega Gnar's critical strike damage and reduce his teamfight burst when he transforms."
     }
   }
 }
