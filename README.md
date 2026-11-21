@@ -202,9 +202,9 @@ leeg-coach/
 - Voice output: ElevenLabs neural voice, edge-tts free fallback
 - Tower state tracking with lane-open callouts
 - Game-transition detection (resets coach state on new game), API watchdog
+- Champ select notes on Windows 10, through Windows `curl.exe` (since Nov 2026)
 
 ### Not working / blocked
-- Champ select notes on Windows 10 (needs Win11 mirrored networking or native Windows Python)
 - ARAM mode awareness (drake/baron timers still render in ARAM)
 
 ### Planned
