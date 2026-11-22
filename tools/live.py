@@ -1109,12 +1109,9 @@ def compute_team_threats(enemies, item_index=None):
 
 def first_turret(ev):
     """(game_time, 'top outer') of the first turret to fall, or None."""
-    lanes = {'L': 'top', 'C': 'mid', 'R': 'bot'}
     for et, _killer, tid in sorted(ev.get('towers') or [], key=lambda t: t[0] or 0):
-        parts = (tid or '').split('_')
-        if len(parts) >= 4:
-            tier = {'01': 'outer', '02': 'inner', '03': 'inhib'}.get(parts[3], 'turret')
-            return et or 0, f'{lanes.get(parts[2], parts[2].lower())} {tier}'
+        st = parse_structure(tid)
+        return et or 0, f'{st[1] or "?"} {st[2]}' if st else 'turret'
     return None
 
 
@@ -1473,11 +1470,11 @@ def enforce_swap_gates(live_build, gated_swaps, build_pick, my_items, item_index
     return lb
 
 
-def allowed_playstyles(variants, enemies, game_time, item_index=None):
+def allowed_playstyles(variants, enemies, game_time, item_index=None, latch=None):
     """Playstyle paths (heading has "coach's call") whose condition holds right now.
     Pure tank: an AD enemy is SNOWBALLING, or a % max-HP damage champ is in the game.
     Survival: an AD or assassin enemy is SNOWBALLING. Any other: someone is SNOWBALLING."""
-    fed = [e for e in enemies if _enemy_threat_state(e, game_time, enemies, item_index) == 'SNOWBALLING']
+    fed = [e for e in enemies if _enemy_threat_state(e, game_time, enemies, item_index, latch) == 'SNOWBALLING']
     fed_ad = any(classify_enemy(e.get('championName', ''), e.get('items') or [], item_index) == 'AD' for e in fed)
     fed_assassin = any('ASSASSIN' in enemy_threat_tags(e) for e in fed)
     max_hp = any(normalize(e.get('championName', '')) in _ANTI_WARMOGS_CHAMPS for e in enemies)
@@ -1593,6 +1590,57 @@ def enforce_path_lock(live_build, swap_pairs, build_pick, my_items, item_index, 
         if len(lb) >= len(path):
             break
         lb.insert(min(pi, len(lb)), name)
+    return lb
+
+
+UNDO_HOLD = 300  # s an item stays out after the coach drops it (no gate or comp change)
+
+
+def guard_swap_undo(live_build, committed_items, dropped, game_time, gated_new, my_items, item_index):
+    """The coach re-added an item it dropped under UNDO_HOLD ago: keep the committed
+    item instead. DMP and Spirit Visage traded places 5 times in 6 minutes with no
+    gate change. Allowed if the committed item it would push out is now gated
+    (the gate really flipped). Owned items never move."""
+    lb = list(live_build or [])
+    if not committed_items or not dropped or not item_index:
+        return lb
+    name_to_id = _build_name_to_id(item_index)
+    rid = lambda n: resolve_item_id(n, name_to_id)
+    owned = {(i or {}).get('itemID') for i in (my_items or [])}
+    gated = {normalize(n) for n in (gated_new or ())}
+    is_boots = lambda n: normalize(n) in _BOOTS_NORMS
+    ids = [rid(n) for n in lb]
+    committed_ids = {rid(n) for n in committed_items}
+    for k, name in enumerate(list(lb)):
+        t = dropped.get(normalize(name))
+        if t is None or game_time - t >= UNDO_HOLD or ids[k] in owned or ids[k] in committed_ids:
+            continue
+        missing = [(ci, n) for ci, n in enumerate(committed_items)
+                   if rid(n) not in ids and is_boots(n) == is_boots(name) and normalize(n) not in gated]
+        if not missing:
+            continue
+        restore = next((n for ci, n in missing if ci == k), missing[0][1])
+        lb[k], ids[k] = restore, rid(restore)
+    return lb
+
+
+def keep_committed_order(live_build, committed_items, my_items, item_index):
+    """Same items as committed_build in a new order: keep the committed order. Otherwise
+    owned items keep their committed relative order. 25 logged "changes" were pure
+    reorders (Heartsteel and Warmog's trading places after both were bought)."""
+    lb = list(live_build or [])
+    if not committed_items or not item_index:
+        return lb
+    if sorted(map(normalize, lb)) == sorted(map(normalize, committed_items)):
+        return list(committed_items)
+    name_to_id = _build_name_to_id(item_index)
+    owned = {(i or {}).get('itemID') for i in (my_items or [])}
+    rank = {normalize(n): r for r, n in enumerate(committed_items)}
+    slots = [k for k, n in enumerate(lb)
+             if resolve_item_id(n, name_to_id) in owned and normalize(n) in rank]
+    ordered = sorted((lb[k] for k in slots), key=lambda n: rank[normalize(n)])
+    for k, n in zip(slots, ordered):
+        lb[k] = n
     return lb
 
 
@@ -2448,7 +2496,7 @@ def format_swap_rules(swaps):
     return out
 
 
-def filter_swaps(swaps, enemies, ap, ad, player_pos='', game_time=0, item_index=None):
+def filter_swaps(swaps, enemies, ap, ad, player_pos='', game_time=0, item_index=None, latch=None):
     """Drop swap options whose comp condition isn't met by the current enemy team.
 
     player_pos: raw Live API position string ('TOP', 'BOTTOM', 'UTILITY', etc.).
@@ -2469,7 +2517,7 @@ def filter_swaps(swaps, enemies, ap, ad, player_pos='', game_time=0, item_index=
         name = normalize(e.get('championName', ''))
         tags = enemy_threat_tags(e)
         enemy_tags.update(tags)
-        fed = _enemy_threat_state(e, game_time, enemies, item_index) == 'SNOWBALLING'
+        fed = _enemy_threat_state(e, game_time, enemies, item_index, latch) == 'SNOWBALLING'
         if is_crit_builder(e):
             crit_count += 1
             fed_crit = fed_crit or fed
@@ -2676,6 +2724,16 @@ def find_active_team(data):
 
 # ─── events, timers, tactical advice ────────────────────────────────────────
 
+_LOGGED_STRUCTURES = set()
+
+
+def _log_structure(sid):
+    """Log each structure ID once, parsed, so a format change shows in leeg.log."""
+    if sid not in _LOGGED_STRUCTURES:
+        _LOGGED_STRUCTURES.add(sid)
+        log.info('structure: %s -> %s', sid, parse_structure(sid) or 'UNPARSED')
+
+
 def parse_events(data):
     """Pull data.events.Events into a structured summary."""
     events = (data.get('events') or {}).get('Events') or []
@@ -2699,8 +2757,10 @@ def parse_events(data):
             summary.setdefault('grub_kills', []).append((et, e.get('KillerName', '?')))
         elif name == 'TurretKilled':
             summary['towers'].append((et, e.get('KillerName', '?'), e.get('TurretKilled', '?')))
+            _log_structure(e.get('TurretKilled', '?'))
         elif name == 'InhibKilled':
             summary['inhibs'].append((et, e.get('KillerName', '?'), e.get('InhibKilled', '?')))
+            _log_structure(e.get('InhibKilled', '?'))
         elif name == 'InhibRespawned':
             rid = e.get('InhibRespawned', '')
             if rid:
@@ -2743,19 +2803,39 @@ def fmt_mmss(seconds):
     return f'{mins}:{secs:02d}'
 
 
+_STRUCT_TEAMS = {'T1': 'ORDER', 'T2': 'CHAOS', 'TORDER': 'ORDER', 'TCHAOS': 'CHAOS'}
+_STRUCT_LANES = {'L': 'top', 'C': 'mid', 'R': 'bot', 'L0': 'bot', 'L1': 'mid', 'L2': 'top'}
+_STRUCT_TIERS = {'01': 'outer', '02': 'inner', '03': 'inhib', '04': 'nexus', '05': 'nexus',
+                 'P3': 'outer', 'P2': 'inner', 'P1': 'inhib', 'P4': 'nexus', 'P5': 'nexus'}
+
+
+def parse_structure(sid):
+    """(owner, lane, kind) for a turret or inhibitor ID, or None. kind: outer / inner /
+    inhib / nexus (turrets) or inhibitor. Two formats: Turret_TOrder_L2_P3_<id> and
+    Inhib_TChaos_L1_P1_<id> (L0 bot, L1 mid, L2 top; P3 outer .. P1 inhib, P4/P5 nexus),
+    and the older Turret_T1_L_03_A / Barracks_T1_L1. Expecting only T1/T2 kept every
+    tower line sideless: tower_taken never fired, and an inhib loss read as ours to end."""
+    parts = (sid or '').split('_')
+    if len(parts) < 3:
+        return None
+    owner = _STRUCT_TEAMS.get(parts[1].upper())
+    if parts[0] in ('Inhib', 'Barracks'):
+        lane = _STRUCT_LANES.get(parts[2][:1] if parts[0] == 'Barracks' else parts[2])
+        return (owner, lane, 'inhibitor') if owner else None
+    if parts[0] != 'Turret' or len(parts) < 4:
+        return None
+    lane, kind = _STRUCT_LANES.get(parts[2]), _STRUCT_TIERS.get(parts[3])
+    return (owner, lane, kind) if owner and kind else None
+
+
 def fmt_turret(s):
-    """Turret_T1_C_05_A → 'T1 mid nexus'.
-    Barracks_T1_L1 → 'T1 top inhib' (inhibitor IDs use a different schema)."""
-    parts = (s or '').split('_')
-    if len(parts) >= 4 and parts[0] == 'Turret':
-        lane = {'C': 'mid', 'L': 'top', 'R': 'bot'}.get(parts[2], parts[2])
-        tier = {'01': 'outer', '02': 'inner', '03': 'inhib', '04': 'nexus', '05': 'nexus'}.get(parts[3], parts[3])
-        return f'{parts[1]} {lane} {tier}'
-    if len(parts) >= 3 and parts[0] == 'Barracks':
-        lane_letter = parts[2][:1]
-        lane = {'C': 'mid', 'L': 'top', 'R': 'bot'}.get(lane_letter, parts[2])
-        return f'{parts[1]} {lane} inhib'
-    return s
+    """Turret_TChaos_L0_P3_1 → 'bot outer turret'; Inhib_TOrder_L1_P1_1 → 'mid inhibitor'.
+    Unparsed IDs pass through."""
+    st = parse_structure(s)
+    if not st:
+        return s
+    _owner, lane, kind = st
+    return f'{lane or "?"} {kind}' + ('' if kind == 'inhibitor' else ' turret')
 
 
 def build_side_lookup(me, enemies, players):
@@ -2799,15 +2879,10 @@ def annotate_event_line(line, side_lookup):
 def _struct_side(struct_id, your_team):
     """Map a turret/inhib ID's T1/T2 prefix to 'your '/'enemy ' relative to your_team.
     Returns '' if direction can't be determined."""
-    if not your_team or not struct_id:
+    st = parse_structure(struct_id) if your_team else None
+    if not st:
         return ''
-    parts = struct_id.split('_')
-    if len(parts) < 2:
-        return ''
-    owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
-    if not owner:
-        return ''
-    return 'your ' if owner == your_team else 'enemy '
+    return 'your ' if st[0] == your_team else 'enemy '
 
 
 def format_event(e, your_team=None):
@@ -2937,7 +3012,7 @@ COACH_SCHEMA = {
         "bullets": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "1-3 short tactical bullet lines, each <=90 chars. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
+            "description": "1-3 tactical bullet lines, one sentence each. Warm, direct, spoken-word tone — like a flirty girlfriend who knows the game.",
         },
         "glance": {
             "type": "string",
@@ -3460,6 +3535,8 @@ class Coach:
         # is what we surface prominently in every prompt so the coach doesn't
         # forget its earlier decision.
         self.committed_build = None  # dict: {'time': ..., 'reason': ..., 'items': [...], 'diverged': bool}
+        self.fed_latch = set()      # normalized champs held SNOWBALLING for the swap gates
+        self.dropped_items = {}     # normalized item -> game time it left committed_build
         self._last_seen_game_time = None
         self.last_call_game_time = 0.0
         self.tts = False
@@ -3479,6 +3556,8 @@ class Coach:
         self.last_diverged = False
         self.last_change_reason = ''
         self.committed_build = None
+        self.fed_latch.clear()
+        self.dropped_items.clear()
         self.recent_responses.clear()
 
     @property
@@ -3624,22 +3703,20 @@ class Coach:
             if en in ('Ace', 'BaronKill'):
                 return en.lower()
             if en == 'TurretKilled':
-                turret_id = e.get('TurretKilled', '')
-                parts = turret_id.split('_')
-                turret_owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1]) if len(parts) > 1 else None
-                tier = parts[3] if len(parts) > 3 else ''
-                if tier in ('01', '02') and turret_owner and your_team and turret_owner != your_team:
+                st = parse_structure(e.get('TurretKilled', ''))
+                if st and st[2] in ('outer', 'inner') and your_team and st[0] != your_team:
                     return 'tower_taken'
             if en == 'InhibKilled':
-                inhib_id = e.get('InhibKilled', '')
-                _iparts = inhib_id.split('_')
-                inhib_owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(_iparts[1]) if len(_iparts) > 1 else None
-                if inhib_owner and your_team:
-                    return 'inhib_lost' if inhib_owner == your_team else 'inhibkilled'
+                st = parse_structure(e.get('InhibKilled', ''))
+                if st and your_team:
+                    return 'inhib_lost' if st[0] == your_team else 'inhibkilled'
+                # Unparsed ID: only a named champion settles the side (minions kill most inhibs).
                 killer = (e.get('KillerName') or '').split('#')[0]
-                if killer and killer in enemy_names:
+                if killer in enemy_names:
                     return 'inhib_lost'
-                return 'inhibkilled'
+                if you_name and killer == you_name:
+                    return 'inhibkilled'
+                continue
             if en == 'Multikill':
                 killer = (e.get('KillerName') or '').split('#')[0]
                 if you_name and killer == you_name and killer not in enemy_names:
@@ -3735,12 +3812,20 @@ class Coach:
             # path when it fires.
             with self.lock:
                 committed_snapshot = list((self.committed_build or {}).get('items') or [])
+                committed_comp = (self.committed_build or {}).get('comp')
+                dropped = dict(self.dropped_items)
+            if comp_kinds and committed_comp and dict(comp_kinds) != committed_comp:
+                dropped = {}  # comp read changed: a re-add can be real news
+            live_build = guard_swap_undo(
+                live_build, committed_snapshot, dropped, getattr(self, 'last_call_game_time', 0),
+                [n for n, _o in (gated_swaps or [])], my_items, item_index)
             live_build = _guard_frozen_heart_ap(live_build, committed_snapshot, ap_count)
             raw_reason = (parsed.get('build_change_reason') or '').strip()
             live_build, citation_reject = validate_counter_citation(
                 live_build, committed_snapshot, bullets, raw_reason, priority_enemy_names,
                 player_class=player_class,
             )
+            live_build = keep_committed_order(live_build, committed_snapshot, my_items, item_index)
             seen = set(); live_build = [x for x in live_build if not (normalize(x) in seen or seen.add(normalize(x)))]
             bullets = drop_rejected_item_bullets(bullets, proposed, live_build, my_items, item_index)
             glance = clean_glance(parsed.get('glance'), current_gold, item_index, my_items)
@@ -3779,6 +3864,11 @@ class Coach:
                 if len(self.recent_responses) > 5:
                     self.recent_responses.pop(0)
                 log.info('response trigger=%s build=%s', self.last_trigger, live_build)
+                if raw_reason:
+                    log.info('  reason: %s', raw_reason)
+                if proposed != live_build:
+                    _pn, _fn = set(proposed), set(live_build)
+                    log.info('  validators: -%s +%s', sorted(_pn - _fn), sorted(_fn - _pn))
                 for b in bullets:
                     log.info('  bullet: %s', b)
                 # Lock the committed build only when items actually change. This
@@ -3787,6 +3877,13 @@ class Coach:
                 if live_build:
                     if (self.committed_build is None
                             or self.committed_build.get('items') != live_build):
+                        _old = {normalize(n) for n in (self.committed_build or {}).get('items') or []}
+                        _new = {normalize(n) for n in live_build}
+                        if self.committed_build is not None:
+                            for n in _old - _new:
+                                self.dropped_items[n] = gt
+                        for n in _new:
+                            self.dropped_items.pop(n, None)
                         self.committed_build = {
                             'time': ts,
                             'reason': reason if diverged else 'rule-based default',
@@ -3806,7 +3903,7 @@ class Coach:
                 permanent_reason = 'API auth failed — using rule-based advice only'
             else:
                 permanent_reason = None
-            log.error('coach error: %s: %s', type(e).__name__, e)
+            log.error('coach error: %s: %s', type(e).__name__, e, exc_info=not type(e).__module__.startswith('anthropic'))
             with self.lock:
                 self.errors += 1
                 self.last_response = f'(coach error: {type(e).__name__}: {e})'
@@ -3921,11 +4018,9 @@ def enemy_jungler_seen(data, ev, me):
     for et, killer, _s in ev.get('barons') or []:
         if killer in names:
             seen.append((et, 'baron', 'took baron'))
-    lanes = {'L': 'top', 'C': 'mid', 'R': 'bot'}
     for et, killer, tid in ev.get('towers') or []:
-        parts = (tid or '').split('_')
-        if killer in names and len(parts) >= 3:
-            seen.append((et, lanes.get(parts[2], '?'), 'took a turret'))
+        if killer in names:
+            seen.append((et, (parse_structure(tid) or (None, '?'))[1] or '?', 'took a turret'))
     last = max(seen, key=lambda x: x[0] or 0) if seen else None
     return {'name': jg.get('championName', '?'), 'where': last[1] if last else '',
             'at': int(last[0] or 0) if last else None, 'how': last[2] if last else ''}
@@ -4029,27 +4124,18 @@ def _team_score_summary(data, ev, your_team):
         elif side == 'enemy':
             enemy_barons += 1
 
-    # Towers: T1 = ORDER side, T2 = CHAOS side. A T1 turret dying means
-    # CHAOS killed it; T2 dying means ORDER killed it.
-    your_towers = enemy_towers = 0
-    for et, killer, turret_id in ev['towers']:
-        parts = (turret_id or '').split('_')
-        if len(parts) >= 2:
-            owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
-            if owner == your_team:
-                enemy_towers += 1
-            elif owner:
-                your_towers += 1
-
-    your_inhibs = enemy_inhibs = 0
-    for et, killer, inhib_id in ev['inhibs']:
-        parts = (inhib_id or '').split('_')
-        if len(parts) >= 2:
-            owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
-            if owner == your_team:
-                enemy_inhibs += 1
-            elif owner:
-                your_inhibs += 1
+    # Structures taken: one of yours falling counts for the enemy.
+    def _taken(rows):
+        yours = theirs = 0
+        for _et, _killer, sid in rows:
+            st = parse_structure(sid)
+            if st and st[0] == your_team:
+                theirs += 1
+            elif st:
+                yours += 1
+        return yours, theirs
+    your_towers, enemy_towers = _taken(ev['towers'])
+    your_inhibs, enemy_inhibs = _taken(ev['inhibs'])
 
     parts = [
         f'kills {your_kills}-{enemy_kills}',
@@ -4068,19 +4154,13 @@ def _tower_state_summary(ev, your_team):
     """
     if not your_team:
         return None
-    lane_label = {'L': 'top', 'C': 'mid', 'R': 'bot'}
-    # Track fallen tier counts per (owner, lane)
+    tier_code = {'outer': '01', 'inner': '02', 'inhib': '03'}
     fallen = {}  # (owner, lane) -> set of tiers fallen
     for _et, _killer, tid in ev.get('towers', []):
-        parts = (tid or '').split('_')
-        if len(parts) < 4:
+        st = parse_structure(tid)
+        if not st or st[2] not in tier_code or not st[1]:
             continue
-        owner = {'T1': 'ORDER', 'T2': 'CHAOS'}.get(parts[1])
-        tier = parts[3]
-        if not owner or tier not in ('01', '02', '03'):
-            continue
-        lane = lane_label.get(parts[2], parts[2].lower())
-        fallen.setdefault((owner, lane), set()).add(tier)
+        fallen.setdefault((st[0], st[1]), set()).add(tier_code[st[2]])
 
     your_fallen_labels, enemy_fallen_labels = [], []
     open_lanes = []
@@ -4103,6 +4183,16 @@ def _tower_state_summary(ev, your_team):
     your_str = ', '.join(your_fallen_labels) if your_fallen_labels else 'none'
     enemy_str = ', '.join(enemy_fallen_labels) if enemy_fallen_labels else 'none'
     lines.append(f'TOWER STATE: your fallen=[{your_str}] · enemy fallen=[{enemy_str}]')
+    down = {}
+    for _et, _k, sid in list(ev.get('towers', [])) + list(ev.get('inhibs', [])):
+        st = parse_structure(sid)
+        if st and st[2] in ('inhibitor', 'nexus'):
+            key = ('your' if st[0] == your_team else 'enemy', st[2])
+            down[key] = down.get(key, 0) + 1
+    if down:
+        lines.append('BASE: ' + ' · '.join(
+            f'{side} {"inhibitors" if kind == "inhibitor" else "nexus turrets"} down {min(n, 3 if kind == "inhibitor" else 2)}/{3 if kind == "inhibitor" else 2}'
+            for side in ('your', 'enemy') for kind in ('inhibitor', 'nexus') if (n := down.get((side, kind)))))
     if open_lanes:
         lines.append(f'OPEN LANES: {" · ".join(open_lanes)}')
     return '\n'.join(lines)
@@ -4123,11 +4213,33 @@ def is_low_threat(enemy, state, avg_enemy_gold, item_index):
     return k + a <= d and not rich
 
 
-def _enemy_threat_state(enemy, game_time, enemies=None, item_index=None):
+def _enemy_threat_state(enemy, game_time, enemies=None, item_index=None, latch=None):
     """SNOWBALLING / AHEAD / BEHIND / None from KDA. With `enemies` + `item_index`,
     the kill rules also need item gold >= FED_GOLD_RATIO x the enemy-team average:
     KDA couldn't separate a 12/9 Garen (1.61x, a real carry) from an 8/6 Viego
-    (1.21x, who took Thornmail's slot for Randuin's). Short of it they read AHEAD."""
+    (1.21x, who took Thornmail's slot for Randuin's). Short of it they read AHEAD.
+    `latch` (update_fed_latch): a latched champ reading AHEAD stays SNOWBALLING."""
+    state = _raw_threat_state(enemy, game_time, enemies, item_index)
+    if state == 'AHEAD' and latch and normalize(enemy.get('championName') or '') in latch:
+        return 'SNOWBALLING'
+    return state
+
+
+def update_fed_latch(latch, enemies, game_time, item_index=None):
+    """Hysteresis for the swap gates: a champ enters on SNOWBALLING and leaves only
+    when no longer AHEAD. One kill either way flipped Steelcaps/Randuin's back and forth."""
+    for e in enemies or []:
+        name = normalize(e.get('championName') or '')
+        state = _raw_threat_state(e, game_time, enemies, item_index)
+        if state == 'SNOWBALLING':
+            latch.add(name)
+        elif state != 'AHEAD':
+            latch.discard(name)
+    return latch
+
+
+def _raw_threat_state(enemy, game_time, enemies=None, item_index=None):
+    """_enemy_threat_state without the latch."""
     sc = enemy.get('scores') or {}
     k = int(sc.get('kills', 0) or 0)
     d = int(sc.get('deaths', 0) or 0)
@@ -4299,14 +4411,12 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
     # Detect base-under-siege: enemy has killed your nexus towers or inhibitors
     if your_team:
         def _tower_owner(tid):
-            p = (tid or '').split('_')
-            return {'T1': 'ORDER', 'T2': 'CHAOS'}.get(p[1]) if len(p) > 1 else None
-        def _tower_tier(tid):
-            p = (tid or '').split('_')
-            return p[3] if len(p) > 3 else ''
+            return (parse_structure(tid) or (None,))[0]
+        def _is_nexus(tid):
+            return (parse_structure(tid) or (None, None, None))[2] == 'nexus'
         lost_nexus_towers = sum(
             1 for _, _, tid in ev['towers']
-            if _tower_owner(tid) == your_team and _tower_tier(tid) in ('04', '05')
+            if _tower_owner(tid) == your_team and _is_nexus(tid)
         )
         lost_inhibs = sum(
             1 for _, _, iid in ev['inhibs']
@@ -4322,11 +4432,11 @@ def build_coach_message(data, me, enemies, ev, timers, profile, build_pick, trig
         # Detect game-ending window: YOUR team has taken enemy nexus towers / inhibs
         enemy_nexus_fallen = sum(
             1 for _, _, tid in ev['towers']
-            if _tower_owner(tid) != your_team and _tower_tier(tid) in ('04', '05')
+            if _tower_owner(tid) not in (None, your_team) and _is_nexus(tid)
         )
         enemy_inhibs_fallen = sum(
             1 for _, _, iid in ev['inhibs']
-            if _tower_owner(iid) != your_team
+            if _tower_owner(iid) not in (None, your_team)
         )
         if enemy_nexus_fallen or enemy_inhibs_fallen:
             dead_count = sum(1 for e in (enemies or []) if e.get('isDead'))
@@ -5534,6 +5644,9 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 matchup_db.ensure_note_async(your_champ, name)
 
     if coach is not None:
+        with coach.lock:
+            update_fed_latch(coach.fed_latch, enemies, game_time, item_index)
+            fed_latch = set(coach.fed_latch)
         trigger = coach.maybe_trigger(ev, me, enemies, timers, game_time, champ_folder)
         if trigger:
             with coach.lock:
@@ -5545,7 +5658,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             gold_lead = compute_gold_lead(me.get('team') if me else None, players, item_index)
             _prof_label, _ap, _ad, *_ = profile if profile else ('Standard', 0, 0, 0, 0)
             active_swaps = filter_swaps(swaps or [], enemies, _ap, _ad, (me.get('position') or '').upper(),
-                                        game_time, item_index)
+                                        game_time, item_index, fed_latch)
             # Boots already bought: a boots swap would mean selling them, so don't offer
             # it. keep_owned_boots (after the validators) is the backstop.
             _my_boots = {normalize((i or {}).get('displayName', '')) for i in (me.get('items') or [])} & _BOOTS_NORMS
@@ -5602,7 +5715,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
                 ap_count=_ap,
                 gated_swaps=gated_swaps,
                 swap_pairs=[(n, o) for n, o, _c in (swaps or [])],
-                playstyles=allowed_playstyles(build_variants, enemies, game_time, item_index),
+                playstyles=allowed_playstyles(build_variants, enemies, game_time, item_index, fed_latch),
                 offered_counters=offered_counters,
             )
 
@@ -6691,7 +6804,7 @@ def run_demo(mode, port, open_browser=True):
         ev_list = [{'EventName': 'DragonKill', 'EventTime': et, 'DragonType': dt, 'KillerName': kn}
                    for et, dt, kn in ((420, 'Fire', 'Lee Sin'), (900, 'Water', 'you'), (1320, 'Air', 'Lee Sin')) if et < t]
         if mid:  # past laning: bot outer fell at 14:00; while dead, Lee Sin got the kill
-            ev_list.append({'EventName': 'TurretKilled', 'EventTime': 840, 'KillerName': 'Jinx', 'TurretKilled': 'Turret_T2_R_01_A'})
+            ev_list.append({'EventName': 'TurretKilled', 'EventTime': 840, 'KillerName': 'Jinx', 'TurretKilled': 'Turret_TChaos_L0_P3_511845594'})
         if view == 'mid' and elapsed >= 6:   # a triple kill a few seconds in: header glow + mascot cheer
             ev_list.append({'EventName': 'Multikill', 'EventTime': 1506, 'KillerName': 'you', 'KillStreak': 3})
         if view == 'dead':

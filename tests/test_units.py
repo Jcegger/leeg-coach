@@ -98,8 +98,9 @@ def test_stale_note_detection():
 def test_laning_ends_at_first_turret():
     pl = [{'level': 8}] * 10
     assert live.compute_phase(700, pl, {'towers': []}) == 'early'
-    assert live.compute_phase(700, pl, {'towers': [(655.0, 'Jinx', 'Turret_T2_R_01_A')]}) == 'mid'
-    assert live.first_turret({'towers': [(690, 'x', 'Turret_T1_L_01_A'), (655, 'y', 'Turret_T2_R_01_A')]}) == (655, 'bot outer')
+    assert live.compute_phase(700, pl, {'towers': [(655.0, 'Jinx', 'Turret_TChaos_L0_P3_511845594')]}) == 'mid'
+    assert live.first_turret({'towers': [(690, 'x', 'Turret_TOrder_L2_P3_1'), (655, 'y', 'Turret_TChaos_L0_P3_2')]}) == (655, 'bot outer')
+    assert live.first_turret({'towers': [(655, 'y', 'Turret_T2_R_01_A')]}) == (655, 'bot outer')   # older format
 
 
 ME = player('Dr. Mundo', 'TOP', 'ORDER', 60, 6)
@@ -271,3 +272,90 @@ def test_game_moment():
     ev = {'multi': [(1506, 'someone', 3)], 'aces': [(1600, 'ally', 'CHAOS')], 'barons': [(1700, 'ally', False)], 'drakes': []}
     assert live.game_moment(data, ev, me, 1601) is None                      # their ace, someone else's multi
     assert live.game_moment(data, ev, me, 1702)['text'] == 'BARON'
+
+
+# ---- build stability: fed latch, undo guard, committed order ----
+
+def _trynd(k, d):
+    return {'championName': 'Tryndamere', 'position': 'TOP', 'scores': {'kills': k, 'deaths': d, 'assists': 0},
+            'items': [item('Infinity Edge'), item("Berserker's Greaves")]}
+
+
+def test_fed_latch_holds_until_not_ahead():
+    latch = set()
+    live.update_fed_latch(latch, [_trynd(4, 0)], 900)
+    assert latch == {'tryndamere'}
+    t = _trynd(4, 2)                                    # diff 2: raw AHEAD, latch keeps SNOWBALLING
+    live.update_fed_latch(latch, [t], 1000)
+    assert live._enemy_threat_state(t, 1000) == 'AHEAD'
+    assert live._enemy_threat_state(t, 1000, latch=latch) == 'SNOWBALLING'
+    sw = [('Plated Steelcaps', 'Boots of Swiftness', 'fed auto-attacker')]
+    assert live.filter_swaps(sw, [t], 0, 1, 'TOP', 1000, None, latch) == sw
+    assert live.filter_swaps(sw, [t], 0, 1, 'TOP', 1000, None) == []
+    live.update_fed_latch(latch, [_trynd(4, 4)], 1200)  # even: released
+    assert latch == set()
+
+
+CB = ['Heartsteel', 'Plated Steelcaps', 'Unending Despair', 'Thornmail', 'Titanic Hydra', "Dead Man's Plate"]
+FLIP = CB[:5] + ['Spirit Visage']
+
+
+def test_undo_guard_reverts_recent_readd():
+    dropped = {live.normalize('Spirit Visage'): 1400}
+    assert live.guard_swap_undo(FLIP, CB, dropped, 1500, [], [], IX) == CB
+    assert live.guard_swap_undo(FLIP, CB, dropped, 1400 + live.UNDO_HOLD, [], [], IX) == FLIP   # hold over
+    assert live.guard_swap_undo(FLIP, CB, dropped, 1500, ["Dead Man's Plate"], [], IX) == FLIP  # DMP now gated
+    assert live.guard_swap_undo(FLIP, CB, dropped, 1500, [], [item('Spirit Visage')], IX) == FLIP  # owned
+    assert live.guard_swap_undo(FLIP, CB, {}, 1500, [], [], IX) == FLIP
+
+
+def test_keep_committed_order():
+    re = [CB[1], CB[0]] + CB[2:]
+    assert live.keep_committed_order(re, CB, [], IX) == CB
+    owned = [item('Heartsteel'), item('Plated Steelcaps')]
+    assert live.keep_committed_order([CB[1], CB[0]] + FLIP[2:], CB, owned, IX) == FLIP
+
+
+# ---- structures: turret and inhib IDs ----
+
+def test_parse_structure_both_formats():
+    P = live.parse_structure
+    assert P('Turret_TChaos_L0_P3_511845594') == ('CHAOS', 'bot', 'outer')
+    assert P('Turret_TOrder_L2_P2_1526764315') == ('ORDER', 'top', 'inner')
+    assert P('Turret_TOrder_L1_P1_1209122387') == ('ORDER', 'mid', 'inhib')
+    assert P('Turret_TOrder_L1_P5_3625540808') == ('ORDER', 'mid', 'nexus')
+    assert P('Inhib_TChaos_L2_P1_2351107073') == ('CHAOS', 'top', 'inhibitor')
+    assert P('Turret_T1_C_05_A') == ('ORDER', 'mid', 'nexus')
+    assert P('Barracks_T2_L1') == ('CHAOS', 'top', 'inhibitor')
+    assert P('Minion_T100L0S01N0004') is None and P('') is None
+    assert live.fmt_turret('Inhib_TChaos_L2_P1_1') == 'top inhibitor'
+    assert live._struct_side('Turret_TChaos_L0_P3_1', 'ORDER') == 'enemy '
+
+
+def _coach_for_events():
+    c = live.Coach()
+    c.client, c.last_response, c.last_call, c.cooldown_seconds = object(), 'x', 0, 0
+    return c
+
+
+def _trigger(event):
+    c = _coach_for_events()
+    me = {'team': 'ORDER', 'riotIdGameName': 'you', 'championName': 'Dr. Mundo'}
+    enemies = [{'riotIdGameName': 'foe', 'team': 'CHAOS', 'championName': 'Garen'}]
+    return c.maybe_trigger({'raw': [event]}, me, enemies, {}, 1200, 'mundo')
+
+
+def test_structure_triggers_pick_the_right_side():
+    assert _trigger({'EventName': 'TurretKilled', 'TurretKilled': 'Turret_TChaos_L0_P3_1', 'KillerName': 'x'}) == 'tower_taken'
+    assert _trigger({'EventName': 'TurretKilled', 'TurretKilled': 'Turret_TOrder_L0_P3_1', 'KillerName': 'foe'}) != 'tower_taken'
+    # A minion kills our inhib: still ours lost, not "push their nexus"
+    assert _trigger({'EventName': 'InhibKilled', 'InhibKilled': 'Inhib_TOrder_L1_P1_1', 'KillerName': 'Minion_T200L1S20N0001'}) == 'inhib_lost'
+    assert _trigger({'EventName': 'InhibKilled', 'InhibKilled': 'Inhib_TChaos_L1_P1_1', 'KillerName': 'Minion_T100L1S20N0001'}) == 'inhibkilled'
+
+
+def test_base_line_counts_per_side():
+    ev = {'towers': [(1, 'x', 'Turret_TOrder_L1_P4_1'), (2, 'x', 'Turret_TChaos_L0_P3_2')],
+          'inhibs': [(3, 'x', 'Inhib_TOrder_L1_P1_1'), (4, 'x', 'Inhib_TOrder_L2_P1_2'), (5, 'y', 'Inhib_TChaos_L0_P1_3')]}
+    out = live._tower_state_summary(ev, 'ORDER')
+    assert 'enemy fallen=[bot outer]' in out
+    assert 'BASE: your inhibitors down 2/3 · your nexus turrets down 1/2 · enemy inhibitors down 1/3' in out
