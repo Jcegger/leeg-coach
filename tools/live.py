@@ -2724,6 +2724,20 @@ def find_active_team(data):
 
 # ─── events, timers, tactical advice ────────────────────────────────────────
 
+_last_spells = None
+
+
+def _log_my_spells(me, game_time):
+    """Log your summoner spells when they change: shows whether the Live API reports the
+    top quest's Unleashed Teleport, and at what minute."""
+    global _last_spells
+    sp = (me or {}).get('summonerSpells') or {}
+    names = tuple((sp.get(k) or {}).get('displayName', '') for k in ('summonerSpellOne', 'summonerSpellTwo'))
+    if any(names) and names != _last_spells:
+        _last_spells = names
+        log.info('summoner spells: %s at %d:%02d', list(names), game_time // 60, game_time % 60)
+
+
 _LOGGED_STRUCTURES = set()
 
 
@@ -5643,6 +5657,7 @@ def render_in_game(data, matchups, host, max_chars, champ_folder, profile=None, 
             if name:
                 matchup_db.ensure_note_async(your_champ, name)
 
+    _log_my_spells(me, game_time)
     if coach is not None:
         with coach.lock:
             update_fed_latch(coach.fed_latch, enemies, game_time, item_index)
@@ -6637,6 +6652,18 @@ def rivalries(games, limit=4):
     return out
 
 
+def macro_notes():
+    """[{folder, name, md}] for each champion folder with a macro.md (the idle page's Macro tab)."""
+    out = []
+    for folder in [''] + available_champs():  # '' = the repo-root General page
+        p = LEEG_ROOT / folder / 'macro.md'
+        if p.exists():
+            md = p.read_text(encoding='utf-8')
+            title = md.splitlines()[0].lstrip('# ').split(' — ')[0].strip() if md else folder
+            out.append({'folder': folder or 'general', 'name': title or folder, 'md': md})
+    return out
+
+
 def web_idle_state(tracker, client_open, all_games=None):
     hist = tracker.history if tracker else []
     return {'mode': 'idle', 'client': client_open, 'cs_target': CS_TARGET,
@@ -6647,6 +6674,8 @@ def web_idle_state(tracker, client_open, all_games=None):
                        if hist and hist[-1].get('vs') else None),
             'stats': _with_fun(career_stats(games := (all_games if all_games is not None else load_all_games())), games),
             'grade': grade_game(hist[-1]) if hist else None,
+            'macro': macro_notes(),
+            'macro_default': champ_to_folder(hist[-1].get('champ'), available_champs()) if hist else None,
             'splash': champ_splash_url(hist[-1].get('champ')) if hist else ''}
 
 
