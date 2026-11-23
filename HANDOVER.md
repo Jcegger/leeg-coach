@@ -10,6 +10,8 @@
 - Checked on the 21:30 game: all 20 structure IDs parsed, none `UNPARSED`; `tower_taken` fired 5 times, enemy outer/inner towers only.
 - Result fallback: `GameEnd` was missed in 5 of 38 saved games (the Live API can close before the poll sees it). `infer_result` now calls the game from both nexus turrets of one side falling in the last `NEXUS_END_WINDOW_S` (60s); surrenders stay `None`. `finish` logs `game end: GameEnd seen|missed, result …`. The 21:30 game was backfilled to Win in `data/games.jsonl` (gitignored).
 
+- Shen go-to: Thornmail replaces Riftmaker in slot 5 (finishes the held Bramble); Warmog's now swaps over Thornmail, Riftmaker only in last items. Spells stay Flash/Ignite (the top quest grants TP anyway).
+
 ## Next (after Jay's next game)
 
 1. `grep "game end:" tools/leeg.log`: if a game ended on the nexus but still saved `None`, widen `NEXUS_END_WINDOW_S` or find why the last polls dropped.
