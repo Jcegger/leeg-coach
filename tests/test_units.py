@@ -241,6 +241,27 @@ def test_restart_saves_a_finished_game_only():
     assert [g['result'] for g in live.load_all_games()] == ['Win']
 
 
+def test_result_inferred_from_nexus_turrets():
+    """GameEnd missed (API closed first): both enemy nexus turrets just fell, so a Win; a
+    surrender (no nexus kills) stays None."""
+    live.GAMES_LOG.write_text('')
+    for theirs, want in (('Chaos', 'Win'), ('Order', 'Loss'), (None, None)):
+        tr = live.GameTracker()
+        _played_game(tr)
+        if theirs:
+            m = dict(ME, scores={'creepScore': 130, 'deaths': 0})
+            evs = [{'EventID': 90 + i, 'EventName': 'TurretKilled', 'EventTime': 20 * 60 + i * 3,
+                    'TurretKilled': f'Turret_T{theirs}_L1_P{4 + i}_1', 'KillerName': 'x'} for i in range(2)]
+            tr.update({'allPlayers': [m] + PLAYERS[1:], 'events': {'Events': evs}}, m, 'Dr. Mundo', 20 * 60 + 10, {}, 'mundo')
+        tr.finish()
+        assert live.load_all_games()[-1]['result'] == want, (theirs, want)
+    tr = live.GameTracker()                          # nexus turrets fell long before the end: no guess
+    _played_game(tr)
+    tr.g['nexus_kills'] = {'a': ('CHAOS', 100), 'b': ('CHAOS', 103)}
+    tr.finish()
+    assert live.load_all_games()[-1]['result'] is None
+
+
 GOOD = {'date': '2026-11-10 10:17', 'cs_min': 7.4, 'deaths': [1300], 'k': 14, 'd': 2, 'a': 9, 'duration': 2500,
         'items': [{'name': 'Yun Tal Wildarrows', 't': 780, 'boots': False}], 'item_bench': [13.5],
         'lane_marks': {'10': {'cs': 12}}, 'result': 'Win', 'vs': 'Garen', 'champ': 'Sivir'}

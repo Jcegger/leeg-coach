@@ -6251,6 +6251,22 @@ LEGENDARY_MIN_COST = 2200
 IDLE_GRACE_S = 30
 
 
+NEXUS_END_WINDOW_S = 60
+
+
+def infer_result(g):
+    """Result when GameEnd never reached us (the API can close first): the side whose two nexus
+    turrets both fell in the last NEXUS_END_WINDOW_S lost. Surrenders stay None."""
+    team, late = g.get('team'), {}
+    for owner, t in (g.get('nexus_kills') or {}).values():
+        if g['time'] - t <= NEXUS_END_WINDOW_S:
+            late[owner] = late.get(owner, 0) + 1
+    down = [o for o, n in late.items() if n >= 2]
+    if not team or len(down) != 1:
+        return None
+    return 'Loss' if down[0] == team else 'Win'
+
+
 class GameTracker:
     """Records the player's timeline each in-game poll; `finish()` writes a summary
     when the game ends (Live API gone, or a new game starts). Games under 5 min
@@ -6351,9 +6367,15 @@ class GameTracker:
             if boots or (info.get('cost') or 0) >= LEGENDARY_MIN_COST:
                 g['items'].append({'name': name, 'icon': info.get('icon', ''), 'boots': boots,
                                    't': None if late_start else game_time})
+        g['team'] = me.get('team') or g.get('team')
         for e in ((data.get('events') or {}).get('Events') or []):
             if e.get('EventName') == 'GameEnd':
                 g['result'] = 'Win' if str(e.get('Result', '')).lower().startswith('win') else 'Loss'
+                g['game_end'] = True
+            elif e.get('EventName') == 'TurretKilled':
+                st = parse_structure(e.get('TurretKilled', ''))
+                if st and st[2] == 'nexus':
+                    g.setdefault('nexus_kills', {})[e.get('TurretKilled')] = (st[0], int(e.get('EventTime') or game_time))
 
     def end_if_gone(self, grace=None):
         """Idle poll: save the game once the live API has been gone for IDLE_GRACE_S.
@@ -6375,6 +6397,10 @@ class GameTracker:
         g, self.g = self.g, None
         if not g or g['time'] < 300:
             return None
+        if not g['result']:
+            g['result'] = infer_result(g)
+        log.info('game end: GameEnd %s, result %s, last poll %d:%02d', 'seen' if g.get('game_end') else 'missed',
+                 g['result'], g['time'] // 60, g['time'] % 60)
         sc = g['scores']
         minutes = g['time'] / 60
         bench = ((read_meta(g['folder']) or {}).get('benchmarks') or {}) if g['folder'] else {}
