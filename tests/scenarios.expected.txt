@@ -79,11 +79,11 @@ offered counters: ['Guardian Angel']
 playstyles: ["Survival (playstyle — coach's call, never auto-picked)"]
 
 === 6 Shen vs fed Yi
-pick: Current build (go-to) | Sunfire Aegis · Mercury's Treads · Unending Despair · Spirit Visage · Thornmail · Jak'Sho, The Protean
-active swaps: ['Hollow Radiance', 'Kaenic Rookern', 'Plated Steelcaps', "Warmog's Armor"]
-  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (extension — grievous + reflect AA dmg)
-  msg> counters: Thornmail 2450g (extension — armor + reflect AA dmg)
-  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (extension — armor + reflect AA dmg)
+pick: Current build (go-to) | Sunfire Aegis · Mercury's Treads · Unending Despair · Spirit Visage · Riftmaker · Jak'Sho, The Protean
+active swaps: ['Hollow Radiance', 'Kaenic Rookern', 'Plated Steelcaps', 'Thornmail', "Warmog's Armor"]
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (swap-rule — grievous + reflect AA dmg)
+  msg> counters: Thornmail 2450g (swap-rule — armor + reflect AA dmg)
+  msg> counters: Plated Steelcaps 1200g (swap-rule — AA dmg reduction boots); Thornmail 2450g (swap-rule — armor + reflect AA dmg)
   msg> [SNOWBALLING] Master Yi (jungle) — top counter: Plated Steelcaps 1200g (swap-rule)
   msg> TEAM THREATS: attack-speed-stacked · heavy-hard-cc · has-tank · crit-carry
 offered counters: ['Plated Steelcaps', 'Thornmail']

@@ -40,10 +40,10 @@ Elixir of Iron is listed in every full build — buy it once you're at full item
 2. Mercury's Treads
 3. Unending Despair
 4. Spirit Visage
-5. Thornmail
+5. Riftmaker
 6. Jak'Sho, The Protean
 
-Based on the guide's Version 2, with Thornmail in place of its Riftmaker: a tank Shen wants survival over damage. Keep Bramble Vest unfinished in inventory through the early items, then finish it into Thornmail in slot 5. Spirit Visage is never skipped.
+Guide's recommended set (Version 2). Keep Bramble Vest unfinished in inventory through the early items. Spirit Visage is never skipped.
 
 When the enemy comp matches a specific path below, use that as the base — it takes priority over the go-to. Situational swaps still apply on top.
 
@@ -99,7 +99,8 @@ Grounded in the go-to path (slot 6 = Jak'Sho, The Protean).
 - Hollow Radiance over Sunfire Aegis — AP lane opponent; build Bami's Cinder into Hollow Radiance instead
 - Plated Steelcaps over Mercury's Treads — full AD team with little CC (Tryndamere, Yasuo, Master Yi), or one SNOWBALLING auto-attacker (crit or attack-speed build)
 - Kaenic Rookern over Unending Despair — heavy magic damage; buy it right after the first item
-- Warmog's Armor over Thornmail — few hard-CC enemies, no % max-HP damage, and little auto-attack damage; lets you reset fights at full HP
+- Thornmail over Riftmaker — auto-attack reliant carries or healers; finish the Bramble Vest you already hold
+- Warmog's Armor over Riftmaker — few hard-CC enemies and no % max-HP damage; lets you reset fights at full HP
 - Force of Nature over Jak'Sho, The Protean — 3+ AP enemies
 
 ## Boots options
